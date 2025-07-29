@@ -21,6 +21,12 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('nowe_zajecia') }}">Nowe zajęcia</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('lista_zajec') }}">Lista zajęć</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('lista_beneficjentow') }}">Beneficjenci</a>
+          </li>
         </ul>
         {% if current_user.is_authenticated %}
         <ul class="navbar-nav">

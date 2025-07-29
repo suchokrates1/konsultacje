@@ -51,3 +51,9 @@ class PasswordResetForm(FlaskForm):
     )
     submit = SubmitField('Zresetuj hasło')
 
+
+class BeneficjentForm(FlaskForm):
+    imie = StringField('Imię i nazwisko', validators=[DataRequired()])
+    wojewodztwo = StringField('Województwo', validators=[DataRequired()])
+    submit = SubmitField('Zapisz')
+

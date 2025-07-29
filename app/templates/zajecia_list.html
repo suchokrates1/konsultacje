@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Lista zajęć{% endblock %}
+{% block content %}
+<h2>Lista zajęć</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Godziny</th>
+      <th>Specjalista</th>
+      <th>PDF</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for zaj in zajecia_list %}
+    <tr>
+      <td>{{ zaj.data.strftime('%d.%m.%Y') }}</td>
+      <td>{{ zaj.godzina_od.strftime('%H:%M') }} - {{ zaj.godzina_do.strftime('%H:%M') }}</td>
+      <td>{{ zaj.specjalista }}</td>
+      <td>
+        <a href="{{ url_for('pobierz_pdf', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Pobierz PDF</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">Brak zajęć.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
