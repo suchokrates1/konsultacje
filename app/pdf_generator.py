@@ -2,7 +2,7 @@ import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from PyPDF2 import PdfReader, PdfWriter
-from datetime import datetime
+
 
 def generate_pdf(zajecia, beneficjenci, output_path):
     buffer = io.BytesIO()
@@ -11,7 +11,10 @@ def generate_pdf(zajecia, beneficjenci, output_path):
     # Pozycje tekstu (zmierzono ręcznie względem PDF-a)
     c.setFont("Helvetica", 12)
     c.drawString(130, 770, zajecia.data.strftime('%d.%m.%Y'))
-    c.drawString(250, 770, f"{zajecia.godzina_od.strftime('%H:%M')} - {zajecia.godzina_do.strftime('%H:%M')}")
+    start_time = zajecia.godzina_od.strftime('%H:%M')
+    end_time = zajecia.godzina_do.strftime('%H:%M')
+    time_range = f"{start_time} - {end_time}"
+    c.drawString(250, 770, time_range)
     c.drawString(440, 770, zajecia.specjalista)
 
     for idx, benef in enumerate(beneficjenci[:3]):

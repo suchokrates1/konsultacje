@@ -1,22 +1,36 @@
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
-from . import db
-from .models import User
-from flask import Blueprint
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
 import os
-from flask import send_file
+from datetime import datetime, timedelta
+
+from flask import (
+    current_app as app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
+from flask_login import (
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from flask_wtf import FlaskForm
+from wtforms import PasswordField, StringField, SubmitField
+from wtforms.validators import DataRequired
+
+from . import db
+from .forms import ZajeciaForm
+from .models import Beneficjent, User, Zajecia
 from .pdf_generator import generate_pdf
 
-
-from flask import current_app as app
 
 class LoginForm(FlaskForm):
     username = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Hasło', validators=[DataRequired()])
     submit = SubmitField('Zaloguj się')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -29,36 +43,40 @@ def login():
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
 @app.route('/')
 @login_required
 def dashboard():
     return render_template('dashboard.html', name=current_user.username)
-from datetime import datetime, timedelta
-from .forms import ZajeciaForm
-from .models import Beneficjent, Zajecia, zajecia_beneficjenci
+
 
 @app.route('/zajecia/nowe', methods=['GET', 'POST'])
 @login_required
 def nowe_zajecia():
     form = ZajeciaForm()
     form.beneficjenci.choices = [
-        (b.id, f"{b.imie} ({b.wojewodztwo})") 
+        (b.id, f"{b.imie} ({b.wojewodztwo})")
         for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
     ]
 
     # Ustawienie domyślnych godzin po zaokrągleniu
     if request.method == 'GET':
         now = datetime.now()
-        rounded = (now + timedelta(minutes=30 - now.minute % 30)).replace(second=0, microsecond=0)
+        rounded = (
+            now + timedelta(minutes=30 - now.minute % 30)
+        ).replace(second=0, microsecond=0)
         form.data.data = now.date()
         form.godzina_od.data = rounded.time()
-        form.godzina_do.data = (rounded + timedelta(minutes=current_user.default_duration)).time()
+        form.godzina_do.data = (
+            rounded + timedelta(minutes=current_user.default_duration)
+        ).time()
 
     if form.validate_on_submit():
         zajecia = Zajecia(
@@ -78,6 +96,8 @@ def nowe_zajecia():
         return redirect(url_for('dashboard'))
 
     return render_template('zajecia_form.html', form=form)
+
+
 @app.route('/zajecia/<int:zajecia_id>/pdf')
 @login_required
 def pobierz_pdf(zajecia_id):
