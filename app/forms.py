@@ -57,3 +57,7 @@ class BeneficjentForm(FlaskForm):
     wojewodztwo = StringField('Województwo', validators=[DataRequired()])
     submit = SubmitField('Zapisz')
 
+
+class DeleteForm(FlaskForm):
+    submit = SubmitField('Usuń')
+

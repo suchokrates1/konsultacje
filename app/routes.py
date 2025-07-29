@@ -29,6 +29,7 @@ from .forms import (
     PasswordResetRequestForm,
     PasswordResetForm,
     BeneficjentForm,
+    DeleteForm,
 )
 from .models import Beneficjent, User, Zajecia
 from . import mail
@@ -202,7 +203,12 @@ def lista_zajec():
 @login_required
 def lista_beneficjentow():
     beneficjenci = Beneficjent.query.filter_by(user_id=current_user.id).all()
-    return render_template('beneficjenci_list.html', beneficjenci=beneficjenci)
+    delete_form = DeleteForm()
+    return render_template(
+        'beneficjenci_list.html',
+        beneficjenci=beneficjenci,
+        delete_form=delete_form,
+    )
 
 
 @app.route('/beneficjenci/nowy', methods=['GET', 'POST'])
@@ -246,11 +252,13 @@ def edytuj_beneficjenta(beneficjent_id):
 @app.route('/beneficjenci/<int:beneficjent_id>/usun', methods=['POST'])
 @login_required
 def usun_beneficjenta(beneficjent_id):
-    benef = Beneficjent.query.get_or_404(beneficjent_id)
-    if benef.user_id != current_user.id:
-        flash('Brak dostępu do tego beneficjenta.')
-        return redirect(url_for('lista_beneficjentow'))
-    db.session.delete(benef)
-    db.session.commit()
-    flash('Beneficjent usunięty.')
+    form = DeleteForm()
+    if form.validate_on_submit():
+        benef = Beneficjent.query.get_or_404(beneficjent_id)
+        if benef.user_id != current_user.id:
+            flash('Brak dostępu do tego beneficjenta.')
+            return redirect(url_for('lista_beneficjentow'))
+        db.session.delete(benef)
+        db.session.commit()
+        flash('Beneficjent usunięty.')
     return redirect(url_for('lista_beneficjentow'))
