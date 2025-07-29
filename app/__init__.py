@@ -45,13 +45,21 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "localhost")
-    app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", 25))
-    app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
-    app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
-    app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "false").lower() == "true"
-    app.config["MAIL_USE_SSL"] = os.environ.get("MAIL_USE_SSL", "false").lower() == "true"
-    app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER", admin_email)
+    mail_server = os.environ.get("MAIL_SERVER", "localhost")
+    mail_port = int(os.environ.get("MAIL_PORT", 25))
+    mail_username = os.environ.get("MAIL_USERNAME")
+    mail_password = os.environ.get("MAIL_PASSWORD")
+    mail_use_tls = os.environ.get("MAIL_USE_TLS", "false").lower() == "true"
+    mail_use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() == "true"
+    app.config.update(
+        MAIL_SERVER=mail_server,
+        MAIL_PORT=mail_port,
+        MAIL_USERNAME=mail_username,
+        MAIL_PASSWORD=mail_password,
+        MAIL_USE_TLS=mail_use_tls,
+        MAIL_USE_SSL=mail_use_ssl,
+        MAIL_DEFAULT_SENDER=os.environ.get("MAIL_DEFAULT_SENDER", admin_email),
+    )
 
     db.init_app(app)
     login_manager.init_app(app)

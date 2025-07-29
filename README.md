@@ -12,6 +12,9 @@ A small Flask application that lets specialists register sessions with beneficia
    ```
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
    `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
+   Configure email delivery with `MAIL_SERVER`, `MAIL_PORT`,
+   `MAIL_USERNAME`, `MAIL_PASSWORD`, and optionally `MAIL_USE_TLS`
+   or `MAIL_USE_SSL` for encrypted connections.
    The `flask` command will load variables from this file automatically
    and an admin user will be created if it does not exist.
 3. (Optional) Run in development mode:
