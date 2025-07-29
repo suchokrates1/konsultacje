@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import (
     current_app as app,
+    current_app,
     flash,
     redirect,
     render_template,
@@ -141,8 +142,9 @@ def pobierz_pdf(zajecia_id):
         return redirect(url_for('dashboard'))
 
     beneficjenci = zajecia.beneficjenci
-    output_path = f"static/pdf/zajecia_{zajecia.id}.pdf"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_dir = os.path.join(current_app.root_path, "static", "pdf")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"zajecia_{zajecia.id}.pdf")
 
     generate_pdf(zajecia, beneficjenci, output_path)
 

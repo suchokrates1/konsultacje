@@ -7,3 +7,4 @@ reportlab
 PyPDF2
 python-dotenv
 Flask-Mail
+email_validator
