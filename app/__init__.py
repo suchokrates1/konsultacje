@@ -10,7 +10,9 @@ login_manager.login_view = 'login'
 
 def create_app():
     app = Flask(__name__)
-    if app.env == "development":
+    # Flask 3 removed the `app.env` attribute. Use the configuration value
+    # instead which is populated from the `FLASK_ENV` environment variable.
+    if app.config.get("ENV") == "development":
         app.config['SECRET_KEY'] = os.environ.get(
             'SECRET_KEY', 'dev-secret-key'
         )
