@@ -37,7 +37,7 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Dodaj pod istniejącym modelem User
+# Additional application models
 
 
 class Beneficjent(db.Model):
