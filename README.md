@@ -10,15 +10,14 @@ A small Flask application that lets specialists register sessions with beneficia
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Export a `SECRET_KEY` environment variable when deploying to production. If it
-   is missing and `FLASK_ENV=development`, a fallback key will be used.
-3. Run the application in development mode without setting `SECRET_KEY`:
+2. Copy `.env.example` to `.env` and set `SECRET_KEY` to a secure value.
+   The `flask` command will load variables from this file automatically.
+3. (Optional) Run in development mode:
    ```bash
    export FLASK_ENV=development
    flask --app run.py run
    ```
-   In production you **must** define `SECRET_KEY` before starting the
-   application.
+   In production you **must** provide a real `SECRET_KEY` in `.env`.
 4. Start the application normally:
    ```bash
    flask --app run.py run
@@ -30,7 +29,7 @@ You can build and run the project in a container:
 
 ```bash
 docker build -t konsultacje .
-docker run -e SECRET_KEY=your-secret -p 8080:5000 konsultacje
+docker run --env-file .env -p 8080:5000 konsultacje
 ```
 
 Alternatively run `docker-compose up` to use the provided compose file which exposes the app on port `8080`.
