@@ -12,6 +12,13 @@ A small Flask application that lets specialists register sessions with beneficia
    ```
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
    `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
+   A secure `SECRET_KEY` is required in **all** environments. You can
+   generate one with:
+
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+
    Configure email delivery with `MAIL_SERVER`, `MAIL_PORT`,
    `MAIL_USERNAME`, `MAIL_PASSWORD`, and optionally `MAIL_USE_TLS`
    or `MAIL_USE_SSL` for encrypted connections.
@@ -22,7 +29,7 @@ A small Flask application that lets specialists register sessions with beneficia
    export FLASK_ENV=development
    flask --app run.py run
    ```
-   In production you **must** provide a real `SECRET_KEY` in `.env`.
+   The application will fail to start if `SECRET_KEY` is missing.
 4. Start the application normally:
    ```bash
    flask --app run.py run

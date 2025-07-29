@@ -24,8 +24,7 @@ def app(monkeypatch):
     import app as app_package
     if hasattr(app_package, 'routes'):
         delattr(app_package, 'routes')
-    app = create_app()
-    app.config.update(TESTING=True, WTF_CSRF_ENABLED=False, MAIL_SUPPRESS_SEND=True)
+    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "MAIL_SUPPRESS_SEND": True})
     return app
 
 
@@ -40,8 +39,7 @@ def test_admin_created_from_env(monkeypatch):
     monkeypatch.setenv('ADMIN_USERNAME', 'admin')
     monkeypatch.setenv('ADMIN_PASSWORD', 'adminpass')
     monkeypatch.setenv('ADMIN_EMAIL', 'admin@example.com')
-    app = create_app()
-    app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
+    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False})
     with app.app_context():
         admin = User.query.filter_by(username='admin').first()
         assert admin is not None
