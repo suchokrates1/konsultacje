@@ -10,8 +10,10 @@ A small Flask application that lets specialists register sessions with beneficia
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Copy `.env.example` to `.env` and set `SECRET_KEY` to a secure value.
-   The `flask` command will load variables from this file automatically.
+2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
+   `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
+   The `flask` command will load variables from this file automatically
+   and an admin user will be created if it does not exist.
 3. (Optional) Run in development mode:
    ```bash
    export FLASK_ENV=development

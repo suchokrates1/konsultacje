@@ -17,6 +17,9 @@ def create_app():
     # instead which is populated from the `FLASK_ENV` environment variable.
     env = app.config.get("ENV")
     secret_key = os.environ.get("SECRET_KEY")
+    admin_username = os.environ.get("ADMIN_USERNAME")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+    admin_email = os.environ.get("ADMIN_EMAIL")
     if secret_key:
         app.config["SECRET_KEY"] = secret_key
     elif env == "development":
@@ -46,5 +49,14 @@ def create_app():
     with app.app_context():
         from . import routes, models  # noqa: F401
         db.create_all()
+
+        if admin_username and admin_password:
+            from .models import User
+            admin = User.query.filter_by(username=admin_username).first()
+            if not admin:
+                admin = User(username=admin_username, email=admin_email)
+                admin.set_password(admin_password)
+                db.session.add(admin)
+                db.session.commit()
 
     return app
