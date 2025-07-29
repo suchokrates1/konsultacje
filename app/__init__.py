@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from dotenv import load_dotenv
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -9,6 +10,8 @@ login_manager.login_view = 'login'
 
 
 def create_app():
+    env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+    load_dotenv(env_path)
     app = Flask(__name__)
     # Flask 3 removed the `app.env` attribute. Use the configuration value
     # instead which is populated from the `FLASK_ENV` environment variable.
