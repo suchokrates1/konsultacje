@@ -1,11 +1,28 @@
 # Konsultacje Application
 
-This Flask application allows specialists to manage sessions and generate PDF reports for beneficiaries.
+A small Flask application that lets specialists register sessions with beneficiaries and produce printable PDF reports. The project stores data using SQLite and provides a simple web interface secured with Flask‑Login.
 
-## Environment Variables
+## Setup
 
-- `SECRET_KEY` – secret key used by Flask for session management and CSRF protection.
-  In development (`FLASK_ENV=development`), the application falls back to a built‑in
-  development key if this variable isn't defined. In other environments the variable
-  must be provided.
+1. Create a virtual environment and install dependencies:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+2. Export a `SECRET_KEY` environment variable. In development mode (`FLASK_ENV=development`) the app will use a fallback value if it is not set, but in other environments it must be provided.
+3. Start the application:
+   ```bash
+   flask --app run.py run
+   ```
 
+## Docker
+
+You can build and run the project in a container:
+
+```bash
+docker build -t konsultacje .
+docker run -e SECRET_KEY=your-secret -p 8080:5000 konsultacje
+```
+
+Alternatively run `docker-compose up` to use the provided compose file which exposes the app on port `8080`.
