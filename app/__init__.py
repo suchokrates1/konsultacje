@@ -13,32 +13,31 @@ mail = Mail()
 csrf = CSRFProtect()
 
 
-def create_app():
+def create_app(test_config=None):
     env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
     load_dotenv(env_path)
     app = Flask(__name__)
-    # Flask 3 removed the `app.env` attribute. Use the configuration value
-    # instead which is populated from the `FLASK_ENV` environment variable.
-    env = app.config.get("ENV")
+    # Flask loads configuration from environment variables such as `FLASK_ENV`.
     secret_key = os.environ.get("SECRET_KEY")
     admin_username = os.environ.get("ADMIN_USERNAME")
     admin_password = os.environ.get("ADMIN_PASSWORD")
     admin_email = os.environ.get("ADMIN_EMAIL")
-    if secret_key:
-        app.config["SECRET_KEY"] = secret_key
-    elif env == "development":
-        # Provide a fallback key in development to avoid crashes if the
-        # variable is not exported. A proper key should be configured for
-        # production deployments.
-        app.logger.warning(
-            "SECRET_KEY not set, using insecure development key."
-        )
-        app.config["SECRET_KEY"] = "dev-secret-key"
-    else:
-        raise RuntimeError(
-            "SECRET_KEY environment variable is not set. "
-            "Configure SECRET_KEY or run with FLASK_ENV=development."
-        )
+
+    if not secret_key:
+        if test_config and test_config.get("TESTING"):
+            app.logger.warning(
+                "SECRET_KEY not set, using insecure test key."
+            )
+            secret_key = "test-secret-key"
+        else:
+            raise RuntimeError(
+                "SECRET_KEY environment variable is not set."
+            )
+
+    app.config["SECRET_KEY"] = secret_key
+
+    if test_config:
+        app.config.update(test_config)
 
     # Ścieżka do bazy SQLite w katalogu 'instance'
     instance_path = os.path.join(app.root_path, '..', 'instance')
