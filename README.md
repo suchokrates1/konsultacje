@@ -28,6 +28,19 @@ A small Flask application that lets specialists register sessions with beneficia
    flask --app run.py run
    ```
 
+## Creating a user
+
+Before logging in for the first time you must add at least one account. Launch a
+Python shell with Flask context and create the user manually:
+
+```bash
+flask shell
+>>> from app import db, models
+>>> u = models.User(username="admin", email="admin@example.com")
+>>> u.set_password("password")
+>>> db.session.add(u); db.session.commit()
+```
+
 ## Docker
 
 You can build and run the project in a container:
