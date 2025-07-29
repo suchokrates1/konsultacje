@@ -12,12 +12,23 @@ def create_app():
     app = Flask(__name__)
     # Flask 3 removed the `app.env` attribute. Use the configuration value
     # instead which is populated from the `FLASK_ENV` environment variable.
-    if app.config.get("ENV") == "development":
-        app.config['SECRET_KEY'] = os.environ.get(
-            'SECRET_KEY', 'dev-secret-key'
+    env = app.config.get("ENV")
+    secret_key = os.environ.get("SECRET_KEY")
+    if secret_key:
+        app.config["SECRET_KEY"] = secret_key
+    elif env == "development":
+        # Provide a fallback key in development to avoid crashes if the
+        # variable is not exported. A proper key should be configured for
+        # production deployments.
+        app.logger.warning(
+            "SECRET_KEY not set, using insecure development key."
         )
+        app.config["SECRET_KEY"] = "dev-secret-key"
     else:
-        app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
+        raise RuntimeError(
+            "SECRET_KEY environment variable is not set. "
+            "Configure SECRET_KEY or run with FLASK_ENV=development."
+        )
 
     # Ścieżka do bazy SQLite w katalogu 'instance'
     instance_path = os.path.join(app.root_path, '..', 'instance')
