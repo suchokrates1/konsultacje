@@ -4,8 +4,11 @@ from wtforms import (
     SubmitField,
     DateField,
     TimeField,
+    StringField,
+    PasswordField,
+    EmailField,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms.widgets import ListWidget, CheckboxInput
 
 
@@ -22,3 +25,15 @@ class ZajeciaForm(FlaskForm):
         'Beneficjenci', coerce=int, validators=[DataRequired()]
     )
     submit = SubmitField('Zapisz zajęcia')
+
+
+class RegisterForm(FlaskForm):
+    username = StringField('Nazwa użytkownika', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Hasło', validators=[DataRequired()])
+    confirm = PasswordField(
+        'Potwierdź hasło',
+        validators=[DataRequired(), EqualTo('password', message='Hasła muszą się zgadzać')],
+    )
+    submit = SubmitField('Zarejestruj się')
+

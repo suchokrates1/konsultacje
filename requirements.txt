@@ -6,3 +6,4 @@ werkzeug
 reportlab
 PyPDF2
 python-dotenv
+Flask-Mail

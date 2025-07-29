@@ -19,10 +19,12 @@ from flask_login import (
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired
+from flask_mail import Message
 
 from . import db
-from .forms import ZajeciaForm
+from .forms import ZajeciaForm, RegisterForm
 from .models import Beneficjent, User, Zajecia
+from . import mail
 from .pdf_generator import generate_pdf
 
 
@@ -43,6 +45,28 @@ def login():
             return redirect(next or url_for('dashboard'))
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+
+        admin_email = os.environ.get('ADMIN_EMAIL')
+        if admin_email:
+            msg = Message('New user registration', recipients=[admin_email])
+            msg.body = (
+                f'Użytkownik {user.username} zarejestrował się z adresem {user.email}.'
+            )
+            mail.send(msg)
+
+        flash('Rejestracja zakończona sukcesem.')
+        return redirect(url_for('login'))
+    return render_template('register.html', form=form)
 
 
 @app.route('/logout')
