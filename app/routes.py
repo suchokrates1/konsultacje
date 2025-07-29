@@ -28,6 +28,7 @@ from .forms import (
     RegisterForm,
     PasswordResetRequestForm,
     PasswordResetForm,
+    BeneficjentForm,
 )
 from .models import Beneficjent, User, Zajecia
 from . import mail
@@ -184,3 +185,72 @@ def reset_password(token):
         flash('Hasło zostało zresetowane.')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/zajecia')
+@login_required
+def lista_zajec():
+    zajecia_list = (
+        Zajecia.query.filter_by(user_id=current_user.id)
+        .order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc())
+        .all()
+    )
+    return render_template('zajecia_list.html', zajecia_list=zajecia_list)
+
+
+@app.route('/beneficjenci')
+@login_required
+def lista_beneficjentow():
+    beneficjenci = Beneficjent.query.filter_by(user_id=current_user.id).all()
+    return render_template('beneficjenci_list.html', beneficjenci=beneficjenci)
+
+
+@app.route('/beneficjenci/nowy', methods=['GET', 'POST'])
+@login_required
+def nowy_beneficjent():
+    form = BeneficjentForm()
+    if form.validate_on_submit():
+        beneficjent = Beneficjent(
+            imie=form.imie.data,
+            wojewodztwo=form.wojewodztwo.data,
+            user_id=current_user.id,
+        )
+        db.session.add(beneficjent)
+        db.session.commit()
+        flash('Beneficjent dodany.')
+        return redirect(url_for('lista_beneficjentow'))
+    return render_template(
+        'beneficjent_form.html', form=form, title='Nowy beneficjent'
+    )
+
+
+@app.route('/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST'])
+@login_required
+def edytuj_beneficjenta(beneficjent_id):
+    benef = Beneficjent.query.get_or_404(beneficjent_id)
+    if benef.user_id != current_user.id:
+        flash('Brak dostępu do tego beneficjenta.')
+        return redirect(url_for('lista_beneficjentow'))
+    form = BeneficjentForm(obj=benef)
+    if form.validate_on_submit():
+        benef.imie = form.imie.data
+        benef.wojewodztwo = form.wojewodztwo.data
+        db.session.commit()
+        flash('Beneficjent zaktualizowany.')
+        return redirect(url_for('lista_beneficjentow'))
+    return render_template(
+        'beneficjent_form.html', form=form, title='Edytuj beneficjenta'
+    )
+
+
+@app.route('/beneficjenci/<int:beneficjent_id>/usun', methods=['POST'])
+@login_required
+def usun_beneficjenta(beneficjent_id):
+    benef = Beneficjent.query.get_or_404(beneficjent_id)
+    if benef.user_id != current_user.id:
+        flash('Brak dostępu do tego beneficjenta.')
+        return redirect(url_for('lista_beneficjentow'))
+    db.session.delete(benef)
+    db.session.commit()
+    flash('Beneficjent usunięty.')
+    return redirect(url_for('lista_beneficjentow'))
