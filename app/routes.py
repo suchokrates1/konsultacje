@@ -17,12 +17,17 @@ from flask_login import (
     logout_user,
 )
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField
+from wtforms import PasswordField, StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired
 from flask_mail import Message
 
 from . import db
-from .forms import ZajeciaForm, RegisterForm
+from .forms import (
+    ZajeciaForm,
+    RegisterForm,
+    PasswordResetRequestForm,
+    PasswordResetForm,
+)
 from .models import Beneficjent, User, Zajecia
 from . import mail
 from .pdf_generator import generate_pdf
@@ -31,6 +36,7 @@ from .pdf_generator import generate_pdf
 class LoginForm(FlaskForm):
     username = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Hasło', validators=[DataRequired()])
+    remember_me = BooleanField('Zapamiętaj mnie')
     submit = SubmitField('Zaloguj się')
 
 
@@ -41,7 +47,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user)
+            login_user(user, remember=form.remember_me.data)
             return redirect(next or url_for('dashboard'))
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
@@ -138,3 +144,38 @@ def pobierz_pdf(zajecia_id):
     generate_pdf(zajecia, beneficjenci, output_path)
 
     return send_file(output_path, as_attachment=True)
+
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    form = PasswordResetRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.get_reset_token()
+            reset_url = url_for('reset_password', token=token, _external=True)
+            msg = Message('Reset hasła', recipients=[user.email])
+            msg.body = f'Kliknij link aby zresetować hasło: {reset_url}'
+            mail.send(msg)
+        flash('Jeśli podany email istnieje, wysłano instrukcje resetowania hasła.')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html', form=form)
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('Link resetujący jest nieważny lub wygasł.')
+        return redirect(url_for('reset_password_request'))
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Hasło zostało zresetowane.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
