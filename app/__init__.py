@@ -7,10 +7,13 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 
+
 def create_app():
     app = Flask(__name__)
     if app.env == "development":
-        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+        app.config['SECRET_KEY'] = os.environ.get(
+            'SECRET_KEY', 'dev-secret-key'
+        )
     else:
         app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
@@ -25,7 +28,7 @@ def create_app():
     login_manager.init_app(app)
 
     with app.app_context():
-        from . import routes, models
+        from . import routes, models  # noqa: F401
         db.create_all()
 
     return app
