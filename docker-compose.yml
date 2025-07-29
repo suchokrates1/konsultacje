@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: konsultacje-web
+    ports:
+      - "8080:5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.konsultacje.rule=Host(`konsultacje.vestmedia.pl`)"
+      - "traefik.http.routers.konsultacje.entrypoints=https"
+      - "traefik.http.routers.konsultacje.tls=true"
+      - "traefik.http.services.konsultacje.loadbalancer.server.port=5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=development

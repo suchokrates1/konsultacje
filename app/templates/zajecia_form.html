@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Nowe zajęcia{% endblock %}
+{% block content %}
+<h2>Nowe zajęcia</h2>
+<form method="post">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    {{ form.data.label(class="form-label") }}
+    {{ form.data(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.godzina_od.label(class="form-label") }}
+    {{ form.godzina_od(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.godzina_do.label(class="form-label") }}
+    {{ form.godzina_do(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Beneficjenci</label>
+    {% for subfield in form.beneficjenci %}
+      <div class="form-check">
+        {{ subfield(class="form-check-input") }}
+        {{ form.beneficjenci.choices[loop.index0][1] }}
+      </div>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+</form>
+{% endblock %}

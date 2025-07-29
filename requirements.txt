@@ -1,0 +1,8 @@
+flask
+flask-login
+flask-wtf
+flask-sqlalchemy
+psycopg2-binary
+werkzeug
+reportlab
+PyPDF2
