@@ -34,12 +34,13 @@ class LoginForm(FlaskForm):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    next = request.args.get('next')
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(next or url_for('dashboard'))
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
 
