@@ -9,7 +9,10 @@ login_manager.login_view = 'login'
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'supersecretkey'
+    if app.env == "development":
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+    else:
+        app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 
     # Ścieżka do bazy SQLite w katalogu 'instance'
     instance_path = os.path.join(app.root_path, '..', 'instance')
