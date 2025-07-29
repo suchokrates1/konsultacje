@@ -38,3 +38,14 @@ docker run --env-file .env -p 8080:5000 konsultacje
 ```
 
 Alternatively run `docker-compose up` to use the provided compose file which exposes the app on port `8080`.
+
+## Running tests
+
+The project uses **pytest** for the test suite located in `tests/`. Install the dependencies and pytest, then run:
+
+```bash
+pip install -r requirements.txt pytest
+pytest
+```
+
+This will create a temporary SQLite database in the `instance/` folder while the tests run.
