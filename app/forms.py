@@ -37,3 +37,17 @@ class RegisterForm(FlaskForm):
     )
     submit = SubmitField('Zarejestruj się')
 
+
+class PasswordResetRequestForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Wyślij link resetujący')
+
+
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('Nowe hasło', validators=[DataRequired()])
+    confirm = PasswordField(
+        'Potwierdź hasło',
+        validators=[DataRequired(), EqualTo('password', message='Hasła muszą się zgadzać')],
+    )
+    submit = SubmitField('Zresetuj hasło')
+
