@@ -1,3 +1,5 @@
+"""Utilities for rendering session details into a PDF document."""
+
 import io
 import os
 
