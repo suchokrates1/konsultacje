@@ -4,7 +4,7 @@ flask-wtf
 flask-sqlalchemy
 werkzeug
 reportlab
-PyPDF2
+pypdf
 python-dotenv
 Flask-Mail
 email_validator

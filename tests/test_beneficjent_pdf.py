@@ -42,7 +42,7 @@ def test_beneficjent_crud(app, client):
     )
     assert 'Beneficjent zaktualizowany' in response.get_data(as_text=True)
     with app.app_context():
-        benef = Beneficjent.query.get(benef_id)
+        benef = db.session.get(Beneficjent, benef_id)
         assert benef.imie == 'Jan Nowak'
         assert benef.wojewodztwo == 'Slaskie'
 
@@ -54,7 +54,7 @@ def test_beneficjent_crud(app, client):
     )
     assert 'Beneficjent usunięty' in response.get_data(as_text=True)
     with app.app_context():
-        assert Beneficjent.query.get(benef_id) is None
+        assert db.session.get(Beneficjent, benef_id) is None
 
 
 def test_create_session(app, client):

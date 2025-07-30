@@ -33,12 +33,12 @@ class User(UserMixin, db.Model):
             data = s.loads(token, max_age=expires_sec)
         except Exception:
             return None
-        return User.query.get(data.get('user_id'))
+        return db.session.get(User, data.get('user_id'))
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 # Additional application models
 

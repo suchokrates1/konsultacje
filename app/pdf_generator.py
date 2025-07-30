@@ -6,7 +6,7 @@ import os
 from flask import current_app
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from PyPDF2 import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 
 
 def generate_pdf(zajecia, beneficjenci, output_path):
