@@ -1,3 +1,5 @@
+"""Flask application factory and extension initialization."""
+
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -14,6 +16,22 @@ csrf = CSRFProtect()
 
 
 def create_app(test_config=None):
+    """Create and configure the Flask application.
+
+    The function loads environment variables, initializes extensions and
+    registers application blueprints. A database and an optional admin user are
+    created on the first run.
+
+    Parameters
+    ----------
+    test_config: dict | None
+        Optional configuration values used during testing.
+
+    Returns
+    -------
+    Flask
+        The configured Flask application instance.
+    """
     env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
     load_dotenv(env_path)
     app = Flask(__name__)

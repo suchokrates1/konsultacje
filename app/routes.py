@@ -1,3 +1,5 @@
+"""Flask view functions and the login form."""
+
 import os
 from datetime import datetime, timedelta
 
@@ -38,6 +40,7 @@ from urllib.parse import urlparse
 
 
 class LoginForm(FlaskForm):
+    """Form used by users to authenticate to the application."""
     username = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Hasło', validators=[DataRequired()])
     remember_me = BooleanField('Zapamiętaj mnie')

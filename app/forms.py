@@ -1,3 +1,5 @@
+"""WTForms used to validate and handle user input."""
+
 from flask_wtf import FlaskForm
 from wtforms import (
     SelectMultipleField,
@@ -13,11 +15,14 @@ from wtforms.widgets import ListWidget, CheckboxInput
 
 
 class MultiCheckboxField(SelectMultipleField):
+    """Multiple selection field rendered as a list of checkboxes."""
+
     widget = ListWidget(prefix_label=False)
     option_widget = CheckboxInput()
 
 
 class ZajeciaForm(FlaskForm):
+    """Form for scheduling a consultation session."""
     data = DateField('Data konsultacji', validators=[DataRequired()])
     godzina_od = TimeField('Godzina od', validators=[DataRequired()])
     godzina_do = TimeField('Godzina do', validators=[DataRequired()])
@@ -28,6 +33,7 @@ class ZajeciaForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
+    """Form allowing new users to create an account."""
     username = StringField('Nazwa użytkownika', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Hasło', validators=[DataRequired()])
@@ -39,11 +45,13 @@ class RegisterForm(FlaskForm):
 
 
 class PasswordResetRequestForm(FlaskForm):
+    """Request form used to send a password reset link."""
     email = EmailField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Wyślij link resetujący')
 
 
 class PasswordResetForm(FlaskForm):
+    """Form for setting a new password after receiving a token."""
     password = PasswordField('Nowe hasło', validators=[DataRequired()])
     confirm = PasswordField(
         'Potwierdź hasło',
@@ -53,11 +61,13 @@ class PasswordResetForm(FlaskForm):
 
 
 class BeneficjentForm(FlaskForm):
+    """Form for adding or editing a beneficiary."""
     imie = StringField('Imię i nazwisko', validators=[DataRequired()])
     wojewodztwo = StringField('Województwo', validators=[DataRequired()])
     submit = SubmitField('Zapisz')
 
 
 class DeleteForm(FlaskForm):
+    """Simple confirmation form used for delete actions."""
     submit = SubmitField('Usuń')
 

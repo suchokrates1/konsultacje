@@ -1,3 +1,5 @@
+"""Database models used by the application."""
+
 from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +9,7 @@ from flask import current_app
 
 
 class User(UserMixin, db.Model):
+    """Application user capable of logging in and resetting a password."""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True)
@@ -41,6 +44,7 @@ def load_user(user_id):
 
 
 class Beneficjent(db.Model):
+    """Person receiving consultations stored for a particular user."""
     id = db.Column(db.Integer, primary_key=True)
     imie = db.Column(db.String(100), nullable=False)
     wojewodztwo = db.Column(db.String(100), nullable=False)
@@ -48,6 +52,7 @@ class Beneficjent(db.Model):
 
 
 class Zajecia(db.Model):
+    """Scheduled consultation session with related beneficiaries."""
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False)
     godzina_od = db.Column(db.Time, nullable=False)
