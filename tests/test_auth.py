@@ -71,6 +71,34 @@ def test_register_and_login_remember_me(client, app):
     assert client.get_cookie('remember_token') is not None
 
 
+def test_register_duplicate_email(client, app):
+    """Registering with an existing email should show an error message."""
+    # first registration
+    client.post(
+        '/register',
+        data={
+            'username': 'user1',
+            'email': 'duplicate@example.com',
+            'password': 'secret',
+            'confirm': 'secret',
+        },
+        follow_redirects=True,
+    )
+
+    response = client.post(
+        '/register',
+        data={
+            'username': 'user2',
+            'email': 'duplicate@example.com',
+            'password': 'secret',
+            'confirm': 'secret',
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert 'Użytkownik z tym adresem email już istnieje.' in response.get_data(as_text=True)
+
+
 def test_password_reset_flow(monkeypatch, app):
     with app.app_context():
         user = User(username='bob', email='bob@example.com')
