@@ -148,7 +148,7 @@ def nowe_zajecia():
             user_id=current_user.id
         )
         for b_id in form.beneficjenci.data:
-            beneficjent = Beneficjent.query.get(b_id)
+            beneficjent = db.session.get(Beneficjent, b_id)
             zajecia.beneficjenci.append(beneficjent)
 
         db.session.add(zajecia)
@@ -382,7 +382,7 @@ def admin_edytuj_zajecia(zajecia_id):
         zajecia.data = form.data.data
         zajecia.godzina_od = form.godzina_od.data
         zajecia.godzina_do = form.godzina_do.data
-        zajecia.beneficjenci = [Beneficjent.query.get(i) for i in form.beneficjenci.data]
+        zajecia.beneficjenci = [db.session.get(Beneficjent, i) for i in form.beneficjenci.data]
         db.session.commit()
         flash('Zajęcia zaktualizowane.')
         return redirect(url_for('admin_zajecia'))
