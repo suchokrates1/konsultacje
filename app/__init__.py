@@ -94,10 +94,10 @@ def create_app(test_config=None):
 
         if admin_username and admin_password:
             from .models import User, Roles
-            admin = User.query.filter_by(username=admin_username).first()
+            admin = User.query.filter_by(full_name=admin_username).first()
             if not admin:
                 admin = User(
-                    username=admin_username,
+                    full_name=admin_username,
                     email=admin_email,
                     role=Roles.ADMIN,
                 )
