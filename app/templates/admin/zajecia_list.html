@@ -16,7 +16,7 @@
     <tr>
       <td>{{ z.data.strftime('%d.%m.%Y') }}</td>
       <td>{{ z.godzina_od.strftime('%H:%M') }} - {{ z.godzina_do.strftime('%H:%M') }}</td>
-      <td>{{ z.user.username }}</td>
+      <td>{{ z.user.full_name }}</td>
       <td>
         <a href="{{ url_for('admin_edytuj_zajecia', zajecia_id=z.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
         <form method="post" action="{{ url_for('admin_usun_zajecia', zajecia_id=z.id) }}" style="display:inline;">

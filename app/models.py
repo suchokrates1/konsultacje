@@ -16,7 +16,7 @@ class Roles:
 class User(UserMixin, db.Model):
     """Application user capable of logging in and resetting a password."""
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
+    full_name = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
     default_duration = db.Column(db.Integer, default=90)

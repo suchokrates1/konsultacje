@@ -5,7 +5,7 @@ from app.models import User, Beneficjent, Zajecia
 
 def setup_data(app):
     with app.app_context():
-        user = User(username="test", email="test@example.com")
+        user = User(full_name="test", email="test@example.com")
         user.set_password("secret")
         db.session.add(user)
         db.session.commit()
@@ -36,7 +36,7 @@ def setup_data(app):
 def login(client):
     return client.post(
         "/login",
-        data={"username": "test", "password": "secret"},
+        data={"full_name": "test", "password": "secret"},
         follow_redirects=True,
     )
 
