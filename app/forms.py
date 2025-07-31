@@ -71,3 +71,10 @@ class DeleteForm(FlaskForm):
     """Simple confirmation form used for delete actions."""
     submit = SubmitField('Usuń')
 
+
+class UserEditForm(FlaskForm):
+    """Form for admin to edit instructor accounts."""
+    username = StringField('Nazwa użytkownika', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Zapisz')
+

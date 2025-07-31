@@ -8,6 +8,11 @@ from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 
 
+class Roles:
+    ADMIN = "admin"
+    INSTRUCTOR = "instructor"
+
+
 class User(UserMixin, db.Model):
     """Application user capable of logging in and resetting a password."""
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +20,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
     default_duration = db.Column(db.Integer, default=90)
+    role = db.Column(db.String(20), default=Roles.INSTRUCTOR)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -49,6 +55,7 @@ class Beneficjent(db.Model):
     imie = db.Column(db.String(100), nullable=False)
     wojewodztwo = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User')
 
 
 class Zajecia(db.Model):
@@ -59,6 +66,7 @@ class Zajecia(db.Model):
     godzina_do = db.Column(db.Time, nullable=False)
     specjalista = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User')
 
     beneficjenci = db.relationship(
         'Beneficjent', secondary='zajecia_beneficjenci'

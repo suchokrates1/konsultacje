@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from flask import (
     current_app as app,
     current_app,
+    abort,
     flash,
     redirect,
     render_template,
@@ -33,11 +34,25 @@ from .forms import (
     PasswordResetForm,
     BeneficjentForm,
     DeleteForm,
+    UserEditForm,
 )
-from .models import Beneficjent, User, Zajecia
+from .models import Beneficjent, User, Zajecia, Roles
 from . import mail
 from .pdf_generator import generate_pdf
 from urllib.parse import urlparse
+from functools import wraps
+
+
+def admin_required(view_func):
+    """Decorator ensuring the current user has the admin role."""
+
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != Roles.ADMIN:
+            return abort(403)
+        return view_func(*args, **kwargs)
+
+    return wrapper
 
 
 class LoginForm(FlaskForm):
@@ -279,3 +294,138 @@ def usun_beneficjenta(beneficjent_id):
         db.session.commit()
         flash('Beneficjent usunięty.')
     return redirect(url_for('lista_beneficjentow'))
+
+
+# --------------------- Admin Views ---------------------
+
+
+@app.route('/admin/beneficjenci')
+@login_required
+@admin_required
+def admin_beneficjenci():
+    beneficjenci = Beneficjent.query.all()
+    delete_form = DeleteForm()
+    return render_template(
+        'admin/beneficjenci_list.html',
+        beneficjenci=beneficjenci,
+        delete_form=delete_form,
+    )
+
+
+@app.route('/admin/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edytuj_beneficjenta(beneficjent_id):
+    benef = Beneficjent.query.get_or_404(beneficjent_id)
+    form = BeneficjentForm(obj=benef)
+    if form.validate_on_submit():
+        benef.imie = form.imie.data
+        benef.wojewodztwo = form.wojewodztwo.data
+        db.session.commit()
+        flash('Beneficjent zaktualizowany.')
+        return redirect(url_for('admin_beneficjenci'))
+    return render_template('beneficjent_form.html', form=form, title='Edytuj beneficjenta')
+
+
+@app.route('/admin/beneficjenci/<int:beneficjent_id>/usun', methods=['POST'])
+@login_required
+@admin_required
+def admin_usun_beneficjenta(beneficjent_id):
+    form = DeleteForm()
+    if form.validate_on_submit():
+        benef = Beneficjent.query.get_or_404(beneficjent_id)
+        db.session.delete(benef)
+        db.session.commit()
+        flash('Beneficjent usunięty.')
+    return redirect(url_for('admin_beneficjenci'))
+
+
+@app.route('/admin/zajecia')
+@login_required
+@admin_required
+def admin_zajecia():
+    zajecia_list = Zajecia.query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
+    delete_form = DeleteForm()
+    return render_template(
+        'admin/zajecia_list.html',
+        zajecia_list=zajecia_list,
+        delete_form=delete_form,
+    )
+
+
+@app.route('/admin/zajecia/<int:zajecia_id>/edytuj', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edytuj_zajecia(zajecia_id):
+    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    form = ZajeciaForm(obj=zajecia)
+    form.beneficjenci.choices = [
+        (b.id, f"{b.imie} ({b.wojewodztwo})")
+        for b in Beneficjent.query.filter_by(user_id=zajecia.user_id).all()
+    ]
+    if request.method == 'GET':
+        form.beneficjenci.data = [b.id for b in zajecia.beneficjenci]
+    if form.validate_on_submit():
+        zajecia.data = form.data.data
+        zajecia.godzina_od = form.godzina_od.data
+        zajecia.godzina_do = form.godzina_do.data
+        zajecia.beneficjenci = [Beneficjent.query.get(i) for i in form.beneficjenci.data]
+        db.session.commit()
+        flash('Zajęcia zaktualizowane.')
+        return redirect(url_for('admin_zajecia'))
+    return render_template('zajecia_form.html', form=form)
+
+
+@app.route('/admin/zajecia/<int:zajecia_id>/usun', methods=['POST'])
+@login_required
+@admin_required
+def admin_usun_zajecia(zajecia_id):
+    form = DeleteForm()
+    if form.validate_on_submit():
+        zajecia = Zajecia.query.get_or_404(zajecia_id)
+        db.session.delete(zajecia)
+        db.session.commit()
+        flash('Zajęcia usunięte.')
+    return redirect(url_for('admin_zajecia'))
+
+
+@app.route('/admin/instruktorzy')
+@login_required
+@admin_required
+def admin_instruktorzy():
+    instructors = User.query.filter_by(role=Roles.INSTRUCTOR).all()
+    delete_form = DeleteForm()
+    return render_template(
+        'admin/instructors_list.html',
+        instructors=instructors,
+        delete_form=delete_form,
+    )
+
+
+@app.route('/admin/instruktorzy/<int:user_id>/edytuj', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edytuj_instruktora(user_id):
+    instr = User.query.get_or_404(user_id)
+    form = UserEditForm(obj=instr)
+    if form.validate_on_submit():
+        instr.username = form.username.data
+        instr.email = form.email.data
+        db.session.commit()
+        flash('Instruktor zaktualizowany.')
+        return redirect(url_for('admin_instruktorzy'))
+    return render_template('instructor_form.html', form=form, title='Edytuj instruktora')
+
+
+@app.route('/admin/instruktorzy/<int:user_id>/usun', methods=['POST'])
+@login_required
+@admin_required
+def admin_usun_instruktora(user_id):
+    form = DeleteForm()
+    if form.validate_on_submit():
+        instr = User.query.get_or_404(user_id)
+        db.session.delete(instr)
+        db.session.commit()
+        flash('Instruktor usunięty.')
+    return redirect(url_for('admin_instruktorzy'))
+

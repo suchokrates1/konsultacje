@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Wszyscy beneficjenci{% endblock %}
+{% block content %}
+<h2>Wszyscy beneficjenci</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Imię i nazwisko</th>
+      <th>Województwo</th>
+      <th>Instruktor</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in beneficjenci %}
+    <tr>
+      <td>{{ b.imie }}</td>
+      <td>{{ b.wojewodztwo }}</td>
+      <td>{{ b.user.username }}</td>
+      <td>
+        <a href="{{ url_for('admin_edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
+        <form method="post" action="{{ url_for('admin_usun_beneficjenta', beneficjent_id=b.id) }}" style="display:inline;">
+          {{ delete_form.csrf_token }}
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');">Usuń</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">Brak beneficjentów.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
