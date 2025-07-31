@@ -24,13 +24,19 @@ A small Flask application that lets specialists register sessions with beneficia
    or `MAIL_USE_SSL` for encrypted connections.
    The `flask` command will load variables from this file automatically
    and an admin user will be created if it does not exist.
-3. (Optional) Run in development mode:
+3. Initialize the migration directory (first run only):
    ```bash
-   export FLASK_ENV=development
-   flask --app run.py run
+   flask --app run.py db init
+   flask --app run.py db migrate -m "initial"
+   flask --app run.py db upgrade
    ```
+4. (Optional) Run in development mode:
+   ```bash
+    export FLASK_ENV=development
+    flask --app run.py run
+    ```
    The application will fail to start if `SECRET_KEY` is missing.
-4. Start the application normally:
+5. Start the application normally:
    ```bash
    flask --app run.py run
    ```

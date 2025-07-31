@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_wtf import CSRFProtect
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 
 db = SQLAlchemy()
@@ -84,10 +85,12 @@ def create_app(test_config=None):
     login_manager.init_app(app)
     mail.init_app(app)
     csrf.init_app(app)
+    Migrate(app, db)
 
     with app.app_context():
         from . import routes, models  # noqa: F401
-        db.create_all()
+        from flask_migrate import upgrade
+        upgrade()
 
         if admin_username and admin_password:
             from .models import User

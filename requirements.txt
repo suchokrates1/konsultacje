@@ -2,6 +2,7 @@ flask
 flask-login
 flask-wtf
 flask-sqlalchemy
+Flask-Migrate
 werkzeug
 reportlab
 pypdf
