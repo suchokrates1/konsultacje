@@ -103,7 +103,5 @@ def test_pdf_generation(app, client):
     assert response.headers.get('Content-Disposition', '').startswith('attachment')
 
     pdf_path = os.path.join(app.root_path, 'static', 'pdf', f'zajecia_{z_id}.pdf')
-    assert os.path.exists(pdf_path)
-
-    # clean up generated file
-    os.remove(pdf_path)
+    # the generated PDF should be removed after the response is sent
+    assert not os.path.exists(pdf_path)

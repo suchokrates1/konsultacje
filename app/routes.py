@@ -12,6 +12,7 @@ from flask import (
     request,
     send_file,
     url_for,
+    after_this_request,
 )
 from flask_login import (
     current_user,
@@ -157,6 +158,14 @@ def pobierz_pdf(zajecia_id):
     output_path = os.path.join(output_dir, f"zajecia_{zajecia.id}.pdf")
 
     generate_pdf(zajecia, beneficjenci, output_path)
+
+    @after_this_request
+    def remove_file(response):
+        try:
+            os.remove(output_path)
+        except OSError:
+            current_app.logger.warning("Failed to remove generated PDF %s", output_path)
+        return response
 
     return send_file(output_path, as_attachment=True)
 
