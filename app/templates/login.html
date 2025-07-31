@@ -12,10 +12,11 @@
   </div>
   <div class="mb-3">
     {{ form.password.label(class="form-label") }}
-    {{ form.password(class="form-control", type="password", id=form.password.id, **{'aria-label': 'Hasło'}) }}
-    <div class="form-check mt-1">
-      <input class="form-check-input" type="checkbox" id="show-password">
-      <label class="form-check-label" for="show-password">Pokaż hasło</label>
+    <div class="input-group">
+      {{ form.password(class="form-control", type="password", id=form.password.id, **{'aria-label': 'Hasło'}) }}
+      <span class="input-group-text">
+        <i class="bi bi-eye-slash toggle-password" data-target="{{ form.password.id }}" role="button"></i>
+      </span>
     </div>
   </div>
   <div class="form-check mb-3">
@@ -31,9 +32,19 @@
 </p>
 <p class="mt-2"><a href="{{ url_for('reset_password_request') }}">Zapomniałeś hasła?</a></p>
 <script>
-  document.getElementById('show-password').addEventListener('change', function() {
-    const pw = document.getElementById('{{ form.password.id }}');
-    pw.type = this.checked ? 'text' : 'password';
+  document.querySelectorAll('.toggle-password').forEach(function(icon) {
+    icon.addEventListener('click', function() {
+      const target = document.getElementById(this.dataset.target);
+      if (target.type === 'password') {
+        target.type = 'text';
+        this.classList.remove('bi-eye-slash');
+        this.classList.add('bi-eye');
+      } else {
+        target.type = 'password';
+        this.classList.add('bi-eye-slash');
+        this.classList.remove('bi-eye');
+      }
+    });
   });
 </script>
 {% endblock %}

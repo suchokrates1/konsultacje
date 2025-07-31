@@ -16,15 +16,41 @@
   </div>
   <div class="mb-3">
     {{ form.password.label(class="form-label") }}
-    {{ form.password(class="form-control", type="password", **{'aria-label': 'Hasło'}) }}
+    <div class="input-group">
+      {{ form.password(class="form-control", type="password", id=form.password.id, **{'aria-label': 'Hasło'}) }}
+      <span class="input-group-text">
+        <i class="bi bi-eye-slash toggle-password" data-target="{{ form.password.id }}" role="button"></i>
+      </span>
+    </div>
   </div>
   <div class="mb-3">
     {{ form.confirm.label(class="form-label") }}
-    {{ form.confirm(class="form-control", type="password", **{'aria-label': 'Potwierdź hasło'}) }}
+    <div class="input-group">
+      {{ form.confirm(class="form-control", type="password", id=form.confirm.id, **{'aria-label': 'Potwierdź hasło'}) }}
+      <span class="input-group-text">
+        <i class="bi bi-eye-slash toggle-password" data-target="{{ form.confirm.id }}" role="button"></i>
+      </span>
+    </div>
   </div>
   <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
     </form>
   </div>
 </div>
+<script>
+  document.querySelectorAll('.toggle-password').forEach(function(icon) {
+    icon.addEventListener('click', function() {
+      const target = document.getElementById(this.dataset.target);
+      if (target.type === 'password') {
+        target.type = 'text';
+        this.classList.remove('bi-eye-slash');
+        this.classList.add('bi-eye');
+      } else {
+        target.type = 'password';
+        this.classList.add('bi-eye-slash');
+        this.classList.remove('bi-eye');
+      }
+    });
+  });
+</script>
 {% endblock %}
 
