@@ -223,23 +223,36 @@ def reset_password(token):
 @app.route('/zajecia')
 @login_required
 def lista_zajec():
+    q = request.args.get('q', '').strip()
+    query = Zajecia.query.filter_by(user_id=current_user.id)
+    if q:
+        query = query.filter(
+            db.cast(Zajecia.data, db.String).ilike(f"%{q}%")
+            | Zajecia.specjalista.ilike(f"%{q}%")
+        )
     zajecia_list = (
-        Zajecia.query.filter_by(user_id=current_user.id)
-        .order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc())
-        .all()
+        query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
     )
-    return render_template('zajecia_list.html', zajecia_list=zajecia_list)
+    return render_template('zajecia_list.html', zajecia_list=zajecia_list, q=q)
 
 
 @app.route('/beneficjenci')
 @login_required
 def lista_beneficjentow():
-    beneficjenci = Beneficjent.query.filter_by(user_id=current_user.id).all()
+    q = request.args.get('q', '').strip()
+    query = Beneficjent.query.filter_by(user_id=current_user.id)
+    if q:
+        query = query.filter(
+            Beneficjent.imie.ilike(f"%{q}%")
+            | Beneficjent.wojewodztwo.ilike(f"%{q}%")
+        )
+    beneficjenci = query.all()
     delete_form = DeleteForm()
     return render_template(
         'beneficjenci_list.html',
         beneficjenci=beneficjenci,
         delete_form=delete_form,
+        q=q,
     )
 
 
