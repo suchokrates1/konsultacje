@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Instruktorzy{% endblock %}
+{% block content %}
+<h2>Instruktorzy</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nazwa użytkownika</th>
+      <th>Email</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in instructors %}
+    <tr>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>
+        <a href="{{ url_for('admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
+        <form method="post" action="{{ url_for('admin_usun_instruktora', user_id=u.id) }}" style="display:inline;">
+          {{ delete_form.csrf_token }}
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');">Usuń</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">Brak instruktorów.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

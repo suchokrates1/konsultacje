@@ -45,6 +45,7 @@ def test_admin_created_from_env(monkeypatch):
         assert admin is not None
         assert admin.email == 'admin@example.com'
         assert admin.check_password('adminpass')
+        assert admin.role == 'admin'
 
 
 def test_register_and_login_remember_me(client, app):

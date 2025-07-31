@@ -32,6 +32,18 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('lista_beneficjentow') }}">Beneficjenci</a>
           </li>
+          {% if current_user.is_authenticated and current_user.role == 'admin' %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Admin
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="adminMenu">
+              <li><a class="dropdown-item" href="{{ url_for('admin_instruktorzy') }}">Instruktorzy</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_beneficjenci') }}">Beneficjenci</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_zajecia') }}">Zajęcia</a></li>
+            </ul>
+          </li>
+          {% endif %}
         </ul>
         {% if current_user.is_authenticated %}
         <ul class="navbar-nav">
