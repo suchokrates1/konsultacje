@@ -135,6 +135,12 @@ class PromoteForm(FlaskForm):
     submit = SubmitField('Nadaj admina')
 
 
+class ConfirmForm(FlaskForm):
+    """Form used by admin to confirm a new instructor's account."""
+
+    submit = SubmitField('Potwierdź rejestrację')
+
+
 class UserEditForm(FlaskForm):
     """Form for admin to edit instructor accounts."""
 

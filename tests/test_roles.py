@@ -96,3 +96,46 @@ def test_promote_instructor(app):
     login(client, 'inst1')
     resp = client.get('/admin/instruktorzy')
     assert resp.status_code == 200
+
+
+def test_confirm_instructor(app):
+    """Admin can confirm an instructor so they can log in."""
+    admin_id, inst1_id, inst2_id = create_users(app)
+    with app.app_context():
+        new_user = User(full_name='newbie', email='newbie@example.com')
+        new_user.set_password('pass')
+        db.session.add(new_user)
+        db.session.commit()
+        new_id = new_user.id
+
+    client = app.test_client()
+    # Unconfirmed user should not be able to log in
+    resp = client.post(
+        '/login',
+        data={'full_name': 'newbie', 'password': 'pass'},
+        follow_redirects=True,
+    )
+    assert 'Twoje konto nie zostało jeszcze potwierdzone.' in resp.get_data(as_text=True)
+
+    login(client, 'admin')
+    # Page should show confirmation button for the new user
+    resp = client.get('/admin/instruktorzy')
+    assert 'Potwierdź rejestrację' in resp.get_data(as_text=True)
+
+    resp = client.post(
+        f'/admin/instruktorzy/{new_id}/confirm',
+        data={'submit': '1'},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        confirmed = db.session.get(User, new_id)
+        assert confirmed.confirmed
+
+    # User should now be able to log in
+    resp = client.post(
+        '/login',
+        data={'full_name': 'newbie', 'password': 'pass'},
+        follow_redirects=True,
+    )
+    assert 'Nowe zajęcia' in resp.get_data(as_text=True)

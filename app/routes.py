@@ -37,6 +37,7 @@ from .forms import (
     BeneficjentForm,
     DeleteForm,
     PromoteForm,
+    ConfirmForm,
     UserEditForm,
     SettingsForm,
 )
@@ -495,11 +496,13 @@ def admin_instruktorzy():
     instructors = User.query.filter_by(role=Roles.INSTRUCTOR).all()
     delete_form = DeleteForm()
     promote_form = PromoteForm()
+    confirm_form = ConfirmForm()
     return render_template(
         'admin/instructors_list.html',
         instructors=instructors,
         delete_form=delete_form,
         promote_form=promote_form,
+        confirm_form=confirm_form,
     )
 
 
@@ -546,6 +549,20 @@ def admin_promote_instruktora(user_id):
         instr.role = Roles.ADMIN
         db.session.commit()
         flash('Instruktor ma teraz uprawnienia admina.')
+    return redirect(url_for('admin_instruktorzy'))
+
+
+@app.route('/admin/instruktorzy/<int:user_id>/confirm', methods=['POST'])
+@login_required
+@admin_required
+def admin_confirm_instruktora(user_id):
+    """Confirm an instructor account registration."""
+    form = ConfirmForm()
+    if form.validate_on_submit():
+        instr = User.query.get_or_404(user_id)
+        instr.confirmed = True
+        db.session.commit()
+        flash('Instruktor został potwierdzony.')
     return redirect(url_for('admin_instruktorzy'))
 
 
