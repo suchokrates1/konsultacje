@@ -1,9 +1,13 @@
+"""Tests covering search functionality for beneficiaries and sessions."""
+
 from datetime import date, time
 from app import db
 from app.models import User, Beneficjent, Zajecia
 
 
 def setup_data(app):
+    """Populate the database with sample data for searching."""
+
     with app.app_context():
         user = User(full_name="test", email="test@example.com")
         user.set_password("secret")
@@ -34,6 +38,8 @@ def setup_data(app):
 
 
 def login(client):
+    """Log the test user in and return the response."""
+
     return client.post(
         "/login",
         data={"full_name": "test", "password": "secret"},
@@ -42,6 +48,7 @@ def login(client):
 
 
 def test_filter_beneficjenci(app, client):
+    """Ensure the beneficiary list can be filtered by name."""
     setup_data(app)
     login(client)
     resp = client.get("/beneficjenci?q=Ali")
@@ -51,6 +58,7 @@ def test_filter_beneficjenci(app, client):
 
 
 def test_filter_zajecia(app, client):
+    """Ensure the session list can be filtered by date."""
     setup_data(app)
     login(client)
     resp = client.get("/zajecia?q=2023-01-02")

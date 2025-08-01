@@ -44,11 +44,14 @@ from functools import wraps
 
 
 def admin_required(view_func):
-    """Decorator ensuring the current user has the admin role."""
+    """Decorate ``view_func`` to allow access only for admin users."""
 
     @wraps(view_func)
     def wrapper(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != Roles.ADMIN:
+        if (
+            not current_user.is_authenticated
+            or current_user.role != Roles.ADMIN
+        ):
             return abort(403)
         return view_func(*args, **kwargs)
 
@@ -57,6 +60,7 @@ def admin_required(view_func):
 
 class LoginForm(FlaskForm):
     """Form used by users to authenticate to the application."""
+
     full_name = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Hasło', validators=[DataRequired()])
     remember_me = BooleanField('Zapamiętaj mnie')
@@ -65,6 +69,7 @@ class LoginForm(FlaskForm):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Authenticate a user and redirect to the next page."""
     next_url = request.args.get('next')
     form = LoginForm()
     if form.validate_on_submit():
@@ -80,6 +85,7 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Create a new user account."""
     form = RegisterForm()
     if form.validate_on_submit():
         # prevent duplicate accounts with the same email address
@@ -94,9 +100,12 @@ def register():
 
         admin_email = os.environ.get('ADMIN_EMAIL')
         if admin_email:
-            msg = Message('New user registration', recipients=[admin_email])
+            msg = Message(
+                'New user registration', recipients=[admin_email]
+            )
             msg.body = (
-                f'Użytkownik {user.full_name} zarejestrował się z adresem {user.email}.'
+                f'Użytkownik {user.full_name} zarejestrował się z adresem '
+                f'{user.email}. '
             )
             mail.send(msg)
 
@@ -108,6 +117,7 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
+    """Log out the current user."""
     logout_user()
     return redirect(url_for('login'))
 
@@ -115,12 +125,14 @@ def logout():
 @app.route('/')
 @login_required
 def dashboard():
+    """Display the dashboard for the logged in user."""
     return render_template('dashboard.html', name=current_user.full_name)
 
 
 @app.route('/zajecia/nowe', methods=['GET', 'POST'])
 @login_required
 def nowe_zajecia():
+    """Create a new consultation session."""
     form = ZajeciaForm()
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
@@ -162,6 +174,7 @@ def nowe_zajecia():
 @app.route('/zajecia/<int:zajecia_id>/pdf')
 @login_required
 def pobierz_pdf(zajecia_id):
+    """Generate and return a PDF report for the given session."""
     zajecia = Zajecia.query.get_or_404(zajecia_id)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
@@ -179,7 +192,10 @@ def pobierz_pdf(zajecia_id):
         try:
             os.remove(output_path)
         except OSError:
-            current_app.logger.warning("Failed to remove generated PDF %s", output_path)
+            current_app.logger.warning(
+                "Failed to remove generated PDF %s",
+                output_path,
+            )
         return response
 
     return send_file(output_path, as_attachment=True)
@@ -187,6 +203,7 @@ def pobierz_pdf(zajecia_id):
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
+    """Send a password reset link to the provided email address."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     form = PasswordResetRequestForm()
@@ -194,17 +211,25 @@ def reset_password_request():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             token = user.get_reset_token()
-            reset_url = url_for('reset_password', token=token, _external=True)
+            reset_url = url_for(
+                'reset_password', token=token, _external=True
+            )
             msg = Message('Reset hasła', recipients=[user.email])
-            msg.body = f'Kliknij link aby zresetować hasło: {reset_url}'
+            msg.body = (
+                f'Kliknij link aby zresetować hasło: {reset_url}'
+            )
             mail.send(msg)
-        flash('Jeśli podany email istnieje, wysłano instrukcje resetowania hasła.')
+        flash(
+            'Jeśli podany email istnieje, wysłano instrukcje '
+            'resetowania hasła.'
+        )
         return redirect(url_for('login'))
     return render_template('reset_password_request.html', form=form)
 
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+    """Allow the user to set a new password using a token."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     user = User.verify_reset_token(token)
@@ -223,6 +248,7 @@ def reset_password(token):
 @app.route('/zajecia')
 @login_required
 def lista_zajec():
+    """List sessions belonging to the current user with optional search."""
     q = request.args.get('q', '').strip()
     query = Zajecia.query.filter_by(user_id=current_user.id)
     if q:
@@ -239,6 +265,7 @@ def lista_zajec():
 @app.route('/beneficjenci')
 @login_required
 def lista_beneficjentow():
+    """List beneficiaries for the current user with optional search."""
     q = request.args.get('q', '').strip()
     query = Beneficjent.query.filter_by(user_id=current_user.id)
     if q:
@@ -259,6 +286,7 @@ def lista_beneficjentow():
 @app.route('/beneficjenci/nowy', methods=['GET', 'POST'])
 @login_required
 def nowy_beneficjent():
+    """Create a new beneficiary entry."""
     form = BeneficjentForm()
     if form.validate_on_submit():
         beneficjent = Beneficjent(
@@ -275,9 +303,12 @@ def nowy_beneficjent():
     )
 
 
-@app.route('/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST'])
+@app.route(
+    '/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST']
+)
 @login_required
 def edytuj_beneficjenta(beneficjent_id):
+    """Edit an existing beneficiary belonging to the user."""
     benef = Beneficjent.query.get_or_404(beneficjent_id)
     if benef.user_id != current_user.id:
         flash('Brak dostępu do tego beneficjenta.')
@@ -297,6 +328,7 @@ def edytuj_beneficjenta(beneficjent_id):
 @app.route('/beneficjenci/<int:beneficjent_id>/usun', methods=['POST'])
 @login_required
 def usun_beneficjenta(beneficjent_id):
+    """Delete a beneficiary owned by the current user."""
     form = DeleteForm()
     if form.validate_on_submit():
         benef = Beneficjent.query.get_or_404(beneficjent_id)
@@ -316,6 +348,7 @@ def usun_beneficjenta(beneficjent_id):
 @login_required
 @admin_required
 def admin_beneficjenci():
+    """Show all beneficiaries to the admin user."""
     beneficjenci = Beneficjent.query.all()
     delete_form = DeleteForm()
     return render_template(
@@ -325,10 +358,13 @@ def admin_beneficjenci():
     )
 
 
-@app.route('/admin/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST'])
+@app.route(
+    '/admin/beneficjenci/<int:beneficjent_id>/edytuj', methods=['GET', 'POST']
+)
 @login_required
 @admin_required
 def admin_edytuj_beneficjenta(beneficjent_id):
+    """Admin view for editing any beneficiary."""
     benef = Beneficjent.query.get_or_404(beneficjent_id)
     form = BeneficjentForm(obj=benef)
     if form.validate_on_submit():
@@ -337,13 +373,16 @@ def admin_edytuj_beneficjenta(beneficjent_id):
         db.session.commit()
         flash('Beneficjent zaktualizowany.')
         return redirect(url_for('admin_beneficjenci'))
-    return render_template('beneficjent_form.html', form=form, title='Edytuj beneficjenta')
+    return render_template(
+        'beneficjent_form.html', form=form, title='Edytuj beneficjenta'
+    )
 
 
 @app.route('/admin/beneficjenci/<int:beneficjent_id>/usun', methods=['POST'])
 @login_required
 @admin_required
 def admin_usun_beneficjenta(beneficjent_id):
+    """Admin action to delete a beneficiary."""
     form = DeleteForm()
     if form.validate_on_submit():
         benef = Beneficjent.query.get_or_404(beneficjent_id)
@@ -357,7 +396,10 @@ def admin_usun_beneficjenta(beneficjent_id):
 @login_required
 @admin_required
 def admin_zajecia():
-    zajecia_list = Zajecia.query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
+    """Display all sessions for the admin."""
+    zajecia_list = Zajecia.query.order_by(
+        Zajecia.data.desc(), Zajecia.godzina_od.desc()
+    ).all()
     delete_form = DeleteForm()
     return render_template(
         'admin/zajecia_list.html',
@@ -370,6 +412,7 @@ def admin_zajecia():
 @login_required
 @admin_required
 def admin_edytuj_zajecia(zajecia_id):
+    """Admin view for editing any session."""
     zajecia = Zajecia.query.get_or_404(zajecia_id)
     form = ZajeciaForm(obj=zajecia)
     form.beneficjenci.choices = [
@@ -382,7 +425,9 @@ def admin_edytuj_zajecia(zajecia_id):
         zajecia.data = form.data.data
         zajecia.godzina_od = form.godzina_od.data
         zajecia.godzina_do = form.godzina_do.data
-        zajecia.beneficjenci = [db.session.get(Beneficjent, i) for i in form.beneficjenci.data]
+        zajecia.beneficjenci = [
+            db.session.get(Beneficjent, i) for i in form.beneficjenci.data
+        ]
         db.session.commit()
         flash('Zajęcia zaktualizowane.')
         return redirect(url_for('admin_zajecia'))
@@ -393,6 +438,7 @@ def admin_edytuj_zajecia(zajecia_id):
 @login_required
 @admin_required
 def admin_usun_zajecia(zajecia_id):
+    """Admin action to remove a session."""
     form = DeleteForm()
     if form.validate_on_submit():
         zajecia = Zajecia.query.get_or_404(zajecia_id)
@@ -406,6 +452,7 @@ def admin_usun_zajecia(zajecia_id):
 @login_required
 @admin_required
 def admin_instruktorzy():
+    """List all instructor accounts."""
     instructors = User.query.filter_by(role=Roles.INSTRUCTOR).all()
     delete_form = DeleteForm()
     return render_template(
@@ -419,6 +466,7 @@ def admin_instruktorzy():
 @login_required
 @admin_required
 def admin_edytuj_instruktora(user_id):
+    """Admin view for editing an instructor account."""
     instr = User.query.get_or_404(user_id)
     form = UserEditForm(obj=instr)
     if form.validate_on_submit():
@@ -427,13 +475,16 @@ def admin_edytuj_instruktora(user_id):
         db.session.commit()
         flash('Instruktor zaktualizowany.')
         return redirect(url_for('admin_instruktorzy'))
-    return render_template('instructor_form.html', form=form, title='Edytuj instruktora')
+    return render_template(
+        'instructor_form.html', form=form, title='Edytuj instruktora'
+    )
 
 
 @app.route('/admin/instruktorzy/<int:user_id>/usun', methods=['POST'])
 @login_required
 @admin_required
 def admin_usun_instruktora(user_id):
+    """Admin action to delete an instructor."""
     form = DeleteForm()
     if form.validate_on_submit():
         instr = User.query.get_or_404(user_id)
@@ -441,4 +492,3 @@ def admin_usun_instruktora(user_id):
         db.session.commit()
         flash('Instruktor usunięty.')
     return redirect(url_for('admin_instruktorzy'))
-

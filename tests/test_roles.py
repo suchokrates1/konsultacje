@@ -1,12 +1,17 @@
-import os
-import pytest
+"""Tests verifying access control based on user roles."""
+
 from app import db
-from app.models import User, Beneficjent, Zajecia
+from app.models import User, Beneficjent
 
 
 def create_users(app):
+    """Create admin and instructor accounts with sample beneficiaries."""
     with app.app_context():
-        admin = User(full_name='admin', email='admin@example.com', role='admin')
+        admin = User(
+            full_name='admin',
+            email='admin@example.com',
+            role='admin',
+        )
         admin.set_password('pass')
         inst1 = User(full_name='inst1', email='i1@example.com')
         inst1.set_password('pass')
@@ -14,18 +19,29 @@ def create_users(app):
         inst2.set_password('pass')
         db.session.add_all([admin, inst1, inst2])
         db.session.commit()
-        b1 = Beneficjent(imie='Ben1', wojewodztwo='Maz', user_id=inst1.id)
-        b2 = Beneficjent(imie='Ben2', wojewodztwo='Maz', user_id=inst2.id)
+        b1 = Beneficjent(
+            imie='Ben1', wojewodztwo='Maz', user_id=inst1.id
+        )
+        b2 = Beneficjent(
+            imie='Ben2', wojewodztwo='Maz', user_id=inst2.id
+        )
         db.session.add_all([b1, b2])
         db.session.commit()
         return admin.id, inst1.id, inst2.id
 
 
 def login(client, username):
-    return client.post('/login', data={'full_name': username, 'password': 'pass'}, follow_redirects=True)
+    """Authenticate a test user and return the response."""
+
+    return client.post(
+        '/login',
+        data={'full_name': username, 'password': 'pass'},
+        follow_redirects=True,
+    )
 
 
 def test_admin_access(app):
+    """Admin should be able to view all beneficiaries and instructors."""
     admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'admin')
@@ -40,6 +56,7 @@ def test_admin_access(app):
 
 
 def test_instructor_cannot_access_admin(app):
+    """Non-admin users must receive 403 when accessing admin pages."""
     admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'inst1')
@@ -48,6 +65,7 @@ def test_instructor_cannot_access_admin(app):
 
 
 def test_instructor_sees_own_beneficiaries(app):
+    """Instructor pages show only beneficiaries belonging to that user."""
     admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'inst1')

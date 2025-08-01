@@ -9,12 +9,15 @@ from flask import current_app
 
 
 class Roles:
+    """Enumeration of user roles available in the system."""
+
     ADMIN = "admin"
     INSTRUCTOR = "instructor"
 
 
 class User(UserMixin, db.Model):
     """Application user capable of logging in and resetting a password."""
+
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True)
@@ -23,17 +26,21 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default=Roles.INSTRUCTOR)
 
     def set_password(self, password):
+        """Store a hashed version of the provided password."""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """Return True if *password* matches the stored hash."""
         return check_password_hash(self.password_hash, password)
 
     def get_reset_token(self, expires_sec=3600):
+        """Return a time-limited password reset token."""
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         return s.dumps({'user_id': self.id})
 
     @staticmethod
     def verify_reset_token(token, expires_sec=3600):
+        """Return the user for a valid token or ``None`` if invalid."""
         s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token, max_age=expires_sec)
@@ -44,6 +51,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """Return the user object for the given *user_id*."""
     return db.session.get(User, int(user_id))
 
 # Additional application models
@@ -51,6 +59,7 @@ def load_user(user_id):
 
 class Beneficjent(db.Model):
     """Person receiving consultations stored for a particular user."""
+
     id = db.Column(db.Integer, primary_key=True)
     imie = db.Column(db.String(100), nullable=False)
     wojewodztwo = db.Column(db.String(100), nullable=False)
@@ -60,6 +69,7 @@ class Beneficjent(db.Model):
 
 class Zajecia(db.Model):
     """Scheduled consultation session with related beneficiaries."""
+
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False)
     godzina_od = db.Column(db.Time, nullable=False)

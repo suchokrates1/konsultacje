@@ -10,6 +10,8 @@ from pypdf import PdfReader, PdfWriter
 
 
 def generate_pdf(zajecia, beneficjenci, output_path):
+    """Create a PDF summary for a session and write it to *output_path*."""
+
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)
 
