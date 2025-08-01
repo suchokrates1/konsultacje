@@ -52,6 +52,7 @@ def test_beneficjenci_mobile_view(app, live_server, driver):
     with app.app_context():
         user = User(full_name="mob", email="m@b.com")
         user.set_password("pass")
+        user.confirmed = True
         db.session.add(user)
         db.session.commit()
     driver.set_window_size(375, 812)

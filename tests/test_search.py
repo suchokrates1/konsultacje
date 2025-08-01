@@ -11,6 +11,7 @@ def setup_data(app):
     with app.app_context():
         user = User(full_name="test", email="test@example.com")
         user.set_password("secret")
+        user.confirmed = True
         db.session.add(user)
         db.session.commit()
         b1 = Beneficjent(imie="Alice", wojewodztwo="Maz", user_id=user.id)

@@ -79,10 +79,13 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(full_name=form.full_name.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            if not next_url or urlparse(next_url).netloc != "":
-                next_url = url_for('nowe_zajecia')
-            return redirect(next_url)
+            if not user.confirmed:
+                flash('Twoje konto nie zostało jeszcze potwierdzone.')
+            else:
+                login_user(user, remember=form.remember_me.data)
+                if not next_url or urlparse(next_url).netloc != "":
+                    next_url = url_for('nowe_zajecia')
+                return redirect(next_url)
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
 
@@ -97,7 +100,11 @@ def register():
             flash('Użytkownik z tym adresem email już istnieje.')
             return render_template('register.html', form=form)
 
-        user = User(full_name=form.full_name.data, email=form.email.data)
+        user = User(
+            full_name=form.full_name.data,
+            email=form.email.data,
+            confirmed=False,
+        )
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()

@@ -88,6 +88,11 @@ def test_register_and_login_remember_me(client, app):
     with app.app_context():
         assert User.query.filter_by(full_name='alice').first() is not None
 
+    with app.app_context():
+        user = User.query.filter_by(full_name='alice').first()
+        user.confirmed = True
+        db.session.commit()
+
     response = client.post('/login', data={
         'full_name': 'alice',
         'password': 'password',
@@ -163,6 +168,7 @@ def test_password_reset_flow(monkeypatch, app):
     with app.app_context():
         user = User(full_name='bob', email='bob@example.com')
         user.set_password('oldpass')
+        user.confirmed = True
         db.session.add(user)
         db.session.commit()
 
@@ -200,3 +206,22 @@ def test_password_reset_flow(monkeypatch, app):
         follow_redirects=True,
     )
     assert b'Nowe zaj\xc4\x99cia' in response.data
+
+
+def test_unconfirmed_user_cannot_login(app):
+    """Ensure unconfirmed users are prevented from logging in."""
+    with app.app_context():
+        user = User(full_name='unc', email='unc@example.com')
+        user.set_password('pass')
+        db.session.add(user)
+        db.session.commit()
+
+    client = app.test_client()
+    resp = client.post(
+        '/login',
+        data={'full_name': 'unc', 'password': 'pass'},
+        follow_redirects=True,
+    )
+    text = resp.get_data(as_text=True)
+    assert 'Twoje konto nie zostało jeszcze potwierdzone.' in text
+    assert 'Nowe zajęcia' not in text
