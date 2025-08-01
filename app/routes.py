@@ -168,7 +168,7 @@ def nowe_zajecia():
         db.session.add(zajecia)
         db.session.commit()
         flash('Zajęcia zapisane.')
-        return redirect(url_for('index'))
+        return redirect(url_for('lista_zajec'))
 
     return render_template('zajecia_form.html', form=form)
 
