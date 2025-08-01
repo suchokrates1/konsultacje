@@ -36,14 +36,19 @@ def make_app(monkeypatch):
     return create_app(config)
 
 
-def create_admin(app):
+def create_admin(app, admin_email=None):
     with app.app_context():
         admin = User(full_name='admin', email='admin@example.com', role=Roles.ADMIN)
         admin.set_password('pass')
         admin.confirmed = True
         db.session.add(admin)
-        s = Settings(mail_server='localhost', mail_port=25,
-                     mail_use_tls=False, mail_use_ssl=False)
+        s = Settings(
+            mail_server='localhost',
+            mail_port=25,
+            mail_use_tls=False,
+            mail_use_ssl=False,
+            admin_email=admin_email,
+        )
         db.session.add(s)
         db.session.commit()
 
@@ -92,11 +97,23 @@ def test_settings_override_and_default(monkeypatch):
         assert app2.config["TIMEZONE"] == "UTC"
 
 
+def test_admin_email_overrides_env(monkeypatch):
+    setup_database()
+    monkeypatch.setenv("ADMIN_EMAIL", "env@example.com")
+    app = make_app(monkeypatch)
+    with app.app_context():
+        s = Settings(admin_email="db@example.com")
+        db.session.add(s)
+        db.session.commit()
+    app2 = make_app(monkeypatch)
+    with app2.app_context():
+        assert app2.config["MAIL_DEFAULT_SENDER"] == "db@example.com"
+
+
 def test_send_test_email_success(monkeypatch):
     setup_database()
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
     app = make_app(monkeypatch)
-    create_admin(app)
+    create_admin(app, admin_email="stored@example.com")
     sent = []
 
     def fake_send(msg):
@@ -121,14 +138,14 @@ def test_send_test_email_success(monkeypatch):
     )
     assert resp.status_code == 200
     assert len(sent) == 1
+    assert sent[0].recipients == ["stored@example.com"]
     assert "Testowy email wysłany." in resp.get_data(as_text=True)
 
 
 def test_send_test_email_failure(monkeypatch):
     setup_database()
-    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
     app = make_app(monkeypatch)
-    create_admin(app)
+    create_admin(app, admin_email="stored@example.com")
 
     def fail_send(msg):
         raise SMTPException("boom")

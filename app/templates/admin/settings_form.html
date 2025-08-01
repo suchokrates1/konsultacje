@@ -31,6 +31,10 @@
         {{ form.mail_use_ssl.label(class="form-check-label") }}
       </div>
       <div class="mb-3">
+        {{ form.admin_email.label(class="form-label") }}
+        {{ form.admin_email(class="form-control") }}
+      </div>
+      <div class="mb-3">
         {{ form.timezone.label(class="form-label") }}
         {{ form.timezone(class="form-control") }}
       </div>

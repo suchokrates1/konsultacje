@@ -106,6 +106,8 @@ def create_app(test_config=None):
                 app.config["MAIL_USE_TLS"] = settings.mail_use_tls
             if settings.mail_use_ssl is not None:
                 app.config["MAIL_USE_SSL"] = settings.mail_use_ssl
+            if settings.admin_email:
+                app.config["MAIL_DEFAULT_SENDER"] = settings.admin_email
             app.config["TIMEZONE"] = settings.timezone or app.config["TIMEZONE"]
         mail.init_app(app)
 
