@@ -13,10 +13,13 @@ def create_users(app):
             role='admin',
         )
         admin.set_password('pass')
+        admin.confirmed = True
         inst1 = User(full_name='inst1', email='i1@example.com')
         inst1.set_password('pass')
+        inst1.confirmed = True
         inst2 = User(full_name='inst2', email='i2@example.com')
         inst2.set_password('pass')
+        inst2.confirmed = True
         db.session.add_all([admin, inst1, inst2])
         db.session.commit()
         b1 = Beneficjent(

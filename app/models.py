@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     default_duration = db.Column(db.Integer, default=90)
     role = db.Column(db.String(20), default=Roles.INSTRUCTOR)
+    confirmed = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         """Store a hashed version of the provided password."""

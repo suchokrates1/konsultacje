@@ -117,6 +117,7 @@ def create_app(test_config=None):
                     full_name=admin_username,
                     email=admin_email,
                     role=Roles.ADMIN,
+                    confirmed=True,
                 )
                 admin.set_password(admin_password)
                 db.session.add(admin)

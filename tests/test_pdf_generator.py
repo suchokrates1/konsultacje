@@ -17,6 +17,7 @@ def test_generate_pdf_file_contains_text(app):
     with app.app_context():
         user = User(full_name="disk", email="disk@example.com")
         user.set_password("pass")
+        user.confirmed = True
         db.session.add(user)
         db.session.commit()
 

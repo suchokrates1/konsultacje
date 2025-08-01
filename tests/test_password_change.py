@@ -7,6 +7,7 @@ def create_user(app):
     with app.app_context():
         user = User(full_name='change', email='c@example.com')
         user.set_password('old')
+        user.confirmed = True
         db.session.add(user)
         db.session.commit()
         return user.id

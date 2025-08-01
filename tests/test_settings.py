@@ -40,6 +40,7 @@ def create_admin(app):
     with app.app_context():
         admin = User(full_name='admin', email='admin@example.com', role=Roles.ADMIN)
         admin.set_password('pass')
+        admin.confirmed = True
         db.session.add(admin)
         s = Settings(mail_server='localhost', mail_port=25,
                      mail_use_tls=False, mail_use_ssl=False)
