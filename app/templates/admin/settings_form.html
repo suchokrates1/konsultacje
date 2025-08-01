@@ -35,6 +35,10 @@
         {{ form.admin_email(class="form-control") }}
       </div>
       <div class="mb-3">
+        {{ form.sender_name.label(class="form-label") }}
+        {{ form.sender_name(class="form-control") }}
+      </div>
+      <div class="mb-3">
         {{ form.timezone.label(class="form-label") }}
         {{ form.timezone(class="form-select") }}
       </div>

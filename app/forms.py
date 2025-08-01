@@ -159,6 +159,7 @@ class SettingsForm(FlaskForm):
     mail_use_tls = BooleanField('Użyj TLS')
     mail_use_ssl = BooleanField('Użyj SSL')
     admin_email = EmailField('Email administratora', validators=[Optional(), Email()])
+    sender_name = StringField('Nazwa nadawcy')
     timezone = SelectField('Strefa czasowa', choices=TIMEZONE_CHOICES)
     submit = SubmitField('Zapisz')
     send_test = SubmitField('Wyślij test')
