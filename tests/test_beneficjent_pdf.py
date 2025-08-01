@@ -99,6 +99,7 @@ def test_create_session(app, client):
         },
         follow_redirects=True,
     )
+    assert response.request.path == '/zajecia'
     assert 'Zajęcia zapisane' in response.get_data(as_text=True)
     with app.app_context():
         zajecia = Zajecia.query.filter_by(user_id=user_id).first()
