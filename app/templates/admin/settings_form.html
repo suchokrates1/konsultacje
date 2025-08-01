@@ -2,28 +2,32 @@
 {% block title %}Ustawienia{% endblock %}
 {% block content %}
 <h2>Ustawienia</h2>
-<form method="post" class="w-100" style="max-width: 400px;">
-  {{ form.csrf_token }}
-  <div class="mb-3">
-    {{ form.mail_server.label(class="form-label") }}
-    {{ form.mail_server(class="form-control") }}
+<div class="row justify-content-center text-center">
+  <div class="col-12 col-md-6">
+    <form method="post" class="text-start w-100" style="max-width: 400px;">
+      {{ form.csrf_token }}
+      <div class="mb-3">
+        {{ form.mail_server.label(class="form-label") }}
+        {{ form.mail_server(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.mail_port.label(class="form-label") }}
+        {{ form.mail_port(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.mail_username.label(class="form-label") }}
+        {{ form.mail_username(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.mail_password.label(class="form-label") }}
+        {{ form.mail_password(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.timezone.label(class="form-label") }}
+        {{ form.timezone(class="form-control") }}
+      </div>
+      {{ form.submit(class="btn btn-primary btn-sm") }}
+    </form>
   </div>
-  <div class="mb-3">
-    {{ form.mail_port.label(class="form-label") }}
-    {{ form.mail_port(class="form-control") }}
-  </div>
-  <div class="mb-3">
-    {{ form.mail_username.label(class="form-label") }}
-    {{ form.mail_username(class="form-control") }}
-  </div>
-  <div class="mb-3">
-    {{ form.mail_password.label(class="form-label") }}
-    {{ form.mail_password(class="form-control") }}
-  </div>
-  <div class="mb-3">
-    {{ form.timezone.label(class="form-label") }}
-    {{ form.timezone(class="form-control") }}
-  </div>
-  {{ form.submit(class="btn btn-primary btn-sm") }}
-</form>
+</div>
 {% endblock %}
