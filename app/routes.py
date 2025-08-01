@@ -83,11 +83,11 @@ def login():
         if user and user.check_password(form.password.data):
             if not user.confirmed:
                 flash('Twoje konto nie zostało jeszcze potwierdzone.')
-            else:
-                login_user(user, remember=form.remember_me.data)
-                if not next_url or urlparse(next_url).netloc != "":
-                    next_url = url_for('nowe_zajecia')
-                return redirect(next_url)
+                return render_template('login.html', form=form)
+            login_user(user, remember=form.remember_me.data)
+            if not next_url or urlparse(next_url).netloc != "":
+                next_url = url_for('nowe_zajecia')
+            return redirect(next_url)
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
 

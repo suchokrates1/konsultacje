@@ -232,4 +232,5 @@ def test_unconfirmed_user_cannot_login(app):
     )
     text = resp.get_data(as_text=True)
     assert 'Twoje konto nie zostało jeszcze potwierdzone.' in text
+    assert 'Nieprawidłowe dane logowania.' not in text
     assert 'Nowe zajęcia' not in text
