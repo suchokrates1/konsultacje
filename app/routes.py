@@ -32,6 +32,7 @@ from .forms import (
     RegisterForm,
     PasswordResetRequestForm,
     PasswordResetForm,
+    PasswordChangeForm,
     BeneficjentForm,
     DeleteForm,
     PromoteForm,
@@ -245,6 +246,22 @@ def reset_password(token):
         flash('Hasło zostało zresetowane.')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Allow the current user to change their password."""
+    form = PasswordChangeForm()
+    if form.validate_on_submit():
+        if not current_user.check_password(form.old_password.data):
+            flash('Nieprawidłowe aktualne hasło.')
+        else:
+            current_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash('Hasło zostało zmienione.')
+            return redirect(url_for('index'))
+    return render_template('change_password.html', form=form)
 
 
 @app.route('/zajecia')
@@ -533,3 +550,16 @@ def admin_ustawienia():
         flash('Ustawienia zapisane.')
         return redirect(url_for('admin_ustawienia'))
     return render_template('admin/settings_form.html', form=form)
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    """Render a custom 404 page."""
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Render a custom 500 page."""
+    db.session.rollback()
+    return render_template('500.html'), 500
