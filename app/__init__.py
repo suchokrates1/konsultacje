@@ -71,6 +71,7 @@ def create_app(test_config=None):
     mail_password = os.environ.get("MAIL_PASSWORD")
     mail_use_tls = os.environ.get("MAIL_USE_TLS", "false").lower() == "true"
     mail_use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() == "true"
+    timezone = os.environ.get("TIMEZONE", "UTC")
     app.config.update(
         MAIL_SERVER=mail_server,
         MAIL_PORT=mail_port,
@@ -79,6 +80,7 @@ def create_app(test_config=None):
         MAIL_USE_TLS=mail_use_tls,
         MAIL_USE_SSL=mail_use_ssl,
         MAIL_DEFAULT_SENDER=os.environ.get("MAIL_DEFAULT_SENDER", admin_email),
+        TIMEZONE=timezone,
     )
 
     db.init_app(app)
@@ -91,6 +93,17 @@ def create_app(test_config=None):
         from . import routes, models  # noqa: F401
         from flask_migrate import upgrade
         upgrade()
+
+        from .models import Settings
+        settings = Settings.query.first()
+        if settings:
+            app.config["MAIL_SERVER"] = settings.mail_server or app.config["MAIL_SERVER"]
+            if settings.mail_port is not None:
+                app.config["MAIL_PORT"] = settings.mail_port
+            app.config["MAIL_USERNAME"] = settings.mail_username or app.config["MAIL_USERNAME"]
+            app.config["MAIL_PASSWORD"] = settings.mail_password or app.config["MAIL_PASSWORD"]
+            app.config["TIMEZONE"] = settings.timezone or app.config["TIMEZONE"]
+        mail.init_app(app)
 
         if admin_username and admin_password:
             from .models import User, Roles

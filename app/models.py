@@ -89,3 +89,19 @@ zajecia_beneficjenci = db.Table(
     db.Column('zajecia_id', db.Integer, db.ForeignKey('zajecia.id')),
     db.Column('beneficjent_id', db.Integer, db.ForeignKey('beneficjent.id')),
 )
+
+
+class Settings(db.Model):
+    """Application-wide configuration stored in the database."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    mail_server = db.Column(db.String(255))
+    mail_port = db.Column(db.Integer)
+    mail_username = db.Column(db.String(255))
+    mail_password = db.Column(db.String(255))
+    timezone = db.Column(db.String(64))
+
+    @classmethod
+    def get(cls):
+        """Return the single settings row or ``None`` if absent."""
+        return cls.query.first()

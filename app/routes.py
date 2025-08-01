@@ -35,8 +35,9 @@ from .forms import (
     BeneficjentForm,
     DeleteForm,
     UserEditForm,
+    SettingsForm,
 )
-from .models import Beneficjent, User, Zajecia, Roles
+from .models import Beneficjent, User, Zajecia, Roles, Settings
 from . import mail
 from .pdf_generator import generate_pdf
 from urllib.parse import urlparse
@@ -492,3 +493,26 @@ def admin_usun_instruktora(user_id):
         db.session.commit()
         flash('Instruktor usunięty.')
     return redirect(url_for('admin_instruktorzy'))
+
+
+@app.route('/admin/ustawienia', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_ustawienia():
+    """View and edit application settings."""
+    settings = Settings.get()
+    if not settings:
+        settings = Settings(mail_port=25)
+        db.session.add(settings)
+        db.session.commit()
+    form = SettingsForm(obj=settings)
+    if form.validate_on_submit():
+        settings.mail_server = form.mail_server.data
+        settings.mail_port = form.mail_port.data
+        settings.mail_username = form.mail_username.data
+        settings.mail_password = form.mail_password.data
+        settings.timezone = form.timezone.data
+        db.session.commit()
+        flash('Ustawienia zapisane.')
+        return redirect(url_for('admin_ustawienia'))
+    return render_template('admin/settings_form.html', form=form)
