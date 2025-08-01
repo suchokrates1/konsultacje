@@ -3,8 +3,9 @@ import sys
 import pytest
 from smtplib import SMTPException
 
-from app import create_app, db
+from app import create_app, db, mail
 from app.models import Settings, User, Roles
+from flask_mail import Message
 
 DB_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -151,3 +152,63 @@ def test_send_test_email_failure(monkeypatch):
     assert resp.status_code == 200
     text = resp.get_data(as_text=True)
     assert "Nie udało się wysłać testowego emaila." in text
+
+
+def test_smtp_host_updated_immediately(monkeypatch):
+    setup_database()
+    app = make_app(monkeypatch)
+    create_admin(app)
+    app.config["MAIL_SUPPRESS_SEND"] = False
+    mail.init_app(app)
+
+    hosts = []
+
+    class DummySMTP:
+        def __init__(self, host="", port=0, *args, **kwargs):
+            hosts.append(host)
+
+        def sendmail(self, *args, **kwargs):
+            pass
+
+        def login(self, *args, **kwargs):
+            pass
+
+        def quit(self):
+            pass
+
+        def starttls(self, *args, **kwargs):
+            pass
+
+        def set_debuglevel(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr("smtplib.SMTP", DummySMTP)
+    monkeypatch.setattr("smtplib.SMTP_SSL", DummySMTP)
+
+    with app.app_context():
+        mail.send(Message("before", sender="admin@example.com", recipients=["a@example.com"]))
+
+    assert hosts[-1] == "localhost"
+
+    client = app.test_client()
+    login(client)
+    client.post(
+        "/admin/ustawienia",
+        data={
+            "mail_server": "newhost",
+            "mail_port": 25,
+            "mail_username": "",
+            "mail_password": "",
+            "mail_use_tls": "",
+            "mail_use_ssl": "",
+            "timezone": "",
+            "submit": "1",
+        },
+        follow_redirects=True,
+    )
+
+    hosts.clear()
+    with app.app_context():
+        mail.send(Message("after", sender="admin@example.com", recipients=["a@example.com"]))
+
+    assert hosts[-1] == "newhost"

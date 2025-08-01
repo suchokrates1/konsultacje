@@ -552,6 +552,23 @@ def admin_ustawienia():
         settings = Settings(mail_port=25, mail_use_tls=False, mail_use_ssl=False)
         db.session.add(settings)
         db.session.commit()
+        current_app.config['MAIL_SERVER'] = (
+            settings.mail_server or current_app.config['MAIL_SERVER']
+        )
+        if settings.mail_port is not None:
+            current_app.config['MAIL_PORT'] = settings.mail_port
+        current_app.config['MAIL_USERNAME'] = (
+            settings.mail_username or current_app.config['MAIL_USERNAME']
+        )
+        current_app.config['MAIL_PASSWORD'] = (
+            settings.mail_password or current_app.config['MAIL_PASSWORD']
+        )
+        current_app.config['MAIL_USE_TLS'] = settings.mail_use_tls
+        current_app.config['MAIL_USE_SSL'] = settings.mail_use_ssl
+        current_app.config['TIMEZONE'] = (
+            settings.timezone or current_app.config['TIMEZONE']
+        )
+        mail.init_app(current_app)
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
         if form.send_test.data:
