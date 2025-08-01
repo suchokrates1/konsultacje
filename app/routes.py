@@ -155,7 +155,9 @@ def nowe_zajecia():
     form = ZajeciaForm()
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
-        for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
+        for b in Beneficjent.query.filter_by(user_id=current_user.id)
+        .order_by(Beneficjent.imie)
+        .all()
     ]
 
     # Ustawienie domyślnych godzin po zaokrągleniu
