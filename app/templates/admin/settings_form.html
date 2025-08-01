@@ -22,11 +22,20 @@
         {{ form.mail_password.label(class="form-label") }}
         {{ form.mail_password(class="form-control") }}
       </div>
+      <div class="form-check form-switch mb-3">
+        {{ form.mail_use_tls(class="form-check-input") }}
+        {{ form.mail_use_tls.label(class="form-check-label") }}
+      </div>
+      <div class="form-check form-switch mb-3">
+        {{ form.mail_use_ssl(class="form-check-input") }}
+        {{ form.mail_use_ssl.label(class="form-check-label") }}
+      </div>
       <div class="mb-3">
         {{ form.timezone.label(class="form-label") }}
         {{ form.timezone(class="form-control") }}
       </div>
-      {{ form.submit(class="btn btn-primary btn-sm") }}
+      {{ form.submit(class="btn btn-primary btn-sm me-2") }}
+      {{ form.send_test(class="btn btn-secondary btn-sm") }}
     </form>
   </div>
 </div>

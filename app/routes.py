@@ -549,17 +549,42 @@ def admin_ustawienia():
     """View and edit application settings."""
     settings = Settings.get()
     if not settings:
-        settings = Settings(mail_port=25)
+        settings = Settings(mail_port=25, mail_use_tls=False, mail_use_ssl=False)
         db.session.add(settings)
         db.session.commit()
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
+        if form.send_test.data:
+            admin_email = os.environ.get('ADMIN_EMAIL')
+            if admin_email:
+                msg = Message('Test email', recipients=[admin_email])
+                msg.body = 'To jest test konfiguracji SMTP.'
+                try:
+                    mail.send(msg)
+                    flash('Testowy email wysłany.')
+                except SMTPException as exc:
+                    current_app.logger.error('Failed to send test email: %s', exc)
+                    flash('Nie udało się wysłać testowego emaila.')
+            else:
+                flash('Adres administratora nie jest skonfigurowany.')
+            return redirect(url_for('admin_ustawienia'))
         settings.mail_server = form.mail_server.data
         settings.mail_port = form.mail_port.data
         settings.mail_username = form.mail_username.data
         settings.mail_password = form.mail_password.data
+        settings.mail_use_tls = form.mail_use_tls.data
+        settings.mail_use_ssl = form.mail_use_ssl.data
         settings.timezone = form.timezone.data
         db.session.commit()
+        current_app.config['MAIL_SERVER'] = settings.mail_server or current_app.config['MAIL_SERVER']
+        if settings.mail_port is not None:
+            current_app.config['MAIL_PORT'] = settings.mail_port
+        current_app.config['MAIL_USERNAME'] = settings.mail_username or current_app.config['MAIL_USERNAME']
+        current_app.config['MAIL_PASSWORD'] = settings.mail_password or current_app.config['MAIL_PASSWORD']
+        current_app.config['MAIL_USE_TLS'] = settings.mail_use_tls
+        current_app.config['MAIL_USE_SSL'] = settings.mail_use_ssl
+        current_app.config['TIMEZONE'] = settings.timezone or current_app.config['TIMEZONE']
+        mail.init_app(current_app)
         flash('Ustawienia zapisane.')
         return redirect(url_for('admin_ustawienia'))
     return render_template('admin/settings_form.html', form=form)

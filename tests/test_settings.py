@@ -1,9 +1,10 @@
 import os
 import sys
 import pytest
+from smtplib import SMTPException
 
 from app import create_app, db
-from app.models import Settings
+from app.models import Settings, User, Roles
 
 DB_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -32,6 +33,25 @@ def make_app(monkeypatch):
         "SECRET_KEY": "test-secret",
     }
     return create_app(config)
+
+
+def create_admin(app):
+    with app.app_context():
+        admin = User(full_name='admin', email='admin@example.com', role=Roles.ADMIN)
+        admin.set_password('pass')
+        db.session.add(admin)
+        s = Settings(mail_server='localhost', mail_port=25,
+                     mail_use_tls=False, mail_use_ssl=False)
+        db.session.add(s)
+        db.session.commit()
+
+
+def login(client):
+    return client.post(
+        '/login',
+        data={'full_name': 'admin', 'password': 'pass'},
+        follow_redirects=True,
+    )
 
 
 def test_fallback_to_env(monkeypatch):
@@ -68,3 +88,66 @@ def test_settings_override_and_default(monkeypatch):
         assert app2.config["MAIL_PORT"] == 2525
         assert app2.config["MAIL_USERNAME"] == "envuser"
         assert app2.config["TIMEZONE"] == "UTC"
+
+
+def test_send_test_email_success(monkeypatch):
+    setup_database()
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
+    app = make_app(monkeypatch)
+    create_admin(app)
+    sent = []
+
+    def fake_send(msg):
+        sent.append(msg)
+
+    monkeypatch.setattr("app.routes.mail.send", fake_send)
+    client = app.test_client()
+    login(client)
+    resp = client.post(
+        "/admin/ustawienia",
+        data={
+            "mail_server": "localhost",
+            "mail_port": 25,
+            "mail_username": "",
+            "mail_password": "",
+            "mail_use_tls": "y",
+            "mail_use_ssl": "",
+            "timezone": "",
+            "send_test": "1",
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    assert len(sent) == 1
+    assert "Testowy email wysłany." in resp.get_data(as_text=True)
+
+
+def test_send_test_email_failure(monkeypatch):
+    setup_database()
+    monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
+    app = make_app(monkeypatch)
+    create_admin(app)
+
+    def fail_send(msg):
+        raise SMTPException("boom")
+
+    monkeypatch.setattr("app.routes.mail.send", fail_send)
+    client = app.test_client()
+    login(client)
+    resp = client.post(
+        "/admin/ustawienia",
+        data={
+            "mail_server": "localhost",
+            "mail_port": 25,
+            "mail_username": "",
+            "mail_password": "",
+            "mail_use_tls": "y",
+            "mail_use_ssl": "",
+            "timezone": "",
+            "send_test": "1",
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    text = resp.get_data(as_text=True)
+    assert "Nie udało się wysłać testowego emaila." in text
