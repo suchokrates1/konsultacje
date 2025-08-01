@@ -114,6 +114,9 @@ def create_app(test_config=None):
         if admin_username and admin_password:
             from .models import User, Roles
             admin = User.query.filter_by(full_name=admin_username).first()
+            if admin and not admin.confirmed:
+                admin.confirmed = True
+                db.session.commit()
             if not admin:
                 admin = User(
                     full_name=admin_username,
