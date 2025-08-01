@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Edytuj instruktora{% endblock %}
 {% block content %}
-<form method="post">
+<div class="d-flex justify-content-center">
+<form method="post" class="text-start">
   {{ form.csrf_token }}
   <div class="mb-3">
     {{ form.full_name.label }}
@@ -13,4 +14,5 @@
   </div>
   <button type="submit" class="btn btn-primary">Zapisz</button>
 </form>
+</div>
 {% endblock %}
