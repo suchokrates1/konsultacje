@@ -7,7 +7,7 @@ from app.models import User, Beneficjent, Zajecia
 
 def create_user(app):
     with app.app_context():
-        user = User(username='tester', email='tester@example.com')
+        user = User(full_name='tester', email='tester@example.com')
         user.set_password('secret')
         db.session.add(user)
         db.session.commit()
@@ -15,7 +15,7 @@ def create_user(app):
 
 
 def login(client, username='tester', password='secret'):
-    return client.post('/login', data={'username': username, 'password': password}, follow_redirects=True)
+    return client.post('/login', data={'full_name': username, 'password': password}, follow_redirects=True)
 
 
 def test_beneficjent_crud(app, client):

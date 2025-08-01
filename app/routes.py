@@ -57,7 +57,7 @@ def admin_required(view_func):
 
 class LoginForm(FlaskForm):
     """Form used by users to authenticate to the application."""
-    username = StringField('Login', validators=[DataRequired()])
+    full_name = StringField('Login', validators=[DataRequired()])
     password = PasswordField('Hasło', validators=[DataRequired()])
     remember_me = BooleanField('Zapamiętaj mnie')
     submit = SubmitField('Zaloguj się')
@@ -68,7 +68,7 @@ def login():
     next_url = request.args.get('next')
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(full_name=form.full_name.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             if not next_url or urlparse(next_url).netloc != "":
@@ -82,7 +82,15 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+
         user = User(username=form.username.data, email=form.email.data)
+=======
+        # prevent duplicate accounts with the same email address
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Użytkownik z tym adresem email już istnieje.')
+            return render_template('register.html', form=form)
+
+        user = User(full_name=form.full_name.data, email=form.email.data
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -91,7 +99,7 @@ def register():
         if admin_email:
             msg = Message('New user registration', recipients=[admin_email])
             msg.body = (
-                f'Użytkownik {user.username} zarejestrował się z adresem {user.email}.'
+                f'Użytkownik {user.full_name} zarejestrował się z adresem {user.email}.'
             )
             mail.send(msg)
 
@@ -114,7 +122,7 @@ def logout():
 @app.route('/')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', name=current_user.username)
+    return render_template('dashboard.html', name=current_user.full_name)
 
 
 @app.route('/zajecia/nowe', methods=['GET', 'POST'])
@@ -143,7 +151,7 @@ def nowe_zajecia():
             data=form.data.data,
             godzina_od=form.godzina_od.data,
             godzina_do=form.godzina_do.data,
-            specjalista=current_user.username,
+            specjalista=current_user.full_name,
             user_id=current_user.id
         )
         for b_id in form.beneficjenci.data:
@@ -421,7 +429,7 @@ def admin_edytuj_instruktora(user_id):
     instr = User.query.get_or_404(user_id)
     form = UserEditForm(obj=instr)
     if form.validate_on_submit():
-        instr.username = form.username.data
+        instr.full_name = form.full_name.data
         instr.email = form.email.data
         db.session.commit()
         flash('Instruktor zaktualizowany.')

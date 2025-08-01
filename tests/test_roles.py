@@ -6,11 +6,11 @@ from app.models import User, Beneficjent, Zajecia
 
 def create_users(app):
     with app.app_context():
-        admin = User(username='admin', email='admin@example.com', role='admin')
+        admin = User(full_name='admin', email='admin@example.com', role='admin')
         admin.set_password('pass')
-        inst1 = User(username='inst1', email='i1@example.com')
+        inst1 = User(full_name='inst1', email='i1@example.com')
         inst1.set_password('pass')
-        inst2 = User(username='inst2', email='i2@example.com')
+        inst2 = User(full_name='inst2', email='i2@example.com')
         inst2.set_password('pass')
         db.session.add_all([admin, inst1, inst2])
         db.session.commit()
@@ -22,7 +22,7 @@ def create_users(app):
 
 
 def login(client, username):
-    return client.post('/login', data={'username': username, 'password': 'pass'}, follow_redirects=True)
+    return client.post('/login', data={'full_name': username, 'password': 'pass'}, follow_redirects=True)
 
 
 def test_admin_access(app):

@@ -16,7 +16,7 @@
     <tr>
       <td>{{ b.imie }}</td>
       <td>{{ b.wojewodztwo }}</td>
-      <td>{{ b.user.username }}</td>
+      <td>{{ b.user.full_name }}</td>
       <td>
         <a href="{{ url_for('admin_edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
         <form method="post" action="{{ url_for('admin_usun_beneficjenta', beneficjent_id=b.id) }}" style="display:inline;">

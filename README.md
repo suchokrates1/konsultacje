@@ -49,7 +49,7 @@ Python shell with Flask context and create the user manually:
 ```bash
 flask shell
 >>> from app import db, models
->>> u = models.User(username="admin", email="admin@example.com")
+>>> u = models.User(full_name="admin", email="admin@example.com")
 >>> u.set_password("password")
 >>> db.session.add(u); db.session.commit()
 ```

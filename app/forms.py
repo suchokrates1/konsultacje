@@ -36,7 +36,7 @@ class ZajeciaForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     """Form allowing new users to create an account."""
-    username = StringField('Nazwa użytkownika', validators=[DataRequired()])
+    full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField(
         'Hasło',
@@ -90,7 +90,7 @@ class DeleteForm(FlaskForm):
 
 class UserEditForm(FlaskForm):
     """Form for admin to edit instructor accounts."""
-    username = StringField('Nazwa użytkownika', validators=[DataRequired()])
+    full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Zapisz')
 

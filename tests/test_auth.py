@@ -41,7 +41,7 @@ def test_admin_created_from_env(monkeypatch):
     monkeypatch.setenv('ADMIN_EMAIL', 'admin@example.com')
     app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False})
     with app.app_context():
-        admin = User.query.filter_by(username='admin').first()
+        admin = User.query.filter_by(full_name='admin').first()
         assert admin is not None
         assert admin.email == 'admin@example.com'
         assert admin.check_password('adminpass')
@@ -52,7 +52,7 @@ def test_register_and_login_remember_me(client, app):
     response = client.post(
         '/register',
         data={
-            'username': 'alice',
+            'full_name': 'alice',
             'email': 'alice@example.com',
             'password': 'password',
             'confirm': 'password',
@@ -61,10 +61,10 @@ def test_register_and_login_remember_me(client, app):
     )
     assert response.status_code == 200
     with app.app_context():
-        assert User.query.filter_by(username='alice').first() is not None
+        assert User.query.filter_by(full_name='alice').first() is not None
 
     response = client.post('/login', data={
-        'username': 'alice',
+        'full_name': 'alice',
         'password': 'password',
         'remember_me': 'y',
     }, follow_redirects=True)
@@ -78,7 +78,7 @@ def test_register_duplicate_email(client, app):
     client.post(
         '/register',
         data={
-            'username': 'user1',
+            'full_name': 'user1',
             'email': 'duplicate@example.com',
             'password': 'secret123',
             'confirm': 'secret123',
@@ -89,7 +89,7 @@ def test_register_duplicate_email(client, app):
     response = client.post(
         '/register',
         data={
-            'username': 'user2',
+            'full_name': 'user2',
             'email': 'duplicate@example.com',
             'password': 'secret123',
             'confirm': 'secret123',
@@ -143,7 +143,7 @@ def test_register_short_password(client, app):
 
 def test_password_reset_flow(monkeypatch, app):
     with app.app_context():
-        user = User(username='bob', email='bob@example.com')
+        user = User(full_name='bob', email='bob@example.com')
         user.set_password('oldpass')
         db.session.add(user)
         db.session.commit()
@@ -176,5 +176,5 @@ def test_password_reset_flow(monkeypatch, app):
     )
     assert response.request.path == '/login'
 
-    response = client.post('/login', data={'username': 'bob', 'password': 'newpass'}, follow_redirects=True)
+    response = client.post('/login', data={'full_name': 'bob', 'password': 'newpass'}, follow_redirects=True)
     assert b'Witaj' in response.data

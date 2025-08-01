@@ -5,7 +5,7 @@
 <table class="table">
   <thead>
     <tr>
-      <th>Nazwa użytkownika</th>
+      <th>Imię i nazwisko</th>
       <th>Email</th>
       <th>Akcje</th>
     </tr>
@@ -13,7 +13,7 @@
   <tbody>
     {% for u in instructors %}
     <tr>
-      <td>{{ u.username }}</td>
+      <td>{{ u.full_name }}</td>
       <td>{{ u.email }}</td>
       <td>
         <a href="{{ url_for('admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary">Edytuj</a>
