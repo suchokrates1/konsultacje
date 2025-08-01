@@ -87,7 +87,7 @@ def test_create_session(app, client):
             'data': '2023-01-01',
             'godzina_od': '10:00',
             'godzina_do': '11:00',
-            'beneficjenci': [str(b_id)],
+            'beneficjenci': str(b_id),
         },
         follow_redirects=True,
     )

@@ -18,13 +18,8 @@
     {{ form.godzina_do(class="form-control") }}
   </div>
   <div class="mb-3">
-    <label class="form-label">Beneficjenci</label>
-    {% for subfield in form.beneficjenci %}
-      <div class="form-check">
-        {{ subfield(class="form-check-input") }}
-        {{ form.beneficjenci.choices[loop.index0][1] }}
-      </div>
-    {% endfor %}
+    {{ form.beneficjenci.label(class="form-label") }}
+    {{ form.beneficjenci(class="form-select", multiple=True) }}
   </div>
   <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
 </form>
