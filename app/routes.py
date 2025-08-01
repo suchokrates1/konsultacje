@@ -77,7 +77,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             if not next_url or urlparse(next_url).netloc != "":
-                next_url = url_for('dashboard')
+                next_url = url_for('nowe_zajecia')
             return redirect(next_url)
         flash('Nieprawidłowe dane logowania.')
     return render_template('login.html', form=form)
@@ -124,9 +124,9 @@ def logout():
 
 @app.route('/')
 @login_required
-def dashboard():
-    """Display the dashboard for the logged in user."""
-    return render_template('dashboard.html', name=current_user.full_name)
+def index():
+    """Redirect authenticated users to the new session form."""
+    return redirect(url_for('nowe_zajecia'))
 
 
 @app.route('/zajecia/nowe', methods=['GET', 'POST'])
@@ -166,7 +166,7 @@ def nowe_zajecia():
         db.session.add(zajecia)
         db.session.commit()
         flash('Zajęcia zapisane.')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
 
     return render_template('zajecia_form.html', form=form)
 
@@ -178,7 +178,7 @@ def pobierz_pdf(zajecia_id):
     zajecia = Zajecia.query.get_or_404(zajecia_id)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
 
     beneficjenci = zajecia.beneficjenci
     output_dir = os.path.join(current_app.root_path, "static", "pdf")
@@ -205,7 +205,7 @@ def pobierz_pdf(zajecia_id):
 def reset_password_request():
     """Send a password reset link to the provided email address."""
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -231,7 +231,7 @@ def reset_password_request():
 def reset_password(token):
     """Allow the user to set a new password using a token."""
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
     user = User.verify_reset_token(token)
     if not user:
         flash('Link resetujący jest nieważny lub wygasł.')
