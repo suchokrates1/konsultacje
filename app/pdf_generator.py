@@ -36,6 +36,9 @@ def generate_pdf(zajecia, beneficjenci, output_path):
 
     # Nałóż na wzór PDF
     template_path = os.path.join(current_app.root_path, "static", "wzor.pdf")
+    if not os.path.exists(template_path):
+        current_app.logger.error("Missing PDF template: %s", template_path)
+        raise FileNotFoundError(f"Template file not found: {template_path}")
     template = PdfReader(template_path)
     output = PdfWriter()
     overlay = PdfReader(buffer)

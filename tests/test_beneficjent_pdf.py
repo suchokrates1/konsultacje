@@ -1,10 +1,12 @@
 """Tests for beneficiary CRUD operations and PDF generation."""
 
 from datetime import date, time
+import io
 import os
 
 from app import db
 from app.models import User, Beneficjent, Zajecia
+from pypdf import PdfReader
 
 
 def create_user(app):
@@ -133,3 +135,34 @@ def test_pdf_generation(app, client):
     )
     # the generated PDF should be removed after the response is sent
     assert not os.path.exists(pdf_path)
+
+
+def test_pdf_content(app, client):
+    """Generate a PDF and verify expected text appears in the document."""
+    user_id = create_user(app)
+    login(client)
+    with app.app_context():
+        benef = Beneficjent(
+            imie="Katarzyna", wojewodztwo="Mazowieckie", user_id=user_id
+        )
+        db.session.add(benef)
+        zajecia = Zajecia(
+            data=date(2023, 2, 1),
+            godzina_od=time(8, 0),
+            godzina_do=time(9, 0),
+            specjalista="tester",
+            user_id=user_id,
+        )
+        zajecia.beneficjenci.append(benef)
+        db.session.add(zajecia)
+        db.session.commit()
+        z_id = zajecia.id
+
+    response = client.get(f"/zajecia/{z_id}/pdf")
+    assert response.status_code == 200
+
+    reader = PdfReader(io.BytesIO(response.data))
+    text = "".join(page.extract_text() or "" for page in reader.pages)
+    assert "tester" in text
+    assert "Katarzyna" in text
+    assert "Mazowieckie" in text
