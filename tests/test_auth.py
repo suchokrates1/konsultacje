@@ -70,6 +70,14 @@ def test_admin_created_from_env(monkeypatch):
         assert admin.email == 'admin@example.com'
         assert admin.check_password('adminpass')
         assert admin.role == 'admin'
+        assert admin.confirmed
+
+    # create_app called again should not alter admin confirmation status
+    app2 = create_app(config)
+    with app2.app_context():
+        admin = User.query.filter_by(full_name='admin').first()
+        assert admin is not None
+        assert admin.confirmed
 
 
 def test_register_and_login_remember_me(client, app):
