@@ -17,14 +17,13 @@ def setup_database():
 @pytest.fixture
 def app(monkeypatch):
     setup_database()
-    monkeypatch.setenv('SECRET_KEY', 'test-secret')
     # Reload routes so they register on the fresh app instance
     import sys
     sys.modules.pop('app.routes', None)
     import app as app_package
     if hasattr(app_package, 'routes'):
         delattr(app_package, 'routes')
-    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "MAIL_SUPPRESS_SEND": True})
+    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "MAIL_SUPPRESS_SEND": True, "SECRET_KEY": "test-secret"})
     return app
 
 
@@ -35,11 +34,10 @@ def client(app):
 
 def test_admin_created_from_env(monkeypatch):
     setup_database()
-    monkeypatch.setenv('SECRET_KEY', 'test-secret')
     monkeypatch.setenv('ADMIN_USERNAME', 'admin')
     monkeypatch.setenv('ADMIN_PASSWORD', 'adminpass')
     monkeypatch.setenv('ADMIN_EMAIL', 'admin@example.com')
-    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False})
+    app = create_app({"TESTING": True, "WTF_CSRF_ENABLED": False, "SECRET_KEY": "test-secret"})
     with app.app_context():
         admin = User.query.filter_by(full_name='admin').first()
         assert admin is not None

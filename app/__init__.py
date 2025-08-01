@@ -37,21 +37,21 @@ def create_app(test_config=None):
     load_dotenv(env_path)
     app = Flask(__name__)
     # Flask loads configuration from environment variables such as `FLASK_ENV`.
-    secret_key = os.environ.get("SECRET_KEY")
+    secret_key = None
+    if test_config is not None:
+        secret_key = test_config.get("SECRET_KEY")
+
+    if not secret_key:
+        secret_key = os.environ.get("SECRET_KEY")
+
     admin_username = os.environ.get("ADMIN_USERNAME")
     admin_password = os.environ.get("ADMIN_PASSWORD")
     admin_email = os.environ.get("ADMIN_EMAIL")
 
     if not secret_key:
-        if test_config and test_config.get("TESTING"):
-            app.logger.warning(
-                "SECRET_KEY not set, using insecure test key."
-            )
-            secret_key = "test-secret-key"
-        else:
-            raise RuntimeError(
-                "SECRET_KEY environment variable is not set."
-            )
+        raise RuntimeError(
+            "SECRET_KEY must be provided via environment or configuration."
+        )
 
     app.config["SECRET_KEY"] = secret_key
 
