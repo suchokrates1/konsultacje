@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+import subprocess
 
 from flask import current_app
 from docxtpl import DocxTemplate
@@ -39,10 +40,34 @@ def generate_pdf(zajecia, beneficjenci, output_path):
         tmp_path = tmp.name
     try:
         doc.save(tmp_path)
-        convert(tmp_path, output_path)
+        try:
+            convert(tmp_path, output_path)
+        except NotImplementedError:
+            out_dir = os.path.dirname(output_path) or "."
+            cmd = [
+                "libreoffice",
+                "--headless",
+                "--convert-to",
+                "pdf",
+                "--outdir",
+                out_dir,
+                tmp_path,
+            ]
+            try:
+                subprocess.run(cmd, check=True)
+            except FileNotFoundError:
+                cmd[0] = "soffice"
+                subprocess.run(cmd, check=True)
+            generated = os.path.join(
+                out_dir,
+                os.path.splitext(os.path.basename(tmp_path))[0] + ".pdf",
+            )
+            os.replace(generated, output_path)
     finally:
         try:
             os.remove(tmp_path)
         except OSError:
-            current_app.logger.warning("Failed to remove temporary file %s", tmp_path)
+            current_app.logger.warning(
+                "Failed to remove temporary file %s", tmp_path
+            )
 
