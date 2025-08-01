@@ -25,6 +25,7 @@ from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired
 from flask_mail import Message
+from smtplib import SMTPException
 
 from . import db
 from .forms import (
@@ -110,7 +111,13 @@ def register():
                 f'Użytkownik {user.full_name} zarejestrował się z adresem '
                 f'{user.email}. '
             )
-            mail.send(msg)
+            try:
+                mail.send(msg)
+            except SMTPException as e:
+                current_app.logger.error(
+                    "Failed to send admin email: %s", e
+                )
+                flash('Nie udało się wysłać powiadomienia do administratora.')
 
         flash('Rejestracja zakończona sukcesem.')
         return redirect(url_for('login'))
@@ -221,7 +228,13 @@ def reset_password_request():
             msg.body = (
                 f'Kliknij link aby zresetować hasło: {reset_url}'
             )
-            mail.send(msg)
+            try:
+                mail.send(msg)
+            except SMTPException as e:
+                current_app.logger.error(
+                    "Failed to send password reset email: %s", e
+                )
+                flash('Nie udało się wysłać emaila z linkiem resetującym.')
         flash(
             'Jeśli podany email istnieje, wysłano instrukcje '
             'resetowania hasła.'

@@ -3,6 +3,7 @@
 import os
 import re
 import pytest
+from smtplib import SMTPException
 
 from app import create_app, db
 from app.models import User
@@ -125,6 +126,33 @@ def test_register_duplicate_email(client, app):
         'Użytkownik z tym adresem email już istnieje.'
         in response.get_data(as_text=True)
     )
+
+
+def test_register_email_failure(monkeypatch, client, app):
+    """Registration succeeds even if sending admin email fails."""
+    monkeypatch.setenv('ADMIN_EMAIL', 'admin@example.com')
+
+    def fail_send(msg):
+        raise SMTPException('tls not supported')
+
+    monkeypatch.setattr('app.routes.mail.send', fail_send)
+
+    response = client.post(
+        '/register',
+        data={
+            'full_name': 'fail',
+            'email': 'fail@example.com',
+            'password': 'secret',
+            'confirm': 'secret',
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    text = response.get_data(as_text=True)
+    assert 'Rejestracja zakończona sukcesem.' in text
+    assert 'Nie udało się wysłać powiadomienia do administratora.' in text
+    with app.app_context():
+        assert User.query.filter_by(full_name='fail').first() is not None
 
 
 def test_password_reset_flow(monkeypatch, app):
