@@ -30,6 +30,7 @@ def generate_pdf(zajecia, beneficjenci, output_path):
         c.drawString(70, y, f"{benef.imie}")
         c.drawString(300, y, f"{benef.wojewodztwo}")
 
+    c.showPage()
     c.save()
 
     buffer.seek(0)
