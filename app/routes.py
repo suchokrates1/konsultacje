@@ -34,6 +34,7 @@ from .forms import (
     PasswordResetForm,
     BeneficjentForm,
     DeleteForm,
+    PromoteForm,
     UserEditForm,
     SettingsForm,
 )
@@ -456,10 +457,12 @@ def admin_instruktorzy():
     """List all instructor accounts."""
     instructors = User.query.filter_by(role=Roles.INSTRUCTOR).all()
     delete_form = DeleteForm()
+    promote_form = PromoteForm()
     return render_template(
         'admin/instructors_list.html',
         instructors=instructors,
         delete_form=delete_form,
+        promote_form=promote_form,
     )
 
 
@@ -492,6 +495,20 @@ def admin_usun_instruktora(user_id):
         db.session.delete(instr)
         db.session.commit()
         flash('Instruktor usunięty.')
+    return redirect(url_for('admin_instruktorzy'))
+
+
+@app.route('/admin/instruktorzy/<int:user_id>/promote', methods=['POST'])
+@login_required
+@admin_required
+def admin_promote_instruktora(user_id):
+    """Grant admin role to the selected instructor."""
+    form = PromoteForm()
+    if form.validate_on_submit():
+        instr = User.query.get_or_404(user_id)
+        instr.role = Roles.ADMIN
+        db.session.commit()
+        flash('Instruktor ma teraz uprawnienia admina.')
     return redirect(url_for('admin_instruktorzy'))
 
 

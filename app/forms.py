@@ -85,6 +85,12 @@ class DeleteForm(FlaskForm):
     submit = SubmitField('Usuń')
 
 
+class PromoteForm(FlaskForm):
+    """Form used by admin to promote an instructor to admin."""
+
+    submit = SubmitField('Nadaj admina')
+
+
 class UserEditForm(FlaskForm):
     """Form for admin to edit instructor accounts."""
 

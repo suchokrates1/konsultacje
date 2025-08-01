@@ -1,7 +1,7 @@
 """Tests verifying access control based on user roles."""
 
 from app import db
-from app.models import User, Beneficjent
+from app.models import User, Beneficjent, Roles
 
 
 def create_users(app):
@@ -73,3 +73,23 @@ def test_instructor_sees_own_beneficiaries(app):
     text = resp.get_data(as_text=True)
     assert 'Ben1' in text
     assert 'Ben2' not in text
+
+
+def test_promote_instructor(app):
+    """Admin can promote an instructor who then gains admin access."""
+    admin_id, inst1_id, inst2_id = create_users(app)
+    client = app.test_client()
+    login(client, 'admin')
+    resp = client.post(
+        f'/admin/instruktorzy/{inst1_id}/promote',
+        data={'submit': '1'},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        user = db.session.get(User, inst1_id)
+        assert user.role == Roles.ADMIN
+    # Instructor should now have admin rights
+    login(client, 'inst1')
+    resp = client.get('/admin/instruktorzy')
+    assert resp.status_code == 200
