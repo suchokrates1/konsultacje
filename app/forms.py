@@ -14,6 +14,7 @@ from wtforms import (
     BooleanField,
 )
 from wtforms.validators import DataRequired, Email, EqualTo, Optional
+import pytz
 from wtforms.widgets import ListWidget, CheckboxInput
 
 WOJEWODZTWA = [
@@ -34,6 +35,9 @@ WOJEWODZTWA = [
     'Wielkopolskie',
     'Zachodniopomorskie',
 ]
+
+# Common time zones used to populate the settings dropdown.
+TIMEZONE_CHOICES = [(tz, tz) for tz in pytz.common_timezones]
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -149,6 +153,6 @@ class SettingsForm(FlaskForm):
     mail_use_tls = BooleanField('Użyj TLS')
     mail_use_ssl = BooleanField('Użyj SSL')
     admin_email = EmailField('Email administratora', validators=[Optional(), Email()])
-    timezone = StringField('Strefa czasowa')
+    timezone = SelectField('Strefa czasowa', choices=TIMEZONE_CHOICES)
     submit = SubmitField('Zapisz')
     send_test = SubmitField('Wyślij test')
