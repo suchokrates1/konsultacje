@@ -10,6 +10,8 @@ A small Flask application that lets specialists register sessions with beneficia
    source venv/bin/activate
    pip install -r requirements.txt
    ```
+   The `email_validator` package is included in `requirements.txt` and must
+   be installed for form validation to work correctly.
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
    `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
    A secure `SECRET_KEY` is required in **all** environments and there is
@@ -67,11 +69,13 @@ Alternatively run `docker-compose up` to use the provided compose file which exp
 
 ## Running tests
 
-The project uses **pytest** for the test suite located in `tests/`. Install the dependencies and pytest, then run:
+The project uses **pytest** for the test suite located in `tests/`. Install the
+runtime dependencies along with the developer tools from `requirements-dev.txt`, then run:
 
 ```bash
-pip install -r requirements.txt pytest
+pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
+`requirements-dev.txt` also includes **flake8** for optional style checks.
 This will create a temporary SQLite database in the `instance/` folder while the tests run. Each test passes a `SECRET_KEY` directly to `create_app`. If you add more tests, ensure `SECRET_KEY` is supplied via the configuration or environment.
