@@ -5,9 +5,10 @@
 <form method="get" class="mb-3">
   <div class="input-group">
     <input type="text" name="q" class="form-control" placeholder="Szukaj" value="{{ q }}">
-    <button class="btn btn-primary" type="submit">Szukaj</button>
+    <button class="btn btn-primary btn-sm" type="submit">Szukaj</button>
   </div>
 </form>
+<div class="table-responsive">
 <table class="table mx-auto text-start">
   <thead>
     <tr>
@@ -32,4 +33,5 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

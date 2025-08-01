@@ -2,7 +2,7 @@
 {% block title %}Edytuj instruktora{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start">
+<form method="post" class="text-start w-100" style="max-width: 400px;">
   {{ form.csrf_token }}
   <div class="mb-3">
     {{ form.full_name.label }}
@@ -12,7 +12,7 @@
     {{ form.email.label }}
     {{ form.email(class="form-control") }}
   </div>
-  <button type="submit" class="btn btn-primary">Zapisz</button>
+  <button type="submit" class="btn btn-primary btn-sm">Zapisz</button>
 </form>
 </div>
 {% endblock %}

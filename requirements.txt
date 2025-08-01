@@ -9,3 +9,4 @@ pypdf
 python-dotenv
 Flask-Mail
 email_validator
+selenium
