@@ -1,52 +1,48 @@
-"""Utilities for rendering session details into a PDF document."""
+"""Utilities for rendering session details into a PDF document using a DOCX template."""
 
-import io
 import os
+import tempfile
 
 from flask import current_app
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from pypdf import PdfReader, PdfWriter
+from docxtpl import DocxTemplate
+from docx2pdf import convert
 
 
 def generate_pdf(zajecia, beneficjenci, output_path):
-    """Create a PDF summary for a session and write it to *output_path*."""
+    """Create a PDF summary for a session and write it to *output_path*.
 
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
+    The function fills the ``wzor.docx`` template using **docxtpl** and then
+    converts the rendered document to PDF using ``docx2pdf``.
+    """
 
-    # Pozycje tekstu (zmierzono ręcznie względem PDF-a)
-    c.setFont("Helvetica", 12)
-    c.drawString(130, 770, zajecia.data.strftime('%d.%m.%Y'))
-    start_time = zajecia.godzina_od.strftime('%H:%M')
-    end_time = zajecia.godzina_do.strftime('%H:%M')
-    time_range = f"{start_time} - {end_time}"
-    c.drawString(250, 770, time_range)
-    c.drawString(440, 770, zajecia.specjalista)
-
-    for idx, benef in enumerate(beneficjenci[:3]):
-        y = 730 - (idx * 30)
-        c.drawString(40, y, f"{idx + 1}.")
-        c.drawString(70, y, f"{benef.imie}")
-        c.drawString(300, y, f"{benef.wojewodztwo}")
-
-    c.showPage()
-    c.save()
-
-    buffer.seek(0)
-
-    # Nałóż na wzór PDF
-    template_path = os.path.join(current_app.root_path, "static", "wzor.pdf")
+    template_path = os.path.join(current_app.root_path, "static", "wzor.docx")
     if not os.path.exists(template_path):
-        current_app.logger.error("Missing PDF template: %s", template_path)
+        current_app.logger.error("Missing DOCX template: %s", template_path)
         raise FileNotFoundError(f"Template file not found: {template_path}")
-    template = PdfReader(template_path)
-    output = PdfWriter()
-    overlay = PdfReader(buffer)
 
-    template_page = template.pages[0]
-    template_page.merge_page(overlay.pages[0])
-    output.add_page(template_page)
+    doc = DocxTemplate(template_path)
+    start_time = zajecia.godzina_od.strftime("%H:%M")
+    end_time = zajecia.godzina_do.strftime("%H:%M")
+    context = {
+        "data": zajecia.data.strftime("%d.%m.%Y"),
+        "time_range": f"{start_time} - {end_time}",
+        "beneficjenci": "\n".join(
+            f"{idx + 1}. {b.imie} {b.wojewodztwo}"
+            for idx, b in enumerate(beneficjenci[:3])
+        ),
+        "specjalista": zajecia.specjalista,
+    }
+    current_app.config["_last_pdf_context"] = context
+    doc.render(context)
 
-    with open(output_path, "wb") as f:
-        output.write(f)
+    with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+        tmp_path = tmp.name
+    try:
+        doc.save(tmp_path)
+        convert(tmp_path, output_path)
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            current_app.logger.warning("Failed to remove temporary file %s", tmp_path)
+
