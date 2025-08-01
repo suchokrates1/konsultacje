@@ -26,10 +26,17 @@
             <i class="bi bi-trash"></i>
           </button>
         </form>
+        {% if not u.confirmed %}
+        <form method="post" action="{{ url_for('admin_confirm_instruktora', user_id=u.id) }}" style="display:inline;">
+          {{ confirm_form.csrf_token }}
+          <button type="submit" class="btn btn-sm btn-success">Potwierdź rejestrację</button>
+        </form>
+        {% else %}
         <form method="post" action="{{ url_for('admin_promote_instruktora', user_id=u.id) }}" style="display:inline;">
           {{ promote_form.csrf_token }}
           <button type="submit" class="btn btn-sm btn-warning">Nadaj admina</button>
         </form>
+        {% endif %}
       </td>
     </tr>
     {% else %}
