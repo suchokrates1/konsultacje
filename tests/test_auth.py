@@ -104,8 +104,8 @@ def test_register_duplicate_email(client, app):
         data={
             'full_name': 'user1',
             'email': 'duplicate@example.com',
-            'password': 'secret',
-            'confirm': 'secret',
+            'password': 'secret123',
+            'confirm': 'secret123',
         },
         follow_redirects=True,
     )
@@ -115,8 +115,8 @@ def test_register_duplicate_email(client, app):
         data={
             'full_name': 'user2',
             'email': 'duplicate@example.com',
-            'password': 'secret',
-            'confirm': 'secret',
+            'password': 'secret123',
+            'confirm': 'secret123',
         },
         follow_redirects=True,
     )
@@ -125,6 +125,47 @@ def test_register_duplicate_email(client, app):
         'Użytkownik z tym adresem email już istnieje.'
         in response.get_data(as_text=True)
     )
+
+
+def test_register_duplicate_username(client, app):
+    client.post(
+        '/register',
+        data={
+            'username': 'sameuser',
+            'email': 'first@example.com',
+            'password': 'secret123',
+            'confirm': 'secret123',
+        },
+        follow_redirects=True,
+    )
+
+    response = client.post(
+        '/register',
+        data={
+            'username': 'sameuser',
+            'email': 'other@example.com',
+            'password': 'secret123',
+            'confirm': 'secret123',
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert 'Nazwa użytkownika jest już zajęta.' in response.get_data(as_text=True)
+
+
+def test_register_short_password(client, app):
+    response = client.post(
+        '/register',
+        data={
+            'username': 'weak',
+            'email': 'weak@example.com',
+            'password': 'short',
+            'confirm': 'short',
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert 'Hasło musi mieć co najmniej 8 znaków.' in response.get_data(as_text=True)
 
 
 def test_password_reset_flow(monkeypatch, app):

@@ -10,7 +10,9 @@ from wtforms import (
     PasswordField,
     EmailField,
 )
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+
+from .models import User
 from wtforms.widgets import ListWidget, CheckboxInput
 
 
@@ -38,7 +40,13 @@ class RegisterForm(FlaskForm):
 
     full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Hasło', validators=[DataRequired()])
+    password = PasswordField(
+        'Hasło',
+        validators=[
+            DataRequired(),
+            Length(min=8, message='Hasło musi mieć co najmniej 8 znaków.')
+        ],
+    )
     confirm = PasswordField(
         'Potwierdź hasło',
         validators=[
@@ -47,6 +55,14 @@ class RegisterForm(FlaskForm):
         ],
     )
     submit = SubmitField('Zarejestruj się')
+
+    def validate_username(self, field):
+        if User.query.filter_by(username=field.data).first():
+            raise ValidationError('Nazwa użytkownika jest już zajęta.')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('Użytkownik z tym adresem email już istnieje.')
 
 
 class PasswordResetRequestForm(FlaskForm):
