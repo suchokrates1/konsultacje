@@ -9,6 +9,7 @@ from wtforms import (
     StringField,
     PasswordField,
     EmailField,
+    IntegerField,
 )
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -89,4 +90,15 @@ class UserEditForm(FlaskForm):
 
     full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Zapisz')
+
+
+class SettingsForm(FlaskForm):
+    """Form for editing application configuration."""
+
+    mail_server = StringField('Serwer SMTP')
+    mail_port = IntegerField('Port SMTP', validators=[DataRequired()])
+    mail_username = StringField('Użytkownik SMTP')
+    mail_password = PasswordField('Hasło SMTP')
+    timezone = StringField('Strefa czasowa')
     submit = SubmitField('Zapisz')

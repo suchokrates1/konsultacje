@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Ustawienia{% endblock %}
+{% block content %}
+<h2>Ustawienia</h2>
+<form method="post">
+  {{ form.csrf_token }}
+  <div class="mb-3">
+    {{ form.mail_server.label(class="form-label") }}
+    {{ form.mail_server(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.mail_port.label(class="form-label") }}
+    {{ form.mail_port(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.mail_username.label(class="form-label") }}
+    {{ form.mail_username(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.mail_password.label(class="form-label") }}
+    {{ form.mail_password(class="form-control") }}
+  </div>
+  <div class="mb-3">
+    {{ form.timezone.label(class="form-label") }}
+    {{ form.timezone(class="form-control") }}
+  </div>
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}
