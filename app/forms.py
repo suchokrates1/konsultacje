@@ -11,6 +11,7 @@ from wtforms import (
     PasswordField,
     EmailField,
     IntegerField,
+    BooleanField,
 )
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -145,5 +146,8 @@ class SettingsForm(FlaskForm):
     mail_port = IntegerField('Port SMTP', validators=[DataRequired()])
     mail_username = StringField('Użytkownik SMTP')
     mail_password = PasswordField('Hasło SMTP')
+    mail_use_tls = BooleanField('Użyj TLS')
+    mail_use_ssl = BooleanField('Użyj SSL')
     timezone = StringField('Strefa czasowa')
     submit = SubmitField('Zapisz')
+    send_test = SubmitField('Wyślij test')
