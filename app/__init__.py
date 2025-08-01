@@ -72,6 +72,7 @@ def create_app(test_config=None):
     mail_use_tls = os.environ.get("MAIL_USE_TLS", "false").lower() == "true"
     mail_use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() == "true"
     timezone = os.environ.get("TIMEZONE", "UTC")
+    sender_name = os.environ.get("MAIL_SENDER_NAME")
     app.config.update(
         MAIL_SERVER=mail_server,
         MAIL_PORT=mail_port,
@@ -79,7 +80,9 @@ def create_app(test_config=None):
         MAIL_PASSWORD=mail_password,
         MAIL_USE_TLS=mail_use_tls,
         MAIL_USE_SSL=mail_use_ssl,
-        MAIL_DEFAULT_SENDER=os.environ.get("MAIL_DEFAULT_SENDER", admin_email),
+        MAIL_DEFAULT_SENDER=(
+            (sender_name, admin_email) if sender_name and admin_email else admin_email
+        ),
         TIMEZONE=timezone,
     )
 
@@ -107,7 +110,11 @@ def create_app(test_config=None):
             if settings.mail_use_ssl is not None:
                 app.config["MAIL_USE_SSL"] = settings.mail_use_ssl
             if settings.admin_email:
-                app.config["MAIL_DEFAULT_SENDER"] = settings.admin_email
+                app.config["MAIL_DEFAULT_SENDER"] = (
+                    (settings.sender_name, settings.admin_email)
+                    if settings.sender_name
+                    else settings.admin_email
+                )
             app.config["TIMEZONE"] = settings.timezone or app.config["TIMEZONE"]
         mail.init_app(app)
 

@@ -23,7 +23,8 @@ A small Flask application that lets specialists register sessions with beneficia
 
    Configure email delivery with `MAIL_SERVER`, `MAIL_PORT`,
    `MAIL_USERNAME`, `MAIL_PASSWORD`, and optionally `MAIL_USE_TLS`
-   or `MAIL_USE_SSL` for encrypted connections.
+   or `MAIL_USE_SSL` for encrypted connections. You can also set
+   `MAIL_SENDER_NAME` to specify the visible sender name.
    The `flask` command will load variables from this file automatically
    and an admin user will be created if it does not exist.
 3. Initialize the migration directory (first run only):

@@ -107,7 +107,11 @@ def test_admin_email_overrides_env(monkeypatch):
         db.session.commit()
     app2 = make_app(monkeypatch)
     with app2.app_context():
-        assert app2.config["MAIL_DEFAULT_SENDER"] == "db@example.com"
+        sender = app2.config["MAIL_DEFAULT_SENDER"]
+        if isinstance(sender, tuple):
+            assert sender[1] == "db@example.com"
+        else:
+            assert sender == "db@example.com"
 
 
 def test_send_test_email_success(monkeypatch):

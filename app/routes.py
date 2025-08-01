@@ -111,7 +111,10 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        admin_email = current_app.config.get('MAIL_DEFAULT_SENDER') or os.environ.get('ADMIN_EMAIL')
+        sender_conf = current_app.config.get('MAIL_DEFAULT_SENDER')
+        admin_email = (
+            sender_conf[1] if isinstance(sender_conf, tuple) else sender_conf
+        ) or os.environ.get('ADMIN_EMAIL')
         if admin_email:
             msg = Message(
                 'New user registration', recipients=[admin_email]
@@ -155,7 +158,10 @@ def nowe_zajecia():
     form = ZajeciaForm()
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
-        for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
+        for b in Beneficjent.query
+        .filter_by(user_id=current_user.id)
+        .order_by(Beneficjent.imie)
+        .all()
     ]
 
     # Ustawienie domyślnych godzin po zaokrągleniu
@@ -584,6 +590,7 @@ def admin_ustawienia():
             mail_use_tls=False,
             mail_use_ssl=False,
             admin_email=os.environ.get('ADMIN_EMAIL'),
+            sender_name=os.environ.get('MAIL_SENDER_NAME'),
         )
         db.session.add(settings)
         db.session.commit()
@@ -604,7 +611,11 @@ def admin_ustawienia():
             settings.timezone or current_app.config['TIMEZONE']
         )
         if settings.admin_email:
-            current_app.config['MAIL_DEFAULT_SENDER'] = settings.admin_email
+            current_app.config['MAIL_DEFAULT_SENDER'] = (
+                (settings.sender_name, settings.admin_email)
+                if settings.sender_name
+                else settings.admin_email
+            )
         mail.init_app(current_app)
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
@@ -629,6 +640,7 @@ def admin_ustawienia():
         settings.mail_use_tls = form.mail_use_tls.data
         settings.mail_use_ssl = form.mail_use_ssl.data
         settings.admin_email = form.admin_email.data
+        settings.sender_name = form.sender_name.data
         settings.timezone = form.timezone.data
         db.session.commit()
         current_app.config['MAIL_SERVER'] = settings.mail_server or current_app.config['MAIL_SERVER']
@@ -639,7 +651,11 @@ def admin_ustawienia():
         current_app.config['MAIL_USE_TLS'] = settings.mail_use_tls
         current_app.config['MAIL_USE_SSL'] = settings.mail_use_ssl
         if settings.admin_email:
-            current_app.config['MAIL_DEFAULT_SENDER'] = settings.admin_email
+            current_app.config['MAIL_DEFAULT_SENDER'] = (
+                (settings.sender_name, settings.admin_email)
+                if settings.sender_name
+                else settings.admin_email
+            )
         current_app.config['TIMEZONE'] = settings.timezone or current_app.config['TIMEZONE']
         mail.init_app(current_app)
         flash('Ustawienia zapisane.')
