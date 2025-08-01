@@ -149,7 +149,10 @@ def test_register_email_failure(monkeypatch, client, app):
     )
     assert response.status_code == 200
     text = response.get_data(as_text=True)
-    assert 'Rejestracja zakończona sukcesem.' in text
+    assert (
+        'Rejestracja zakończona sukcesem. Poczekaj na potwierdzenie przez administratora.'
+        in text
+    )
     assert 'Nie udało się wysłać powiadomienia do administratora.' in text
     with app.app_context():
         assert User.query.filter_by(full_name='fail').first() is not None

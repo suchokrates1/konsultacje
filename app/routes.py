@@ -119,7 +119,7 @@ def register():
                 )
                 flash('Nie udało się wysłać powiadomienia do administratora.')
 
-        flash('Rejestracja zakończona sukcesem.')
+        flash('Rejestracja zakończona sukcesem. Poczekaj na potwierdzenie przez administratora.')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
