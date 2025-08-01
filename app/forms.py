@@ -3,6 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     SelectMultipleField,
+    SelectField,
     SubmitField,
     DateField,
     TimeField,
@@ -13,6 +14,25 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms.widgets import ListWidget, CheckboxInput
+
+WOJEWODZTWA = [
+    'Dolnoslaskie',
+    'Kujawsko-Pomorskie',
+    'Lubelskie',
+    'Lubuskie',
+    'Lodzkie',
+    'Malopolskie',
+    'Mazowieckie',
+    'Opolskie',
+    'Podkarpackie',
+    'Podlaskie',
+    'Pomorskie',
+    'Slaskie',
+    'Swietokrzyskie',
+    'Warminsko-Mazurskie',
+    'Wielkopolskie',
+    'Zachodniopomorskie',
+]
 
 
 class MultiCheckboxField(SelectMultipleField):
@@ -75,7 +95,11 @@ class BeneficjentForm(FlaskForm):
     """Form for adding or editing a beneficiary."""
 
     imie = StringField('Imię i nazwisko', validators=[DataRequired()])
-    wojewodztwo = StringField('Województwo', validators=[DataRequired()])
+    wojewodztwo = SelectField(
+        'Województwo',
+        choices=[(w, w) for w in WOJEWODZTWA],
+        validators=[DataRequired()],
+    )
     submit = SubmitField('Zapisz')
 
 

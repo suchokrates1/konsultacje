@@ -36,6 +36,12 @@ def test_beneficjent_crud(app, client):
     create_user(app)
     login(client)
 
+    # Verify dropdown renders
+    resp = client.get('/beneficjenci/nowy')
+    html = resp.get_data(as_text=True)
+    assert '<select' in html
+    assert html.count('<option') >= 16
+
     # Add
     response = client.post(
         '/beneficjenci/nowy',
