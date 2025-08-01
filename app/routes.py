@@ -82,11 +82,6 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        # prevent duplicate accounts with the same email address
-        if User.query.filter_by(email=form.email.data).first():
-            flash('Użytkownik z tym adresem email już istnieje.')
-            return render_template('register.html', form=form)
-
         user = User(username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
@@ -102,6 +97,10 @@ def register():
 
         flash('Rejestracja zakończona sukcesem.')
         return redirect(url_for('login'))
+    elif request.method == 'POST':
+        for errors in form.errors.values():
+            for error in errors:
+                flash(error)
     return render_template('register.html', form=form)
 
 
