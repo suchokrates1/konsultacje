@@ -36,7 +36,7 @@ def make_app(monkeypatch):
     return create_app(config)
 
 
-def create_admin(app, admin_email=None):
+def create_admin(app, admin_email=None, sender_name=None):
     with app.app_context():
         admin = User(full_name='admin', email='admin@example.com', role=Roles.ADMIN)
         admin.set_password('pass')
@@ -48,6 +48,7 @@ def create_admin(app, admin_email=None):
             mail_use_tls=False,
             mail_use_ssl=False,
             admin_email=admin_email,
+            mail_sender_name=sender_name,
         )
         db.session.add(s)
         db.session.commit()
@@ -107,7 +108,19 @@ def test_admin_email_overrides_env(monkeypatch):
         db.session.commit()
     app2 = make_app(monkeypatch)
     with app2.app_context():
-        assert app2.config["MAIL_DEFAULT_SENDER"] == "db@example.com"
+        assert app2.config["MAIL_DEFAULT_SENDER"] == ("", "db@example.com")
+
+
+def test_sender_name_applied(monkeypatch):
+    setup_database()
+    app = make_app(monkeypatch)
+    with app.app_context():
+        s = Settings(admin_email="admin@example.com", mail_sender_name="Konsultacje")
+        db.session.add(s)
+        db.session.commit()
+    app2 = make_app(monkeypatch)
+    with app2.app_context():
+        assert app2.config["MAIL_DEFAULT_SENDER"] == ("Konsultacje", "admin@example.com")
 
 
 def test_send_test_email_success(monkeypatch):

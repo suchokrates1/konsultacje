@@ -103,6 +103,7 @@ class Settings(db.Model):
     mail_use_tls = db.Column(db.Boolean, default=False)
     mail_use_ssl = db.Column(db.Boolean, default=False)
     admin_email = db.Column(db.String(120))
+    mail_sender_name = db.Column(db.String(120))
     timezone = db.Column(db.String(64))
 
     @classmethod
