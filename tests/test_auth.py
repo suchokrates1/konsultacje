@@ -92,7 +92,7 @@ def test_register_and_login_remember_me(client, app):
         'password': 'password',
         'remember_me': 'y',
     }, follow_redirects=True)
-    assert b'Witaj' in response.data
+    assert b'Nowe zaj\xc4\x99cia' in response.data
     assert client.get_cookie('remember_token') is not None
 
 
@@ -168,4 +168,4 @@ def test_password_reset_flow(monkeypatch, app):
         data={'full_name': 'bob', 'password': 'newpass'},
         follow_redirects=True,
     )
-    assert b'Witaj' in response.data
+    assert b'Nowe zaj\xc4\x99cia' in response.data
