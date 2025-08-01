@@ -3,7 +3,7 @@
 {% block content %}
 <h2>{{ title }}</h2>
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start">
+<form method="post" class="text-start w-100" style="max-width: 400px;">
   {{ form.hidden_tag() }}
   <div class="mb-3">
     {{ form.imie.label(class="form-label") }}
@@ -13,7 +13,7 @@
     {{ form.wojewodztwo.label(class="form-label") }}
     {{ form.wojewodztwo(class="form-select") }}
   </div>
-  <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+  <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label.text }}</button>
 </form>
 </div>
 {% endblock %}

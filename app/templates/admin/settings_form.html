@@ -2,7 +2,7 @@
 {% block title %}Ustawienia{% endblock %}
 {% block content %}
 <h2>Ustawienia</h2>
-<form method="post">
+<form method="post" class="w-100" style="max-width: 400px;">
   {{ form.csrf_token }}
   <div class="mb-3">
     {{ form.mail_server.label(class="form-label") }}
@@ -24,6 +24,6 @@
     {{ form.timezone.label(class="form-label") }}
     {{ form.timezone(class="form-control") }}
   </div>
-  {{ form.submit(class="btn btn-primary") }}
+  {{ form.submit(class="btn btn-primary btn-sm") }}
 </form>
 {% endblock %}

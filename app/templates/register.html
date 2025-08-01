@@ -3,8 +3,8 @@
 {% block content %}
 <h2>Rejestracja</h2>
 <div class="row justify-content-center text-center">
-  <div class="col-md-6">
-    <form method="post" class="text-start">
+  <div class="col-12 col-md-6">
+    <form method="post" class="text-start w-100" style="max-width: 400px;">
   {{ form.hidden_tag() }}
   <div class="mb-3">
     {{ form.full_name.label(class="form-label") }}
@@ -32,7 +32,7 @@
       </span>
     </div>
   </div>
-  <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+  <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label.text }}</button>
     </form>
   </div>
 </div>
