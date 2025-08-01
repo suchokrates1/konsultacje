@@ -1,6 +1,7 @@
 """Flask view functions and the login form."""
 
 import os
+import re
 from datetime import datetime, timedelta
 
 from flask import (
@@ -201,7 +202,12 @@ def pobierz_pdf(zajecia_id):
     beneficjenci = zajecia.beneficjenci
     output_dir = os.path.join(current_app.root_path, "static", "pdf")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"zajecia_{zajecia.id}.pdf")
+
+    first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
+    date_str = zajecia.data.strftime("%Y-%m-%d")
+    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.pdf"
+    output_path = os.path.join(output_dir, filename)
 
     generate_pdf(zajecia, beneficjenci, output_path)
 
@@ -216,7 +222,7 @@ def pobierz_pdf(zajecia_id):
             )
         return response
 
-    return send_file(output_path, as_attachment=True)
+    return send_file(output_path, as_attachment=True, download_name=filename)
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
