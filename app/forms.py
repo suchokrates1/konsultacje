@@ -13,7 +13,7 @@ from wtforms import (
     IntegerField,
     BooleanField,
 )
-from wtforms.validators import DataRequired, Email, EqualTo
+from wtforms.validators import DataRequired, Email, EqualTo, Optional
 from wtforms.widgets import ListWidget, CheckboxInput
 
 WOJEWODZTWA = [
@@ -148,6 +148,7 @@ class SettingsForm(FlaskForm):
     mail_password = PasswordField('Hasło SMTP')
     mail_use_tls = BooleanField('Użyj TLS')
     mail_use_ssl = BooleanField('Użyj SSL')
+    admin_email = EmailField('Email administratora', validators=[Optional(), Email()])
     timezone = StringField('Strefa czasowa')
     submit = SubmitField('Zapisz')
     send_test = SubmitField('Wyślij test')

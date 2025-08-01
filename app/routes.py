@@ -109,7 +109,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        admin_email = os.environ.get('ADMIN_EMAIL')
+        admin_email = current_app.config.get('MAIL_DEFAULT_SENDER') or os.environ.get('ADMIN_EMAIL')
         if admin_email:
             msg = Message(
                 'New user registration', recipients=[admin_email]
@@ -556,7 +556,12 @@ def admin_ustawienia():
     """View and edit application settings."""
     settings = Settings.get()
     if not settings:
-        settings = Settings(mail_port=25, mail_use_tls=False, mail_use_ssl=False)
+        settings = Settings(
+            mail_port=25,
+            mail_use_tls=False,
+            mail_use_ssl=False,
+            admin_email=os.environ.get('ADMIN_EMAIL'),
+        )
         db.session.add(settings)
         db.session.commit()
         current_app.config['MAIL_SERVER'] = (
@@ -575,11 +580,13 @@ def admin_ustawienia():
         current_app.config['TIMEZONE'] = (
             settings.timezone or current_app.config['TIMEZONE']
         )
+        if settings.admin_email:
+            current_app.config['MAIL_DEFAULT_SENDER'] = settings.admin_email
         mail.init_app(current_app)
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
         if form.send_test.data:
-            admin_email = os.environ.get('ADMIN_EMAIL')
+            admin_email = settings.admin_email or os.environ.get('ADMIN_EMAIL')
             if admin_email:
                 msg = Message('Test email', recipients=[admin_email])
                 msg.body = 'To jest test konfiguracji SMTP.'
@@ -598,6 +605,7 @@ def admin_ustawienia():
         settings.mail_password = form.mail_password.data
         settings.mail_use_tls = form.mail_use_tls.data
         settings.mail_use_ssl = form.mail_use_ssl.data
+        settings.admin_email = form.admin_email.data
         settings.timezone = form.timezone.data
         db.session.commit()
         current_app.config['MAIL_SERVER'] = settings.mail_server or current_app.config['MAIL_SERVER']
@@ -607,6 +615,8 @@ def admin_ustawienia():
         current_app.config['MAIL_PASSWORD'] = settings.mail_password or current_app.config['MAIL_PASSWORD']
         current_app.config['MAIL_USE_TLS'] = settings.mail_use_tls
         current_app.config['MAIL_USE_SSL'] = settings.mail_use_ssl
+        if settings.admin_email:
+            current_app.config['MAIL_DEFAULT_SENDER'] = settings.admin_email
         current_app.config['TIMEZONE'] = settings.timezone or current_app.config['TIMEZONE']
         mail.init_app(current_app)
         flash('Ustawienia zapisane.')
