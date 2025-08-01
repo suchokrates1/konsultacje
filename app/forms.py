@@ -91,6 +91,21 @@ class PasswordResetForm(FlaskForm):
     submit = SubmitField('Zresetuj hasło')
 
 
+class PasswordChangeForm(FlaskForm):
+    """Form for authenticated users to change their password."""
+
+    old_password = PasswordField('Aktualne hasło', validators=[DataRequired()])
+    new_password = PasswordField('Nowe hasło', validators=[DataRequired()])
+    confirm = PasswordField(
+        'Potwierdź hasło',
+        validators=[
+            DataRequired(),
+            EqualTo('new_password', message='Hasła muszą się zgadzać'),
+        ],
+    )
+    submit = SubmitField('Zmień hasło')
+
+
 class BeneficjentForm(FlaskForm):
     """Form for adding or editing a beneficiary."""
 
