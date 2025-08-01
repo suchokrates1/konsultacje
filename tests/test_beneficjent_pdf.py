@@ -1,3 +1,5 @@
+"""Tests for beneficiary CRUD operations and PDF generation."""
+
 from datetime import date, time
 import os
 
@@ -6,6 +8,8 @@ from app.models import User, Beneficjent, Zajecia
 
 
 def create_user(app):
+    """Create a user in the database and return its ID."""
+
     with app.app_context():
         user = User(full_name='tester', email='tester@example.com')
         user.set_password('secret')
@@ -15,10 +19,18 @@ def create_user(app):
 
 
 def login(client, username='tester', password='secret'):
-    return client.post('/login', data={'full_name': username, 'password': password}, follow_redirects=True)
+    """Log in a user using the test client."""
+
+    return client.post(
+        '/login',
+        data={'full_name': username, 'password': password},
+        follow_redirects=True,
+    )
 
 
 def test_beneficjent_crud(app, client):
+    """Add, edit and delete a beneficiary through the web interface."""
+
     create_user(app)
     login(client)
 
@@ -58,20 +70,27 @@ def test_beneficjent_crud(app, client):
 
 
 def test_create_session(app, client):
+    """Create a consultation session and verify it was stored."""
     user_id = create_user(app)
     login(client)
     with app.app_context():
-        benef = Beneficjent(imie='Anna', wojewodztwo='Pomorskie', user_id=user_id)
+        benef = Beneficjent(
+            imie='Anna', wojewodztwo='Pomorskie', user_id=user_id
+        )
         db.session.add(benef)
         db.session.commit()
         b_id = benef.id
 
-    response = client.post('/zajecia/nowe', data={
-        'data': '2023-01-01',
-        'godzina_od': '10:00',
-        'godzina_do': '11:00',
-        'beneficjenci': [str(b_id)]
-    }, follow_redirects=True)
+    response = client.post(
+        '/zajecia/nowe',
+        data={
+            'data': '2023-01-01',
+            'godzina_od': '10:00',
+            'godzina_do': '11:00',
+            'beneficjenci': [str(b_id)],
+        },
+        follow_redirects=True,
+    )
     assert 'Zajęcia zapisane' in response.get_data(as_text=True)
     with app.app_context():
         zajecia = Zajecia.query.filter_by(user_id=user_id).first()
@@ -80,10 +99,13 @@ def test_create_session(app, client):
 
 
 def test_pdf_generation(app, client):
+    """Generate a PDF report and ensure the file is removed afterwards."""
     user_id = create_user(app)
     login(client)
     with app.app_context():
-        benef = Beneficjent(imie='Piotr', wojewodztwo='Lubelskie', user_id=user_id)
+        benef = Beneficjent(
+            imie='Piotr', wojewodztwo='Lubelskie', user_id=user_id
+        )
         db.session.add(benef)
         zajecia = Zajecia(
             data=date(2023, 1, 2),
@@ -100,8 +122,14 @@ def test_pdf_generation(app, client):
     response = client.get(f'/zajecia/{z_id}/pdf')
     assert response.status_code == 200
     assert 'application/pdf' in response.headers.get('Content-Type', '')
-    assert response.headers.get('Content-Disposition', '').startswith('attachment')
+    disposition = response.headers.get('Content-Disposition', '')
+    assert disposition.startswith('attachment')
 
-    pdf_path = os.path.join(app.root_path, 'static', 'pdf', f'zajecia_{z_id}.pdf')
+    pdf_path = os.path.join(
+        app.root_path,
+        'static',
+        'pdf',
+        f'zajecia_{z_id}.pdf',
+    )
     # the generated PDF should be removed after the response is sent
     assert not os.path.exists(pdf_path)
