@@ -12,8 +12,8 @@ A small Flask application that lets specialists register sessions with beneficia
    ```
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
    `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
-   A secure `SECRET_KEY` is required in **all** environments. You can
-   generate one with:
+   A secure `SECRET_KEY` is required in **all** environments and there is
+   no automatic fallback. You can generate one with:
 
    ```bash
    python -c "import secrets; print(secrets.token_hex(32))"
@@ -74,4 +74,4 @@ pip install -r requirements.txt pytest
 pytest
 ```
 
-This will create a temporary SQLite database in the `instance/` folder while the tests run.
+This will create a temporary SQLite database in the `instance/` folder while the tests run. Each test passes a `SECRET_KEY` directly to `create_app`. If you add more tests, ensure `SECRET_KEY` is supplied via the configuration or environment.
