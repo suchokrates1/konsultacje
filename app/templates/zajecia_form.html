@@ -12,10 +12,16 @@
   <div class="mb-3">
     {{ form.godzina_od.label(class="form-label") }}
     {{ form.godzina_od(class="form-control") }}
+    {% for error in form.godzina_od.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
   </div>
   <div class="mb-3">
     {{ form.godzina_do.label(class="form-label") }}
     {{ form.godzina_do(class="form-control") }}
+    {% for error in form.godzina_do.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
   </div>
   <div class="mb-3">
     {{ form.beneficjenci.label(class="form-label") }}
