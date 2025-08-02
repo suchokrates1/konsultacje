@@ -3,6 +3,7 @@
 import os
 import re
 from datetime import datetime, timedelta
+import pytz
 
 from flask import (
     current_app as app,
@@ -169,7 +170,8 @@ def nowe_zajecia():
 
     # Ustawienie domyślnych godzin po zaokrągleniu
     if request.method == 'GET':
-        now = datetime.now()
+        tz = pytz.timezone(current_app.config['TIMEZONE'])
+        now = datetime.now(tz)
         rounded = (
             now + timedelta(minutes=30 - now.minute % 30)
         ).replace(second=0, microsecond=0)
