@@ -46,6 +46,14 @@ A small Flask application that lets specialists register sessions with beneficia
 6. Report generation uses the `wzor.docx` template filled with session data
    and saves the result as a DOCX file.
 
+## DOCX reports
+
+The `app/docx_generator.py` module renders session details into the
+`static/wzor.docx` template using **python-docx**. From the session list view
+you can click **Pobierz raport** to hit the `/zajecia/<id>/docx` endpoint which
+generates the document, serves it for download, and cleans up the temporary
+file afterwards.
+
 ## Creating a user
 
 Before logging in for the first time you must add at least one account. Launch a
