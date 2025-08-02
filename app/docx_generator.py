@@ -1,23 +1,16 @@
-"""Utilities for rendering session details into a PDF document using a DOCX template."""
+"""Utilities for rendering session details into a DOCX document."""
 
 import os
-import tempfile
-import subprocess
 
 from flask import current_app
 from docx import Document
-from docx2pdf import convert
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.shared import Pt
 
 
-def generate_pdf(zajecia, beneficjenci, output_path):
-    """Create a PDF summary for a session and write it to *output_path*.
-
-    The function fills the ``wzor.docx`` template using :mod:`python-docx`
-    and then converts the rendered document to PDF using ``docx2pdf``.
-    """
+def generate_docx(zajecia, beneficjenci, output_path):
+    """Create a DOCX summary for a session and write it to *output_path*."""
 
     template_path = os.path.join(current_app.root_path, "static", "wzor.docx")
     if not os.path.exists(template_path):
@@ -36,7 +29,7 @@ def generate_pdf(zajecia, beneficjenci, output_path):
         "wojewodztwo": wojew,
         "specjalista": zajecia.specjalista,
     }
-    current_app.config["_last_pdf_context"] = context
+    current_app.config["_last_docx_context"] = context
 
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
@@ -59,38 +52,4 @@ def generate_pdf(zajecia, beneficjenci, output_path):
                 run.font.size = font_size
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
-        tmp_path = tmp.name
-    try:
-        doc.save(tmp_path)
-        try:
-            convert(tmp_path, output_path)
-        except NotImplementedError:
-            out_dir = os.path.dirname(output_path) or "."
-            cmd = [
-                "libreoffice",
-                "--headless",
-                "--convert-to",
-                "pdf",
-                "--outdir",
-                out_dir,
-                tmp_path,
-            ]
-            try:
-                subprocess.run(cmd, check=True)
-            except FileNotFoundError:
-                cmd[0] = "soffice"
-                subprocess.run(cmd, check=True)
-            generated = os.path.join(
-                out_dir,
-                os.path.splitext(os.path.basename(tmp_path))[0] + ".pdf",
-            )
-            os.replace(generated, output_path)
-    finally:
-        try:
-            os.remove(tmp_path)
-        except OSError:
-            current_app.logger.warning(
-                "Failed to remove temporary file %s", tmp_path
-            )
-
+    doc.save(output_path)
