@@ -1,8 +1,8 @@
 import io
 from datetime import date, time
+from pathlib import Path
 
 from docx import Document
-
 from app import db
 from app.models import User, Beneficjent, Zajecia
 
@@ -50,6 +50,32 @@ def test_docx_route_returns_valid_file(app, client):
     assert resp.status_code == 200
     assert 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' in resp.headers.get('Content-Type', '')
     Document(io.BytesIO(resp.data))
+
+
+def test_docx_route_creates_no_pdf(app, client, monkeypatch):
+    """Generated DOCX download should not leave PDF artifacts on disk."""
+    user_id = create_user(app)
+    login(client)
+    z_id = create_session(app, user_id)
+
+    import app.routes as routes
+    import app.docx_generator as docx_module
+
+    called = {"val": False}
+
+    def spy(zajecia, beneficjenci, output_path):
+        called["val"] = True
+        return docx_module.generate_docx(zajecia, beneficjenci, output_path)
+
+    monkeypatch.setattr(routes, "generate_docx", spy)
+
+    resp = client.get(f"/zajecia/{z_id}/docx")
+    assert resp.status_code == 200
+    Document(io.BytesIO(resp.data))
+    assert called["val"]
+
+    output_dir = Path(app.root_path) / "static" / "docx"
+    assert not list(output_dir.glob("*.pdf"))
 
 
 def test_docx_route_requires_ownership(app, client):
