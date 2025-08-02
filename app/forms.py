@@ -13,7 +13,13 @@ from wtforms import (
     IntegerField,
     BooleanField,
 )
-from wtforms.validators import DataRequired, Email, EqualTo, Optional
+from wtforms.validators import (
+    DataRequired,
+    Email,
+    EqualTo,
+    Optional,
+    ValidationError,
+)
 import pytz
 from wtforms.widgets import ListWidget, CheckboxInput
 
@@ -54,9 +60,21 @@ class ZajeciaForm(FlaskForm):
     godzina_od = TimeField('Godzina od', validators=[DataRequired()])
     godzina_do = TimeField('Godzina do', validators=[DataRequired()])
     beneficjenci = SelectField(
-        'Beneficjent', coerce=int, validators=[DataRequired()]
+        'Beneficjent', coerce=int, validators=[DataRequired()] 
     )
     submit = SubmitField('Zapisz zajęcia')
+
+    def validate(self, extra_validators=None):  # pragma: no cover - custom logic
+        """Ensure the end time is later than the start time."""
+        if not super().validate(extra_validators):
+            return False
+        if self.godzina_do.data <= self.godzina_od.data:
+            message = (
+                'Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.'
+            )
+            self.godzina_do.errors.append(message)
+            raise ValidationError(message)
+        return True
 
 
 class RegisterForm(FlaskForm):
