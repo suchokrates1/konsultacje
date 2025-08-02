@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Ustawienia użytkownika{% endblock %}
+{% block content %}
+<h2>Ustawienia użytkownika</h2>
+<div class="row justify-content-center text-center">
+  <div class="col-12 col-md-6">
+    <form method="post" class="text-start w-100" style="max-width: 400px;">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.full_name.label(class="form-label") }}
+        {{ form.full_name(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control") }}
+      </div>
+      <div class="mb-3">
+        {{ form.default_duration.label(class="form-label") }}
+        {{ form.default_duration(class="form-control") }}
+      </div>
+      <hr>
+      <div class="mb-3">
+        {{ form.old_password.label(class="form-label") }}
+        {{ form.old_password(class="form-control", type="password") }}
+      </div>
+      <div class="mb-3">
+        {{ form.new_password.label(class="form-label") }}
+        {{ form.new_password(class="form-control", type="password") }}
+      </div>
+      <div class="mb-3">
+        {{ form.confirm.label(class="form-label") }}
+        {{ form.confirm(class="form-control", type="password") }}
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label.text }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
