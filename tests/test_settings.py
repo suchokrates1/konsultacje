@@ -57,7 +57,7 @@ def create_admin(app, admin_email=None, sender_name=None):
 def login(client):
     return client.post(
         '/login',
-        data={'full_name': 'admin', 'password': 'pass'},
+        data={'email': 'admin@example.com', 'password': 'pass'},
         follow_redirects=True,
     )
 

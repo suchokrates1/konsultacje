@@ -17,10 +17,10 @@ def create_user(app, name='doc', email=None):
         return user.id
 
 
-def login(client, name='doc'):
+def login(client, name='doc', email=None):
     return client.post(
         '/login',
-        data={'full_name': name, 'password': 'secret'},
+        data={'email': email or f'{name}@example.com', 'password': 'secret'},
         follow_redirects=True,
     )
 

@@ -102,7 +102,7 @@ def test_register_and_login_remember_me(client, app):
         db.session.commit()
 
     response = client.post('/login', data={
-        'full_name': 'alice',
+        'email': 'alice@example.com',
         'password': 'password',
         'remember_me': 'y',
     }, follow_redirects=True)
@@ -210,7 +210,7 @@ def test_password_reset_flow(monkeypatch, app):
 
     response = client.post(
         '/login',
-        data={'full_name': 'bob', 'password': 'newpass'},
+        data={'email': 'bob@example.com', 'password': 'newpass'},
         follow_redirects=True,
     )
     assert b'Nowe zaj\xc4\x99cia' in response.data
@@ -227,7 +227,7 @@ def test_unconfirmed_user_cannot_login(app):
     client = app.test_client()
     resp = client.post(
         '/login',
-        data={'full_name': 'unc', 'password': 'pass'},
+        data={'email': 'unc@example.com', 'password': 'pass'},
         follow_redirects=True,
     )
     text = resp.get_data(as_text=True)
