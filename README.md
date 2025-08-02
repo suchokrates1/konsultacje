@@ -12,7 +12,7 @@ A small Flask application that lets specialists register sessions with beneficia
    ```
    The `email_validator` package is included in `requirements.txt` and must
    be installed for form validation to work correctly. The file now also
-   lists `docxtpl` and `docx2pdf` which are used to generate PDF reports.
+   lists `python-docx` and `docx2pdf` which are used to generate PDF reports.
    On Linux, install LibreOffice so `docx2pdf` can convert documents when
    Microsoft Word is not present.
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
