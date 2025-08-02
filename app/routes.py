@@ -189,9 +189,8 @@ def nowe_zajecia():
             specjalista=current_user.full_name,
             user_id=current_user.id
         )
-        for b_id in form.beneficjenci.data:
-            beneficjent = db.session.get(Beneficjent, b_id)
-            zajecia.beneficjenci.append(beneficjent)
+        beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
+        zajecia.beneficjenci = [beneficjent]
 
         db.session.add(zajecia)
         db.session.commit()
@@ -489,14 +488,14 @@ def admin_edytuj_zajecia(zajecia_id):
         for b in Beneficjent.query.filter_by(user_id=zajecia.user_id).all()
     ]
     if request.method == 'GET':
-        form.beneficjenci.data = [b.id for b in zajecia.beneficjenci]
+        if zajecia.beneficjenci:
+            form.beneficjenci.data = zajecia.beneficjenci[0].id
     if form.validate_on_submit():
         zajecia.data = form.data.data
         zajecia.godzina_od = form.godzina_od.data
         zajecia.godzina_do = form.godzina_do.data
-        zajecia.beneficjenci = [
-            db.session.get(Beneficjent, i) for i in form.beneficjenci.data
-        ]
+        beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
+        zajecia.beneficjenci = [beneficjent]
         db.session.commit()
         flash('Zajęcia zaktualizowane.')
         return redirect(url_for('admin_zajecia'))
