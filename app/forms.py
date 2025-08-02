@@ -53,8 +53,8 @@ class ZajeciaForm(FlaskForm):
     data = DateField('Data konsultacji', validators=[DataRequired()])
     godzina_od = TimeField('Godzina od', validators=[DataRequired()])
     godzina_do = TimeField('Godzina do', validators=[DataRequired()])
-    beneficjenci = SelectMultipleField(
-        'Beneficjenci', coerce=int, validators=[DataRequired()]
+    beneficjenci = SelectField(
+        'Beneficjent', coerce=int, validators=[DataRequired()]
     )
     submit = SubmitField('Zapisz zajęcia')
 
