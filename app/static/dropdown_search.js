@@ -27,20 +27,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const options = Array.from(select.options).map((option) => {
       const label = document.createElement('label');
-      label.className = 'dropdown-item d-flex align-items-center';
-      const input = document.createElement('input');
-      input.type = select.multiple ? 'checkbox' : 'radio';
-      input.className = 'form-check-input me-2';
-      input.checked = option.selected;
-      label.appendChild(input);
+      label.className = 'dropdown-item';
       label.appendChild(document.createTextNode(option.textContent));
+      if (option.selected) {
+        label.classList.add('active');
+      }
       optionsContainer.appendChild(label);
 
-      input.addEventListener('change', () => {
+      label.addEventListener('click', () => {
         if (select.multiple) {
-          option.selected = input.checked;
-        } else if (input.checked) {
+          option.selected = !option.selected;
+          label.classList.toggle('active', option.selected);
+        } else {
           select.value = option.value;
+          options.forEach(({ label: lbl }) => lbl.classList.remove('active'));
+          label.classList.add('active');
+          bootstrap.Dropdown.getOrCreateInstance(button).hide();
         }
         updateButtonText();
       });
