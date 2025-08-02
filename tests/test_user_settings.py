@@ -21,35 +21,41 @@ def login(client):
     )
 
 
-def test_change_password_requires_login(client):
-    resp = client.get('/change_password', follow_redirects=True)
+def test_settings_requires_login(client):
+    resp = client.get('/settings', follow_redirects=True)
     assert resp.request.path == '/login'
 
 
-def test_change_password_success(app, client):
+def test_settings_password_change_success(app, client):
     create_user(app)
     login(client)
     resp = client.post(
-        '/change_password',
+        '/settings',
         data={
+            'email': 'c@example.com',
+            'full_name': 'change',
+            'default_duration': 90,
             'old_password': 'old',
             'new_password': 'new',
             'confirm': 'new',
         },
         follow_redirects=True,
     )
-    assert 'Hasło zostało zmienione' in resp.get_data(as_text=True)
+    assert 'Ustawienia zapisane' in resp.get_data(as_text=True)
     with app.app_context():
         user = User.query.filter_by(full_name='change').first()
         assert user.check_password('new')
 
 
-def test_change_password_wrong_old(app, client):
+def test_settings_wrong_old_password(app, client):
     create_user(app)
     login(client)
     resp = client.post(
-        '/change_password',
+        '/settings',
         data={
+            'email': 'c@example.com',
+            'full_name': 'change',
+            'default_duration': 90,
             'old_password': 'bad',
             'new_password': 'new',
             'confirm': 'new',

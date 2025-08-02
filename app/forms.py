@@ -111,6 +111,30 @@ class PasswordChangeForm(FlaskForm):
     submit = SubmitField('Zmień hasło')
 
 
+class UserSettingsForm(FlaskForm):
+    """Form allowing users to update their details and password."""
+
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
+    default_duration = IntegerField(
+        'Domyślny czas trwania (min)', validators=[DataRequired()]
+    )
+    old_password = PasswordField(
+        'Aktualne hasło', validators=[Optional()]
+    )
+    new_password = PasswordField(
+        'Nowe hasło', validators=[Optional()]
+    )
+    confirm = PasswordField(
+        'Potwierdź hasło',
+        validators=[
+            Optional(),
+            EqualTo('new_password', message='Hasła muszą się zgadzać'),
+        ],
+    )
+    submit = SubmitField('Zapisz')
+
+
 class BeneficjentForm(FlaskForm):
     """Form for adding or editing a beneficiary."""
 

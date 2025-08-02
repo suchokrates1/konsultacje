@@ -35,7 +35,7 @@ from .forms import (
     RegisterForm,
     PasswordResetRequestForm,
     PasswordResetForm,
-    PasswordChangeForm,
+    UserSettingsForm,
     BeneficjentForm,
     DeleteForm,
     PromoteForm,
@@ -290,20 +290,28 @@ def reset_password(token):
     return render_template('reset_password.html', form=form)
 
 
-@app.route('/change_password', methods=['GET', 'POST'])
+@app.route('/settings', methods=['GET', 'POST'])
 @login_required
-def change_password():
-    """Allow the current user to change their password."""
-    form = PasswordChangeForm()
+def user_settings():
+    """Display and update user account settings."""
+    form = UserSettingsForm()
     if form.validate_on_submit():
-        if not current_user.check_password(form.old_password.data):
-            flash('Nieprawidłowe aktualne hasło.')
-        else:
+        current_user.email = form.email.data
+        current_user.full_name = form.full_name.data
+        current_user.default_duration = form.default_duration.data
+        if form.new_password.data:
+            if not current_user.check_password(form.old_password.data):
+                flash('Nieprawidłowe aktualne hasło.')
+                return render_template('settings.html', form=form)
             current_user.set_password(form.new_password.data)
-            db.session.commit()
-            flash('Hasło zostało zmienione.')
-            return redirect(url_for('index'))
-    return render_template('change_password.html', form=form)
+        db.session.commit()
+        flash('Ustawienia zapisane.')
+        return redirect(url_for('user_settings'))
+    elif request.method == 'GET':
+        form.email.data = current_user.email
+        form.full_name.data = current_user.full_name
+        form.default_duration.data = current_user.default_duration
+    return render_template('settings.html', form=form)
 
 
 @app.route('/zajecia')
