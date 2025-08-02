@@ -15,7 +15,7 @@
       <th>Data</th>
       <th>Godziny</th>
       <th>Specjalista</th>
-      <th>PDF</th>
+      <th>DOCX</th>
     </tr>
   </thead>
   <tbody>
@@ -25,7 +25,7 @@
       <td>{{ zaj.godzina_od.strftime('%H:%M') }} - {{ zaj.godzina_do.strftime('%H:%M') }}</td>
       <td>{{ zaj.specjalista }}</td>
       <td>
-        <a href="{{ url_for('pobierz_pdf', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Pobierz PDF</a>
+        <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Pobierz DOCX</a>
       </td>
     </tr>
     {% else %}

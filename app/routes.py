@@ -44,7 +44,7 @@ from .forms import (
 )
 from .models import Beneficjent, User, Zajecia, Roles, Settings
 from . import mail
-from .pdf_generator import generate_pdf
+from .docx_generator import generate_docx
 from urllib.parse import urlparse
 from functools import wraps
 
@@ -199,26 +199,26 @@ def nowe_zajecia():
     return render_template('zajecia_form.html', form=form)
 
 
-@app.route('/zajecia/<int:zajecia_id>/pdf')
+@app.route('/zajecia/<int:zajecia_id>/docx')
 @login_required
-def pobierz_pdf(zajecia_id):
-    """Generate and return a PDF report for the given session."""
+def pobierz_docx(zajecia_id):
+    """Generate and return a DOCX report for the given session."""
     zajecia = Zajecia.query.get_or_404(zajecia_id)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for('index'))
 
     beneficjenci = zajecia.beneficjenci
-    output_dir = os.path.join(current_app.root_path, "static", "pdf")
+    output_dir = os.path.join(current_app.root_path, "static", "docx")
     os.makedirs(output_dir, exist_ok=True)
 
     first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
     date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.pdf"
+    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
     output_path = os.path.join(output_dir, filename)
 
-    generate_pdf(zajecia, beneficjenci, output_path)
+    generate_docx(zajecia, beneficjenci, output_path)
 
     @after_this_request
     def remove_file(response):
@@ -226,7 +226,7 @@ def pobierz_pdf(zajecia_id):
             os.remove(output_path)
         except OSError:
             current_app.logger.warning(
-                "Failed to remove generated PDF %s",
+                "Failed to remove generated DOCX %s",
                 output_path,
             )
         return response

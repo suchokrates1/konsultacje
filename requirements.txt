@@ -4,9 +4,7 @@ flask-wtf
 flask-sqlalchemy
 Flask-Migrate
 werkzeug
-pypdf
 python-docx
-docx2pdf
 python-dotenv
 Flask-Mail
 email_validator

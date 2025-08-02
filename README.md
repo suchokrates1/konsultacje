@@ -1,6 +1,6 @@
 # Konsultacje Application
 
-A small Flask application that lets specialists register sessions with beneficiaries and produce printable PDF reports. The project stores data using SQLite and provides a simple web interface secured with Flask‑Login.
+A small Flask application that lets specialists register sessions with beneficiaries and produce printable DOCX reports. The project stores data using SQLite and provides a simple web interface secured with Flask‑Login.
 
 ## Setup
 
@@ -12,9 +12,7 @@ A small Flask application that lets specialists register sessions with beneficia
    ```
    The `email_validator` package is included in `requirements.txt` and must
    be installed for form validation to work correctly. The file now also
-   lists `python-docx` and `docx2pdf` which are used to generate PDF reports.
-   On Linux, install LibreOffice so `docx2pdf` can convert documents when
-   Microsoft Word is not present.
+   lists `python-docx` which is used to generate DOCX reports.
 2. Copy `.env.example` to `.env` and set values for `SECRET_KEY`,
    `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_EMAIL`.
    A secure `SECRET_KEY` is required in **all** environments and there is
@@ -45,11 +43,8 @@ A small Flask application that lets specialists register sessions with beneficia
    ```bash
    flask --app run.py run
    ```
-6. PDF generation uses the `wzor.docx` template filled with session data and
-   converted to PDF using **docx2pdf**. Ensure a working copy of Microsoft
-   Word or LibreOffice is available if you run the application outside the
-   provided Docker container. On Linux, install LibreOffice so the fallback
-   converter in ``pdf_generator.generate_pdf`` can create PDF files.
+6. Report generation uses the `wzor.docx` template filled with session data
+   and saves the result as a DOCX file.
 
 ## Creating a user
 

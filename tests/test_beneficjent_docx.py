@@ -1,4 +1,4 @@
-"""Tests for beneficiary CRUD operations and PDF generation."""
+"""Tests for beneficiary CRUD operations and DOCX generation."""
 
 from datetime import date, time
 import io
@@ -6,47 +6,7 @@ import os
 
 from app import db
 from app.models import User, Beneficjent, Zajecia
-from pypdf import PdfReader
 from docx import Document
-import app.pdf_generator as pdfgen
-
-
-def _create_pdf(text, path):
-    text = text.replace('(', '\\(').replace(')', '\\)')
-    objects = [
-        "<< /Type /Catalog /Pages 2 0 R >>",
-        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
-        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    ]
-    stream = f"BT /F1 12 Tf 50 800 Td ({text}) Tj ET"
-    encoded = stream.encode('latin-1', 'ignore')
-    objects.append(f"<< /Length {len(encoded)} >>\nstream\n{stream}\nendstream")
-    content = ['%PDF-1.4']
-    offsets = []
-    offset = len(content[0]) + 1
-    for i, obj in enumerate(objects, start=1):
-        offsets.append(offset)
-        part = f"{i} 0 obj\n{obj}\nendobj"
-        content.append(part)
-        offset += len(part) + 1
-    xref_offset = offset
-    xref = ["xref", f"0 {len(objects)+1}", "0000000000 65535 f "]
-    for off in offsets:
-        xref.append(f"{off:010d} 00000 n ")
-    content.append("\n".join(xref))
-    content.append(f"trailer\n<< /Root 1 0 R /Size {len(objects)+1} >>")
-    content.append(f"startxref\n{xref_offset}")
-    content.append("%%EOF")
-    with open(path, 'wb') as f:
-        f.write("\n".join(content).encode('latin-1', 'ignore'))
-
-
-def fake_convert(docx_path, pdf_path):
-    from flask import current_app
-    ctx = current_app.config.get("_last_pdf_context", {})
-    text = " \n".join(str(v) for v in ctx.values())
-    _create_pdf(text, pdf_path)
 
 
 def create_user(app):
@@ -148,9 +108,8 @@ def test_create_session(app, client):
         assert len(zajecia.beneficjenci) == 1
 
 
-def test_pdf_generation(app, client, monkeypatch):
-    """Generate a PDF report and ensure the file is removed afterwards."""
-    monkeypatch.setattr(pdfgen, "convert", fake_convert)
+def test_docx_generation(app, client):
+    """Generate a DOCX report and ensure the file is removed afterwards."""
     user_id = create_user(app)
     login(client)
     with app.app_context():
@@ -170,29 +129,28 @@ def test_pdf_generation(app, client, monkeypatch):
         db.session.commit()
         z_id = zajecia.id
 
-    response = client.get(f'/zajecia/{z_id}/pdf')
+    response = client.get(f'/zajecia/{z_id}/docx')
     assert response.status_code == 200
-    assert 'application/pdf' in response.headers.get('Content-Type', '')
+    assert 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' in response.headers.get('Content-Type', '')
     disposition = response.headers.get('Content-Disposition', '')
     expected_name = (
-        "Konsultacje dietetyczne 2023-01-02 Piotr.pdf"
+        "Konsultacje dietetyczne 2023-01-02 Piotr.docx"
     )
     assert disposition.startswith('attachment')
     assert expected_name in disposition
 
-    pdf_path = os.path.join(
+    docx_path = os.path.join(
         app.root_path,
         'static',
-        'pdf',
+        'docx',
         expected_name,
     )
-    # the generated PDF should be removed after the response is sent
-    assert not os.path.exists(pdf_path)
+    # the generated DOCX should be removed after the response is sent
+    assert not os.path.exists(docx_path)
 
 
-def test_pdf_content(app, client, monkeypatch):
-    """Generate a PDF and verify expected text appears in the document."""
-    monkeypatch.setattr(pdfgen, "convert", fake_convert)
+def test_docx_content(app, client):
+    """Generate a DOCX and verify expected text appears in the document."""
     user_id = create_user(app)
     login(client)
     with app.app_context():
@@ -212,11 +170,16 @@ def test_pdf_content(app, client, monkeypatch):
         db.session.commit()
         z_id = zajecia.id
 
-    response = client.get(f"/zajecia/{z_id}/pdf")
+    response = client.get(f"/zajecia/{z_id}/docx")
     assert response.status_code == 200
 
-    reader = PdfReader(io.BytesIO(response.data))
-    text = "".join(page.extract_text() or "" for page in reader.pages)
+    doc = Document(io.BytesIO(response.data))
+    text = "\n".join(p.text for p in doc.paragraphs)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                text += "\n" + cell.text
     assert "tester" in text
     assert "Katarzyna" in text
     assert "Mazowieckie" in text
+
