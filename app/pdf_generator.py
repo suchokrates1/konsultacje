@@ -7,6 +7,9 @@ import subprocess
 from flask import current_app
 from docx import Document
 from docx2pdf import convert
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.shared import Pt
 
 
 def generate_pdf(zajecia, beneficjenci, output_path):
@@ -24,9 +27,7 @@ def generate_pdf(zajecia, beneficjenci, output_path):
     doc = Document(template_path)
     start_time = zajecia.godzina_od.strftime("%H:%M")
     end_time = zajecia.godzina_do.strftime("%H:%M")
-    names = "\n".join(
-        f"{idx + 1}. {b.imie} {b.wojewodztwo}" for idx, b in enumerate(beneficjenci[:3])
-    )
+    names = "\n".join(b.imie for b in beneficjenci[:3])
     wojew = ", ".join({b.wojewodztwo for b in beneficjenci[:3]})
     context = {
         "data": zajecia.data.strftime("%d.%m.%Y"),
@@ -46,11 +47,17 @@ def generate_pdf(zajecia, beneficjenci, output_path):
 
     if doc.tables:
         table = doc.tables[0]
+        font_size = Pt(16)
         for idx, _ in enumerate(beneficjenci[:3]):
             row = table.rows[idx + 1]
-            row.cells[1].text = context["data"]
-            row.cells[2].text = context["time_range"]
-            row.cells[3].text = context["specjalista"]
+            values = [context["data"], context["time_range"], context["specjalista"]]
+            for cell, value in zip(row.cells[1:4], values):
+                cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+                p = cell.paragraphs[0]
+                p.clear()
+                run = p.add_run(value)
+                run.font.size = font_size
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
         tmp_path = tmp.name
