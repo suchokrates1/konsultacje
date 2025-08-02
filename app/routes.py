@@ -13,6 +13,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    jsonify,
     send_file,
     url_for,
     after_this_request,
@@ -328,6 +329,47 @@ def lista_zajec():
         query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
     )
     return render_template('zajecia_list.html', zajecia_list=zajecia_list, q=q)
+
+
+@app.route('/kalendarz')
+@login_required
+def kalendarz():
+    """Display a calendar with upcoming sessions for the user."""
+    tz = pytz.timezone(current_app.config['TIMEZONE'])
+    today = datetime.now(tz).date()
+    zajecia_list = (
+        Zajecia.query.filter_by(user_id=current_user.id)
+        .filter(Zajecia.data >= today)
+        .order_by(Zajecia.data, Zajecia.godzina_od)
+        .all()
+    )
+    return render_template('zajecia_calendar.html', zajecia_list=zajecia_list)
+
+
+@app.route('/api/zajecia')
+@login_required
+def api_zajecia():
+    """Return upcoming sessions for the current user in JSON format."""
+    tz = pytz.timezone(current_app.config['TIMEZONE'])
+    today = datetime.now(tz).date()
+    sessions = (
+        Zajecia.query.filter_by(user_id=current_user.id)
+        .filter(Zajecia.data >= today)
+        .order_by(Zajecia.data, Zajecia.godzina_od)
+        .all()
+    )
+    events = []
+    for s in sessions:
+        start_dt = datetime.combine(s.data, s.godzina_od)
+        end_dt = datetime.combine(s.data, s.godzina_do)
+        events.append(
+            {
+                'title': s.specjalista,
+                'start': start_dt.isoformat(),
+                'end': end_dt.isoformat(),
+            }
+        )
+    return jsonify(events)
 
 
 @app.route('/beneficjenci')
