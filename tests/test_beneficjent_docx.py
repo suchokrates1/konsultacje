@@ -9,6 +9,23 @@ from app.models import User, Beneficjent, Zajecia
 from docx import Document
 
 
+def _docx_text(doc: Document) -> str:
+    """Return all text content from a DOCX document."""
+
+    text = "\n".join(p.text for p in doc.paragraphs)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                text += "\n" + cell.text
+    return text
+
+
+def _docx_text_from_bytes(data: bytes) -> str:
+    """Load DOCX bytes and return their textual content."""
+
+    return _docx_text(Document(io.BytesIO(data)))
+
+
 def create_user(app):
     """Create a user in the database and return its ID."""
 
@@ -173,12 +190,7 @@ def test_docx_content(app, client):
     response = client.get(f"/zajecia/{z_id}/docx")
     assert response.status_code == 200
 
-    doc = Document(io.BytesIO(response.data))
-    text = "\n".join(p.text for p in doc.paragraphs)
-    for table in doc.tables:
-        for row in table.rows:
-            for cell in row.cells:
-                text += "\n" + cell.text
+    text = _docx_text_from_bytes(response.data)
     assert "tester" in text
     assert "Katarzyna" in text
     assert "Mazowieckie" in text
