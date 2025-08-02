@@ -1,9 +1,6 @@
 """Tests ensuring generated DOCX files contain the expected text."""
 
 from datetime import date, time
-import os
-import tempfile
-
 from docx import Document
 
 from app import db
@@ -11,7 +8,18 @@ from app.models import User, Beneficjent, Zajecia
 from app.docx_generator import generate_docx
 
 
-def test_generate_docx_file_contains_text(app):
+def _docx_text(doc: Document) -> str:
+    """Extract all text content from a DOCX document."""
+
+    text = "\n".join(p.text for p in doc.paragraphs)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                text += "\n" + cell.text
+    return text
+
+
+def test_generate_docx_file_contains_text(app, tmp_path):
     """DOCX generated on disk should include rendered session data."""
 
     with app.app_context():
@@ -34,17 +42,9 @@ def test_generate_docx_file_contains_text(app):
         db.session.add(zajecia)
         db.session.commit()
 
-        fd, path = tempfile.mkstemp(suffix=".docx")
-        os.close(fd)
-        try:
-            generate_docx(zajecia, [benef], path)
-            doc = Document(path)
-            text = "\n".join(p.text for p in doc.paragraphs)
-            for table in doc.tables:
-                for row in table.rows:
-                    for cell in row.cells:
-                        text += "\n" + cell.text
-            assert "disk" in text
-            assert "Tomek" in text
-        finally:
-            os.remove(path)
+        path = tmp_path / "report.docx"
+        generate_docx(zajecia, [benef], str(path))
+        doc = Document(str(path))
+        text = _docx_text(doc)
+        assert "disk" in text
+        assert "Tomek" in text
