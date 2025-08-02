@@ -52,7 +52,7 @@
             <a class="nav-link" href="{{ url_for('change_password') }}">Zmień hasło</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Wyloguj</a>
+            <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('logout') }}">Wyloguj</a>
           </li>
         </ul>
         {% endif %}
@@ -94,7 +94,7 @@
           <a class="nav-link" href="{{ url_for('change_password') }}">Zmień hasło</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('logout') }}">Wyloguj</a>
+          <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('logout') }}">Wyloguj</a>
         </li>
         {% endif %}
       </ul>

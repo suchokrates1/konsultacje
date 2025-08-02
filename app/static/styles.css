@@ -7,3 +7,7 @@
     border-radius: 0.25rem;
 }
 
+.logout-btn:hover {
+    opacity: 0.85;
+}
+
