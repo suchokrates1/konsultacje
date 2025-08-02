@@ -65,6 +65,34 @@ def test_settings_wrong_old_password(app, client):
     assert 'Nieprawidłowe aktualne hasło' in resp.get_data(as_text=True)
 
 
+def test_settings_form_prefilled_with_user_data(app, client):
+    """GET /settings should render form fields populated with current user data."""
+    create_user(app)
+    login(client)
+    resp = client.get('/settings')
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert 'value="c@example.com"' in html
+    assert 'value="change"' in html
+    assert 'value="90"' in html
+
+
+def test_settings_missing_required_fields_shows_errors(app, client):
+    """Submitting without required fields should re-render form and keep data unchanged."""
+    create_user(app)
+    login(client)
+    resp = client.post(
+        '/settings',
+        data={'email': '', 'full_name': '', 'default_duration': ''},
+    )
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert 'Ustawienia użytkownika' in html
+    with app.app_context():
+        user = User.query.filter_by(full_name='change').first()
+        assert user.email == 'c@example.com'
+
+
 def test_custom_error_pages(app, client):
     create_user(app)
 
