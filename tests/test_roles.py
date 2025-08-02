@@ -36,9 +36,14 @@ def create_users(app):
 def login(client, username):
     """Authenticate a test user and return the response."""
 
+    email_map = {
+        'admin': 'admin@example.com',
+        'inst1': 'i1@example.com',
+        'inst2': 'i2@example.com',
+    }
     return client.post(
         '/login',
-        data={'full_name': username, 'password': 'pass'},
+        data={'email': email_map.get(username, f'{username}@example.com'), 'password': 'pass'},
         follow_redirects=True,
     )
 
@@ -112,7 +117,7 @@ def test_confirm_instructor(app):
     # Unconfirmed user should not be able to log in
     resp = client.post(
         '/login',
-        data={'full_name': 'newbie', 'password': 'pass'},
+        data={'email': 'newbie@example.com', 'password': 'pass'},
         follow_redirects=True,
     )
     assert 'Twoje konto nie zostało jeszcze potwierdzone.' in resp.get_data(as_text=True)
@@ -135,7 +140,7 @@ def test_confirm_instructor(app):
     # User should now be able to log in
     resp = client.post(
         '/login',
-        data={'full_name': 'newbie', 'password': 'pass'},
+        data={'email': 'newbie@example.com', 'password': 'pass'},
         follow_redirects=True,
     )
     assert 'Nowe zajęcia' in resp.get_data(as_text=True)

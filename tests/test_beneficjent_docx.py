@@ -38,12 +38,12 @@ def create_user(app):
         return user.id
 
 
-def login(client, username='tester', password='secret'):
+def login(client, email='tester@example.com', password='secret'):
     """Log in a user using the test client."""
 
     return client.post(
         '/login',
-        data={'full_name': username, 'password': password},
+        data={'email': email, 'password': password},
         follow_redirects=True,
     )
 

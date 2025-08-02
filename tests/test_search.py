@@ -43,7 +43,7 @@ def login(client):
 
     return client.post(
         "/login",
-        data={"full_name": "test", "password": "secret"},
+        data={"email": "test@example.com", "password": "secret"},
         follow_redirects=True,
     )
 

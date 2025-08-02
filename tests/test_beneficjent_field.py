@@ -18,7 +18,7 @@ def create_user(app):
 def login(client):
     return client.post(
         '/login',
-        data={'full_name': 'field', 'password': 'secret'},
+        data={'email': 'field@example.com', 'password': 'secret'},
         follow_redirects=True,
     )
 

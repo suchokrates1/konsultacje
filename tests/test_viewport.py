@@ -57,7 +57,7 @@ def test_beneficjenci_mobile_view(app, live_server, driver):
         db.session.commit()
     driver.set_window_size(375, 812)
     driver.get(live_server + "/login")
-    driver.find_element("name", "full_name").send_keys("mob")
+    driver.find_element("name", "email").send_keys("m@b.com")
     driver.find_element("name", "password").send_keys("pass")
     driver.find_element("css selector", "button[type=submit]").click()
     driver.get(live_server + "/beneficjenci")

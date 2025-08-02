@@ -25,8 +25,8 @@ from flask_login import (
     logout_user,
 )
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, ValidationError
+from wtforms import PasswordField, SubmitField, BooleanField, EmailField
+from wtforms.validators import DataRequired, ValidationError, Email
 from flask_mail import Message
 from smtplib import SMTPException
 
@@ -69,7 +69,7 @@ def admin_required(view_func):
 class LoginForm(FlaskForm):
     """Form used by users to authenticate to the application."""
 
-    full_name = StringField('Login', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Hasło', validators=[DataRequired()])
     remember_me = BooleanField('Zapamiętaj mnie')
     submit = SubmitField('Zaloguj się')
@@ -81,7 +81,7 @@ def login():
     next_url = request.args.get('next')
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(full_name=form.full_name.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             if not user.confirmed:
                 flash('Twoje konto nie zostało jeszcze potwierdzone.')
