@@ -420,8 +420,8 @@ def api_zajecia():
     )
     events = []
     for s in sessions:
-        start_dt = datetime.combine(s.data, s.godzina_od)
-        end_dt = datetime.combine(s.data, s.godzina_do)
+        start_dt = tz.localize(datetime.combine(s.data, s.godzina_od))
+        end_dt = tz.localize(datetime.combine(s.data, s.godzina_do))
         events.append(
             {
                 'title': s.specjalista,
