@@ -171,6 +171,36 @@ def test_register_email_failure(monkeypatch, client, app):
         assert User.query.filter_by(full_name='fail').first() is not None
 
 
+def test_register_sends_confirmation_email(monkeypatch, client, app):
+    """Registration sends a confirmation link to the admin."""
+    monkeypatch.setenv('ADMIN_EMAIL', 'admin@example.com')
+    sent = []
+
+    def fake_send(msg):
+        sent.append(msg)
+
+    monkeypatch.setattr('app.routes.mail.send', fake_send)
+
+    response = client.post(
+        '/register',
+        data={
+            'full_name': 'jan',
+            'email': 'jan@example.com',
+            'password': 'tajne',
+            'confirm': 'tajne',
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert len(sent) == 1
+    msg = sent[0]
+    assert msg.subject == 'Nowa rejestracja użytkownika'
+    with app.app_context():
+        user = User.query.filter_by(full_name='jan').first()
+        assert user is not None
+        assert f'/admin/instruktorzy/{user.id}/confirm' in msg.body
+
+
 def test_password_reset_flow(monkeypatch, app):
     """Test the full password reset process."""
     with app.app_context():

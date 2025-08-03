@@ -49,6 +49,21 @@ class User(UserMixin, db.Model):
             return None
         return db.session.get(User, data.get('user_id'))
 
+    def get_confirm_token(self, expires_sec=3600):
+        """Return a time-limited account confirmation token."""
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id}, salt='confirm')
+
+    @staticmethod
+    def verify_confirm_token(token, expires_sec=3600):
+        """Return the user for a valid confirmation token or ``None``."""
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token, salt='confirm', max_age=expires_sec)
+        except Exception:
+            return None
+        return db.session.get(User, data.get('user_id'))
+
 
 @login_manager.user_loader
 def load_user(user_id):
