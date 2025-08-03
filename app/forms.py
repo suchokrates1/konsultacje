@@ -18,7 +18,6 @@ from wtforms.validators import (
     Email,
     EqualTo,
     Optional,
-    ValidationError,
 )
 import pytz
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -73,7 +72,7 @@ class ZajeciaForm(FlaskForm):
                 'Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.'
             )
             self.godzina_do.errors.append(message)
-            raise ValidationError(message)
+            return False
         return True
 
 

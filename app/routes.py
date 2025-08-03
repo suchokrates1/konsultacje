@@ -189,24 +189,21 @@ def nowe_zajecia():
             rounded + timedelta(minutes=current_user.default_duration)
         ).time()
 
-    try:
-        if form.validate_on_submit():
-            zajecia = Zajecia(
-                data=form.data.data,
-                godzina_od=form.godzina_od.data,
-                godzina_do=form.godzina_do.data,
-                specjalista=current_user.full_name,
-                user_id=current_user.id,
-            )
-            beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
-            zajecia.beneficjenci = [beneficjent]
+    if form.validate_on_submit():
+        zajecia = Zajecia(
+            data=form.data.data,
+            godzina_od=form.godzina_od.data,
+            godzina_do=form.godzina_do.data,
+            specjalista=current_user.full_name,
+            user_id=current_user.id,
+        )
+        beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
+        zajecia.beneficjenci = [beneficjent]
 
-            db.session.add(zajecia)
-            db.session.commit()
-            flash('Zajęcia zapisane.')
-            return redirect(url_for('lista_zajec'))
-    except ValidationError:
-        pass
+        db.session.add(zajecia)
+        db.session.commit()
+        flash('Zajęcia zapisane.')
+        return redirect(url_for('lista_zajec'))
 
     return render_template('zajecia_form.html', form=form)
 
@@ -365,18 +362,15 @@ def edytuj_zajecia(zajecia_id):
     if request.method == 'GET' and zajecia.beneficjenci:
         form.beneficjenci.data = zajecia.beneficjenci[0].id
 
-    try:
-        if form.validate_on_submit():
-            zajecia.data = form.data.data
-            zajecia.godzina_od = form.godzina_od.data
-            zajecia.godzina_do = form.godzina_do.data
-            beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
-            zajecia.beneficjenci = [beneficjent]
-            db.session.commit()
-            flash('Zajęcia zaktualizowane.')
-            return redirect(url_for('lista_zajec'))
-    except ValidationError:
-        pass
+    if form.validate_on_submit():
+        zajecia.data = form.data.data
+        zajecia.godzina_od = form.godzina_od.data
+        zajecia.godzina_do = form.godzina_do.data
+        beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
+        zajecia.beneficjenci = [beneficjent]
+        db.session.commit()
+        flash('Zajęcia zaktualizowane.')
+        return redirect(url_for('lista_zajec'))
 
     return render_template('zajecia_form.html', form=form)
 
