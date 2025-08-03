@@ -18,6 +18,7 @@ from wtforms.validators import (
     Email,
     EqualTo,
     Optional,
+    NumberRange,
 )
 import pytz
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -134,7 +135,8 @@ class UserSettingsForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
     full_name = StringField('Imię i nazwisko', validators=[DataRequired()])
     default_duration = IntegerField(
-        'Domyślny czas trwania (min)', validators=[DataRequired()]
+        'Domyślny czas trwania (min)',
+        validators=[DataRequired(), NumberRange(min=1)],
     )
     old_password = PasswordField(
         'Aktualne hasło', validators=[Optional()]
