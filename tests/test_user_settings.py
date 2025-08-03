@@ -93,6 +93,27 @@ def test_settings_missing_required_fields_shows_errors(app, client):
         assert user.email == 'c@example.com'
 
 
+def test_settings_invalid_default_duration_shows_errors(app, client):
+    """Submitting a negative duration should re-render form and keep settings unchanged."""
+    create_user(app)
+    login(client)
+    resp = client.post(
+        '/settings',
+        data={
+            'email': 'c@example.com',
+            'full_name': 'change',
+            'default_duration': -5,
+        },
+    )
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert 'Ustawienia zapisane' not in html
+    assert 'Ustawienia użytkownika' in html
+    with app.app_context():
+        user = User.query.filter_by(full_name='change').first()
+        assert user.default_duration == 90
+
+
 def test_custom_error_pages(app, client):
     create_user(app)
 
