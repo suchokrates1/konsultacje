@@ -4,8 +4,7 @@
 <h2>Lista zajęć</h2>
 <form method="get" class="mb-3">
   <div class="input-group">
-    <input type="text" name="q" class="form-control" placeholder="Szukaj" value="{{ q }}">
-    <button class="btn btn-primary btn-sm" type="submit">Szukaj</button>
+    <input id="zajecia-search" data-live-search="#zajecia-rows" type="text" name="q" class="form-control" placeholder="Szukaj" value="{{ q }}">
   </div>
 </form>
 <div class="table-responsive">
@@ -19,30 +18,8 @@
       <th>Akcje</th>
     </tr>
   </thead>
-  <tbody>
-    {% for zaj in zajecia_list %}
-    <tr>
-      <td>{{ zaj.data.strftime('%d.%m.%Y') }}</td>
-      <td>{{ zaj.godzina_od.strftime('%H:%M') }} - {{ zaj.godzina_do.strftime('%H:%M') }}</td>
-      <td>{{ zaj.specjalista }}</td>
-      <td>
-        <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Pobierz raport</a>
-      </td>
-      <td>
-        <a href="{{ url_for('edytuj_zajecia', zajecia_id=zaj.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj">
-          <i class="bi bi-pencil"></i>
-        </a>
-        <form method="post" action="{{ url_for('usun_zajecia', zajecia_id=zaj.id) }}" style="display:inline;">
-          {{ delete_form.csrf_token }}
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń">
-            <i class="bi bi-trash"></i>
-          </button>
-        </form>
-      </td>
-    </tr>
-    {% else %}
-    <tr><td colspan="5">Brak zajęć.</td></tr>
-    {% endfor %}
+  <tbody id="zajecia-rows">
+    {% include '_zajecia_rows.html' %}
   </tbody>
 </table>
 </div>

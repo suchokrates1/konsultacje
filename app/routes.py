@@ -339,6 +339,10 @@ def lista_zajec():
         query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
     )
     delete_form = DeleteForm()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template(
+            '_zajecia_rows.html', zajecia_list=zajecia_list, delete_form=delete_form
+        )
     return render_template(
         'zajecia_list.html', zajecia_list=zajecia_list, q=q, delete_form=delete_form
     )
@@ -447,6 +451,12 @@ def lista_beneficjentow():
         )
     beneficjenci = query.all()
     delete_form = DeleteForm()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render_template(
+            '_beneficjenci_rows.html',
+            beneficjenci=beneficjenci,
+            delete_form=delete_form,
+        )
     return render_template(
         'beneficjenci_list.html',
         beneficjenci=beneficjenci,
