@@ -338,7 +338,59 @@ def lista_zajec():
     zajecia_list = (
         query.order_by(Zajecia.data.desc(), Zajecia.godzina_od.desc()).all()
     )
-    return render_template('zajecia_list.html', zajecia_list=zajecia_list, q=q)
+    delete_form = DeleteForm()
+    return render_template(
+        'zajecia_list.html', zajecia_list=zajecia_list, q=q, delete_form=delete_form
+    )
+
+
+@app.route('/zajecia/<int:zajecia_id>/edytuj', methods=['GET', 'POST'])
+@login_required
+def edytuj_zajecia(zajecia_id):
+    """Edit an existing session belonging to the current user."""
+    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    if zajecia.user_id != current_user.id:
+        flash('Brak dostępu do tych zajęć.')
+        return redirect(url_for('lista_zajec'))
+
+    form = ZajeciaForm(obj=zajecia)
+    form.beneficjenci.choices = [
+        (b.id, f"{b.imie} ({b.wojewodztwo})")
+        for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
+    ]
+    if request.method == 'GET' and zajecia.beneficjenci:
+        form.beneficjenci.data = zajecia.beneficjenci[0].id
+
+    try:
+        if form.validate_on_submit():
+            zajecia.data = form.data.data
+            zajecia.godzina_od = form.godzina_od.data
+            zajecia.godzina_do = form.godzina_do.data
+            beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
+            zajecia.beneficjenci = [beneficjent]
+            db.session.commit()
+            flash('Zajęcia zaktualizowane.')
+            return redirect(url_for('lista_zajec'))
+    except ValidationError:
+        pass
+
+    return render_template('zajecia_form.html', form=form)
+
+
+@app.route('/zajecia/<int:zajecia_id>/usun', methods=['POST'])
+@login_required
+def usun_zajecia(zajecia_id):
+    """Delete a session owned by the current user."""
+    form = DeleteForm()
+    if form.validate_on_submit():
+        zajecia = Zajecia.query.get_or_404(zajecia_id)
+        if zajecia.user_id != current_user.id:
+            flash('Brak dostępu do tych zajęć.')
+            return redirect(url_for('lista_zajec'))
+        db.session.delete(zajecia)
+        db.session.commit()
+        flash('Zajęcia usunięte.')
+    return redirect(url_for('lista_zajec'))
 
 
 @app.route('/kalendarz')
