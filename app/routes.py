@@ -121,13 +121,20 @@ def register():
             admin_email = admin_cfg
         if admin_email:
             msg = Message(
-                'New user registration',
+                'Nowa rejestracja użytkownika',
                 recipients=[admin_email],
                 sender=current_app.config['MAIL_DEFAULT_SENDER'],
             )
+            token = user.get_confirm_token()
+            confirm_url = url_for(
+                'admin_confirm_instruktora',
+                user_id=user.id,
+                token=token,
+                _external=True,
+            )
             msg.body = (
                 f'Użytkownik {user.full_name} zarejestrował się z adresem '
-                f'{user.email}. '
+                f'{user.email}. Potwierdź konto: {confirm_url}'
             )
             try:
                 mail.send(msg)
@@ -628,11 +635,22 @@ def admin_promote_instruktora(user_id):
     return redirect(url_for('admin_instruktorzy'))
 
 
-@app.route('/admin/instruktorzy/<int:user_id>/confirm', methods=['POST'])
+@app.route('/admin/instruktorzy/<int:user_id>/confirm', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_confirm_instruktora(user_id):
     """Confirm an instructor account registration."""
+    if request.method == 'GET':
+        token = request.args.get('token')
+        user = User.verify_confirm_token(token)
+        if user and user.id == user_id:
+            user.confirmed = True
+            db.session.commit()
+            flash('Instruktor został potwierdzony.')
+        else:
+            flash('Nieprawidłowy token potwierdzenia.')
+        return redirect(url_for('admin_instruktorzy'))
+
     form = ConfirmForm()
     if form.validate_on_submit():
         instr = User.query.get_or_404(user_id)
