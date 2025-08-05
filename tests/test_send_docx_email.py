@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from app import db
-from app.models import User, Beneficjent
+from app.models import User, Beneficjent, Zajecia
 
 
 def create_user(app):
@@ -68,3 +68,7 @@ def test_submit_send_dispatches_email_with_attachment(monkeypatch, app, client):
 
     output_dir = Path(app.root_path) / 'static' / 'docx'
     assert not (output_dir / 'Konsultacje dietetyczne 2023-01-01 Ala.docx').exists()
+
+    with app.app_context():
+        zaj = Zajecia.query.one()
+        assert zaj.doc_sent_at is not None

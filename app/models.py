@@ -95,6 +95,8 @@ class Zajecia(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User')
 
+    doc_sent_at = db.Column(db.DateTime, nullable=True)
+
     beneficjenci = db.relationship(
         'Beneficjent', secondary='zajecia_beneficjenci'
     )

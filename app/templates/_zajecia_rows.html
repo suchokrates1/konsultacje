@@ -3,6 +3,7 @@
   <td>{{ zaj.data.strftime('%d.%m.%Y') }}</td>
   <td>{{ zaj.godzina_od.strftime('%H:%M') }} - {{ zaj.godzina_do.strftime('%H:%M') }}</td>
   <td>{{ zaj.specjalista }}</td>
+  <td>{{ 'wysłano' if zaj.doc_sent_at else 'niewysłano' }}</td>
   <td>
     <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Pobierz raport</a>
     <a href="{{ url_for('wyslij_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary">Wyślij ponownie</a>
@@ -20,5 +21,5 @@
   </td>
 </tr>
 {% else %}
-<tr><td colspan="5">Brak zajęć.</td></tr>
+<tr><td colspan="6">Brak zajęć.</td></tr>
 {% endfor %}
