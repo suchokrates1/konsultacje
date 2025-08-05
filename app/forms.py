@@ -60,17 +60,20 @@ class ZajeciaForm(FlaskForm):
     godzina_od = TimeField('Godzina od', validators=[DataRequired()])
     godzina_do = TimeField('Godzina do', validators=[DataRequired()])
     beneficjenci = SelectField(
-        'Beneficjent', coerce=int, validators=[DataRequired()] 
+        'Beneficjent', coerce=int, validators=[DataRequired()]
     )
-    submit = SubmitField('Zapisz zajęcia')
+    submit = SubmitField('Zapisz')
+    submit_send = SubmitField('Zapisz i wyślij')
 
-    def validate(self, extra_validators=None):  # pragma: no cover - custom logic
+    def validate(self, extra_validators=None):
+        # pragma: no cover - custom logic
         """Ensure the end time is later than the start time."""
         if not super().validate(extra_validators):
             return False
         if self.godzina_do.data <= self.godzina_od.data:
             message = (
-                'Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.'
+                'Godzina zakończenia musi być późniejsza niż '
+                'godzina rozpoczęcia.'
             )
             self.godzina_do.errors.append(message)
             return False
@@ -205,7 +208,9 @@ class SettingsForm(FlaskForm):
     mail_password = PasswordField('Hasło SMTP')
     mail_use_tls = BooleanField('Użyj TLS')
     mail_use_ssl = BooleanField('Użyj SSL')
-    admin_email = EmailField('Email administratora', validators=[Optional(), Email()])
+    admin_email = EmailField(
+        'Email administratora', validators=[Optional(), Email()]
+    )
     sender_name = StringField('Nazwa nadawcy')
     timezone = SelectField('Strefa czasowa', choices=TIMEZONE_CHOICES)
     submit = SubmitField('Zapisz')

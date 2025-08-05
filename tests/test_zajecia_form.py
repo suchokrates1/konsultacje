@@ -15,3 +15,10 @@ def test_invalid_time_range_returns_error(app):
         form.beneficjenci.choices = [(1, 'Test')]
         assert not form.validate()
         assert form.godzina_do.errors
+
+
+def test_form_has_submit_send(app):
+    """ZajeciaForm should include submit_send field."""
+    with app.test_request_context('/'):
+        form = ZajeciaForm()
+        assert 'submit_send' in form._fields

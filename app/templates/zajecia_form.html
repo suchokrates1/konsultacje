@@ -3,8 +3,9 @@
 {% block content %}
 <h2>Nowe zajęcia</h2>
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start w-100" style="max-width: 400px;">
+<form method="post" class="text-start w-100" style="max-width: 400px;" id="zajecia-form">
   {{ form.hidden_tag() }}
+  <input type="hidden" name="recipient_email" id="recipient-email" value="{{ current_user.document_recipient_email or '' }}">
   <div class="mb-3">
     {{ form.data.label(class="form-label") }}
     {{ form.data(class="form-control") }}
@@ -28,8 +29,57 @@
     {{ form.beneficjenci(class="form-select") }}
   </div>
   <div class="text-center">
-    <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label.text }}</button>
+    {{ form.submit(class="btn btn-success btn-sm me-2") }}
+    {{ form.submit_send(id="submit-send", class="btn btn-primary btn-sm") }}
   </div>
 </form>
 </div>
+
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="emailModalLabel">Podaj email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="modal-email" class="form-label">Email odbiorcy dokumentów</label>
+        <input type="email" id="modal-email" class="form-control">
+        <div class="form-text">Email można zmienić w ustawieniach.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        <button type="button" class="btn btn-primary" id="modal-submit">Wyślij</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const recipientEmail = "{{ current_user.document_recipient_email or '' }}";
+  const submitSend = document.getElementById('submit-send');
+  const form = document.getElementById('zajecia-form');
+  const modalEl = document.getElementById('emailModal');
+  const modal = new bootstrap.Modal(modalEl);
+
+  submitSend.addEventListener('click', function (event) {
+    if (!recipientEmail) {
+      event.preventDefault();
+      modal.show();
+    }
+  });
+
+  document.getElementById('modal-submit').addEventListener('click', function () {
+    const emailInput = document.getElementById('modal-email').value;
+    document.getElementById('recipient-email').value = emailInput;
+    const sendField = document.createElement('input');
+    sendField.type = 'hidden';
+    sendField.name = 'submit_send';
+    sendField.value = '1';
+    form.appendChild(sendField);
+    form.submit();
+  });
+});
+</script>
 {% endblock %}
