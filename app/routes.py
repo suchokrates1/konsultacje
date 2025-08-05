@@ -237,6 +237,8 @@ def nowe_zajecia():
                             f.read(),
                         )
                     mail.send(msg)
+                    zajecia.doc_sent_at = datetime.utcnow()
+                    db.session.commit()
                     flash("Dokument wysłany.")
                 except (FileNotFoundError, SMTPException) as e:
                     current_app.logger.error(
@@ -335,6 +337,8 @@ def wyslij_docx(zajecia_id):
 
     try:
         mail.send(msg)
+        zajecia.doc_sent_at = datetime.utcnow()
+        db.session.commit()
         flash("Raport wysłany ponownie.")
     except SMTPException as exc:
         current_app.logger.error("Failed to send session email: %s", exc)

@@ -118,6 +118,10 @@ def test_send_route_emails_docx(app, client, monkeypatch):
     assert sent[0].attachments
     assert sent[0].attachments[0].filename.endswith('.docx')
 
+    with app.app_context():
+        zaj = db.session.get(Zajecia, z_id)
+        assert zaj.doc_sent_at is not None
+
 
 def test_send_route_requires_ownership(app, client, monkeypatch):
     owner_id = create_user(app, name='owner', email='owner@example.com')
