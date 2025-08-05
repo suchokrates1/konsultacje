@@ -54,6 +54,7 @@ def test_email_log_and_resend(monkeypatch, app, client):
             'data': '2023-01-01',
             'godzina_od': '10:00',
             'godzina_do': '11:00',
+            'specjalista': 'spec',
             'beneficjenci': str(b_id),
             'submit_send': '1',
         },

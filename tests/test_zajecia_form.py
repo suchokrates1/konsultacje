@@ -9,6 +9,7 @@ def test_invalid_time_range_returns_error(app):
                 'data': '2023-01-01',
                 'godzina_od': '10:00',
                 'godzina_do': '09:00',
+                'specjalista': 'spec',
                 'beneficjenci': 1,
             }
         )

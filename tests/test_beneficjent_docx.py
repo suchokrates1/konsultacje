@@ -113,6 +113,7 @@ def test_create_session(app, client):
             'data': '2023-01-01',
             'godzina_od': '10:00',
             'godzina_do': '11:00',
+            'specjalista': 'spec',
             'beneficjenci': str(b_id),
         },
         follow_redirects=True,
@@ -151,7 +152,7 @@ def test_docx_generation(app, client):
     assert 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' in response.headers.get('Content-Type', '')
     disposition = response.headers.get('Content-Disposition', '')
     expected_name = (
-        "Konsultacje dietetyczne 2023-01-02 Piotr.docx"
+        "Konsultacje z tester 2023-01-02 Piotr.docx"
     )
     assert disposition.startswith('attachment')
     assert expected_name in disposition

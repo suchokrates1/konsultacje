@@ -52,6 +52,7 @@ def test_beneficjent_field_requires_selection(app, client):
             'data': '2023-01-01',
             'godzina_od': '10:00',
             'godzina_do': '11:00',
+            'specjalista': 'spec',
         },
         follow_redirects=True,
     )
