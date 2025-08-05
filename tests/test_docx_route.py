@@ -109,7 +109,7 @@ def test_send_route_emails_docx(app, client, monkeypatch):
     def fake_send(msg):
         sent.append(msg)
 
-    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.send_email', fake_send)
 
     resp = client.get(f'/zajecia/{z_id}/send')
     assert resp.status_code == 302
@@ -134,7 +134,7 @@ def test_send_route_requires_ownership(app, client, monkeypatch):
     def fake_send(msg):
         sent.append(msg)
 
-    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.send_email', fake_send)
 
     resp = client.get(f'/zajecia/{z_id}/send')
     assert resp.status_code == 302
