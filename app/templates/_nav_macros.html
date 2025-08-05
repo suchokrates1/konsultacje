@@ -6,6 +6,9 @@
     <a class="nav-link{% if request.endpoint == 'lista_zajec' %} active{% endif %}" href="{{ url_for('lista_zajec') }}"{% if request.endpoint == 'lista_zajec' %} aria-current="page"{% endif %}>Lista zajęć</a>
   </li>
   <li class="nav-item">
+    <a class="nav-link{% if request.endpoint == 'emails_list' %} active{% endif %}" href="{{ url_for('emails_list') }}"{% if request.endpoint == 'emails_list' %} aria-current="page"{% endif %}>Wiadomości</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link{% if request.endpoint == 'lista_beneficjentow' %} active{% endif %}" href="{{ url_for('lista_beneficjentow') }}"{% if request.endpoint == 'lista_beneficjentow' %} aria-current="page"{% endif %}>Beneficjenci</a>
   </li>
   {% if current_user.is_authenticated and current_user.role == 'admin' %}

@@ -128,3 +128,19 @@ class Settings(db.Model):
     def get(cls):
         """Return the single settings row or ``None`` if absent."""
         return cls.query.first()
+
+
+class SentEmail(db.Model):
+    """Log entry for a sent email related to a session."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    zajecia_id = db.Column(
+        db.Integer, db.ForeignKey('zajecia.id'), nullable=False
+    )
+    recipient = db.Column(db.String(120), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    sent_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), nullable=False)
+    file_path = db.Column(db.String(255), nullable=True)
+
+    zajecia = db.relationship('Zajecia', backref='sent_emails')

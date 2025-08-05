@@ -44,7 +44,7 @@ from .forms import (
     UserEditForm,
     SettingsForm,
 )
-from .models import Beneficjent, User, Zajecia, Roles, Settings
+from .models import Beneficjent, User, Zajecia, Roles, Settings, SentEmail
 from . import mail
 from .docx_generator import generate_docx
 from urllib.parse import urlparse
@@ -223,6 +223,8 @@ def nowe_zajecia():
                     f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
                 )
                 output_path = os.path.join(output_dir, filename)
+                status = "error"
+                sent_at = None
                 try:
                     generate_docx(zajecia, [beneficjent], output_path)
                     msg = Message(
@@ -237,8 +239,9 @@ def nowe_zajecia():
                             f.read(),
                         )
                     mail.send(msg)
-                    zajecia.doc_sent_at = datetime.utcnow()
-                    db.session.commit()
+                    sent_at = datetime.utcnow()
+                    zajecia.doc_sent_at = sent_at
+                    status = "sent"
                     flash("Dokument wysłany.")
                 except (FileNotFoundError, SMTPException) as e:
                     current_app.logger.error(
@@ -246,6 +249,15 @@ def nowe_zajecia():
                     )
                     flash("Nie udało się wysłać dokumentu.")
                 finally:
+                    sent_email = SentEmail(
+                        zajecia_id=zajecia.id,
+                        recipient=recipient,
+                        subject="Dokument z konsultacji",
+                        sent_at=sent_at,
+                        status=status,
+                    )
+                    db.session.add(sent_email)
+                    db.session.commit()
                     try:
                         os.remove(output_path)
                     except OSError:
@@ -335,15 +347,27 @@ def wyslij_docx(zajecia_id):
             f.read(),
         )
 
+    status = "error"
+    sent_at = None
     try:
         mail.send(msg)
-        zajecia.doc_sent_at = datetime.utcnow()
-        db.session.commit()
+        sent_at = datetime.utcnow()
+        zajecia.doc_sent_at = sent_at
+        status = "sent"
         flash("Raport wysłany ponownie.")
     except SMTPException as exc:
         current_app.logger.error("Failed to send session email: %s", exc)
         flash("Nie udało się wysłać raportu.")
     finally:
+        sent_email = SentEmail(
+            zajecia_id=zajecia.id,
+            recipient=recipient,
+            subject="Raport zajęć",
+            sent_at=sent_at,
+            status=status,
+        )
+        db.session.add(sent_email)
+        db.session.commit()
         try:
             os.remove(output_path)
         except OSError:
@@ -352,6 +376,77 @@ def wyslij_docx(zajecia_id):
             )
 
     return redirect(url_for('lista_zajec'))
+
+
+@app.route('/emails')
+@login_required
+def emails_list():
+    """List sent emails for the current user."""
+    emails = (
+        SentEmail.query.join(Zajecia)
+        .filter(Zajecia.user_id == current_user.id)
+        .order_by(SentEmail.sent_at.desc())
+        .all()
+    )
+    return render_template('emails_list.html', emails=emails)
+
+
+@app.route('/emails/<int:email_id>/resend')
+@login_required
+def resend_email(email_id):
+    """Regenerate attachment and resend the email."""
+    sent_email = SentEmail.query.get_or_404(email_id)
+    if not sent_email.zajecia or sent_email.zajecia.user_id != current_user.id:
+        flash('Brak dostępu do tej wiadomości.')
+        return redirect(url_for('emails_list'))
+
+    zajecia = sent_email.zajecia
+    recipient = sent_email.recipient
+    subject = sent_email.subject
+    beneficjenci = zajecia.beneficjenci
+    output_dir = os.path.join(current_app.root_path, 'static', 'docx')
+    os.makedirs(output_dir, exist_ok=True)
+
+    first_name = beneficjenci[0].imie if beneficjenci else 'beneficjent'
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
+    date_str = zajecia.data.strftime('%Y-%m-%d')
+    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+    output_path = os.path.join(output_dir, filename)
+
+    status = 'error'
+    sent_at = None
+    try:
+        generate_docx(zajecia, beneficjenci, output_path)
+        msg = Message(
+            subject,
+            recipients=[recipient],
+            sender=current_app.config['MAIL_DEFAULT_SENDER'],
+        )
+        with open(output_path, 'rb') as f:
+            msg.attach(
+                filename,
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                f.read(),
+            )
+        mail.send(msg)
+        sent_at = datetime.utcnow()
+        status = 'sent'
+        zajecia.doc_sent_at = sent_at
+        flash('Wiadomość wysłana ponownie.')
+    except SMTPException as exc:
+        current_app.logger.error('Failed to resend email: %s', exc)
+        flash('Nie udało się wysłać raportu ponownie.')
+    finally:
+        sent_email.sent_at = sent_at
+        sent_email.status = status
+        db.session.commit()
+        try:
+            os.remove(output_path)
+        except OSError:
+            current_app.logger.warning(
+                'Failed to remove generated DOCX %s', output_path
+            )
+    return redirect(url_for('emails_list'))
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
