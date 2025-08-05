@@ -138,6 +138,10 @@ class UserSettingsForm(FlaskForm):
         'Domyślny czas trwania (min)',
         validators=[DataRequired(), NumberRange(min=1)],
     )
+    document_recipient_email = EmailField(
+        'Email odbiorcy dokumentów',
+        validators=[Optional(), Email()],
+    )
     old_password = PasswordField(
         'Aktualne hasło', validators=[Optional()]
     )
