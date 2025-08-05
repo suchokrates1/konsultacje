@@ -66,6 +66,7 @@ def test_edit_session(app, client):
             "data": "2023-01-01",
             "godzina_od": "09:00",
             "godzina_do": "11:00",
+            "specjalista": "spec2",
             "beneficjenci": b_id,
         },
         follow_redirects=True,

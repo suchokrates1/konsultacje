@@ -19,6 +19,10 @@
         {{ form.default_duration(class="form-control") }}
       </div>
       <div class="mb-3">
+        {{ form.session_type.label(class="form-label") }}
+        {{ form.session_type(class="form-control") }}
+      </div>
+      <div class="mb-3">
         {{ form.document_recipient_email.label(class="form-label") }}
         {{ form.document_recipient_email(class="form-control") }}
       </div>

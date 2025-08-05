@@ -59,6 +59,7 @@ class ZajeciaForm(FlaskForm):
     data = DateField('Data konsultacji', validators=[DataRequired()])
     godzina_od = TimeField('Godzina od', validators=[DataRequired()])
     godzina_do = TimeField('Godzina do', validators=[DataRequired()])
+    specjalista = StringField('Konsultacje z:', validators=[DataRequired()])
     beneficjenci = SelectField(
         'Beneficjent', coerce=int, validators=[DataRequired()]
     )
@@ -141,6 +142,7 @@ class UserSettingsForm(FlaskForm):
         'Domyślny czas trwania (min)',
         validators=[DataRequired(), NumberRange(min=1)],
     )
+    session_type = StringField('Rodzaj zajęć', validators=[Optional()])
     document_recipient_email = EmailField(
         'Email odbiorcy dokumentów',
         validators=[Optional(), Email()],

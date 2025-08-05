@@ -54,6 +54,7 @@ def test_submit_send_dispatches_email_with_attachment(monkeypatch, app, client):
             'data': '2023-01-01',
             'godzina_od': '10:00',
             'godzina_do': '11:00',
+            'specjalista': 'spec',
             'beneficjenci': str(b_id),
             'submit_send': '1',
         },
@@ -67,7 +68,9 @@ def test_submit_send_dispatches_email_with_attachment(monkeypatch, app, client):
     assert msg.attachments[0].filename.endswith('.docx')
 
     output_dir = Path(app.root_path) / 'static' / 'docx'
-    assert not (output_dir / 'Konsultacje dietetyczne 2023-01-01 Ala.docx').exists()
+    assert not (
+        output_dir / 'Konsultacje z spec 2023-01-01 Ala.docx'
+    ).exists()
 
     with app.app_context():
         zaj = Zajecia.query.one()

@@ -188,13 +188,14 @@ def nowe_zajecia():
         form.godzina_do.data = (
             rounded + timedelta(minutes=current_user.default_duration)
         ).time()
+        form.specjalista.data = current_user.session_type
 
     if form.validate_on_submit():
         zajecia = Zajecia(
             data=form.data.data,
             godzina_od=form.godzina_od.data,
             godzina_do=form.godzina_do.data,
-            specjalista=current_user.full_name,
+            specjalista=form.specjalista.data,
             user_id=current_user.id,
         )
         beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
@@ -220,7 +221,7 @@ def nowe_zajecia():
                 safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
                 date_str = zajecia.data.strftime("%Y-%m-%d")
                 filename = (
-                    f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+                    f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
                 )
                 output_path = os.path.join(output_dir, filename)
                 status = "error"
@@ -290,7 +291,7 @@ def pobierz_docx(zajecia_id):
     first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
     date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
     output_path = os.path.join(output_dir, filename)
 
     generate_docx(zajecia, beneficjenci, output_path)
@@ -330,7 +331,7 @@ def wyslij_docx(zajecia_id):
     first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
     date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
     output_path = os.path.join(output_dir, filename)
 
     generate_docx(zajecia, beneficjenci, output_path)
@@ -410,7 +411,7 @@ def resend_email(email_id):
     first_name = beneficjenci[0].imie if beneficjenci else 'beneficjent'
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
     date_str = zajecia.data.strftime('%Y-%m-%d')
-    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
     output_path = os.path.join(output_dir, filename)
 
     status = 'error'
@@ -515,6 +516,7 @@ def user_settings():
         current_user.document_recipient_email = (
             form.document_recipient_email.data
         )
+        current_user.session_type = form.session_type.data
         if form.new_password.data:
             if not current_user.check_password(form.old_password.data):
                 flash('Nieprawidłowe aktualne hasło.')
@@ -530,6 +532,7 @@ def user_settings():
         form.document_recipient_email.data = (
             current_user.document_recipient_email
         )
+        form.session_type.data = current_user.session_type
     return render_template('settings.html', form=form)
 
 
@@ -571,13 +574,16 @@ def edytuj_zajecia(zajecia_id):
         (b.id, f"{b.imie} ({b.wojewodztwo})")
         for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
     ]
-    if request.method == 'GET' and zajecia.beneficjenci:
-        form.beneficjenci.data = zajecia.beneficjenci[0].id
+    if request.method == 'GET':
+        if zajecia.beneficjenci:
+            form.beneficjenci.data = zajecia.beneficjenci[0].id
+        form.specjalista.data = current_user.session_type
 
     if form.validate_on_submit():
         zajecia.data = form.data.data
         zajecia.godzina_od = form.godzina_od.data
         zajecia.godzina_do = form.godzina_do.data
+        zajecia.specjalista = form.specjalista.data
         beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
         zajecia.beneficjenci = [beneficjent]
         db.session.commit()

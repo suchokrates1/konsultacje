@@ -25,6 +25,10 @@
     {% endfor %}
   </div>
   <div class="mb-3">
+    {{ form.specjalista.label(class="form-label") }}
+    {{ form.specjalista(class="form-control") }}
+  </div>
+  <div class="mb-3">
     {{ form.beneficjenci.label(class="form-label") }}
     {{ form.beneficjenci(class="form-select") }}
   </div>
