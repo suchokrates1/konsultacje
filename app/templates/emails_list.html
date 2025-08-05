@@ -1,0 +1,38 @@
+{% block title %}Wysłane wiadomości{% endblock %}
+{% block content %}
+<h2>Wysłane wiadomości</h2>
+<div class="table-responsive">
+<table class="table mx-auto text-start">
+  <thead>
+    <tr>
+      <th>Zajęcia</th>
+      <th>Odbiorca</th>
+      <th>Temat</th>
+      <th>Wysłano</th>
+      <th>Status</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for email in emails %}
+    <tr>
+      <td>{{ email.zajecia.data.strftime('%d.%m.%Y') if email.zajecia else '' }}</td>
+      <td>{{ email.recipient }}</td>
+      <td>{{ email.subject }}</td>
+      <td>{{ email.sent_at.strftime('%Y-%m-%d %H:%M') if email.sent_at else '' }}</td>
+      <td>{{ email.status }}</td>
+      <td>
+        {% if email.zajecia %}
+        <a href="{{ url_for('pobierz_docx', zajecia_id=email.zajecia_id) }}" class="btn btn-sm btn-secondary">Pobierz</a>
+        <a href="{{ url_for('resend_email', email_id=email.id) }}" class="btn btn-sm btn-secondary">Wyślij ponownie</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">Brak wysłanych wiadomości.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+
