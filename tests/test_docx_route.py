@@ -93,3 +93,49 @@ def test_docx_route_missing_session_returns_404(app, client):
     login(client)
     resp = client.get('/zajecia/999/docx')
     assert resp.status_code == 404
+
+
+def test_send_route_emails_docx(app, client, monkeypatch):
+    user_id = create_user(app)
+    with app.app_context():
+        user = db.session.get(User, user_id)
+        user.document_recipient_email = 'dest@example.com'
+        db.session.commit()
+    login(client)
+    z_id = create_session(app, user_id)
+
+    sent = []
+
+    def fake_send(msg):
+        sent.append(msg)
+
+    monkeypatch.setattr('app.routes.mail.send', fake_send)
+
+    resp = client.get(f'/zajecia/{z_id}/send')
+    assert resp.status_code == 302
+    assert len(sent) == 1
+    assert sent[0].recipients == ['dest@example.com']
+    assert sent[0].attachments
+    assert sent[0].attachments[0].filename.endswith('.docx')
+
+
+def test_send_route_requires_ownership(app, client, monkeypatch):
+    owner_id = create_user(app, name='owner', email='owner@example.com')
+    with app.app_context():
+        owner = db.session.get(User, owner_id)
+        owner.document_recipient_email = 'dest@example.com'
+        db.session.commit()
+    z_id = create_session(app, owner_id)
+    create_user(app, name='other', email='other@example.com')
+    login(client, name='other', email='other@example.com')
+
+    sent = []
+
+    def fake_send(msg):
+        sent.append(msg)
+
+    monkeypatch.setattr('app.routes.mail.send', fake_send)
+
+    resp = client.get(f'/zajecia/{z_id}/send')
+    assert resp.status_code == 302
+    assert not sent
