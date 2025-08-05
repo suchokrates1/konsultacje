@@ -295,6 +295,61 @@ def pobierz_docx(zajecia_id):
     return send_file(output_path, as_attachment=True, download_name=filename)
 
 
+@app.route('/zajecia/<int:zajecia_id>/send')
+@login_required
+def wyslij_docx(zajecia_id):
+    """Regenerate a DOCX report and email it to the configured recipient."""
+    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    if zajecia.user_id != current_user.id:
+        flash("Brak dostępu do tych zajęć.")
+        return redirect(url_for('lista_zajec'))
+
+    recipient = zajecia.user.document_recipient_email
+    if not recipient:
+        flash("Brak ustawionego adresu odbiorcy dokumentu.")
+        return redirect(url_for('lista_zajec'))
+
+    beneficjenci = zajecia.beneficjenci
+    output_dir = os.path.join(current_app.root_path, "static", "docx")
+    os.makedirs(output_dir, exist_ok=True)
+
+    first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
+    date_str = zajecia.data.strftime("%Y-%m-%d")
+    filename = f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+    output_path = os.path.join(output_dir, filename)
+
+    generate_docx(zajecia, beneficjenci, output_path)
+
+    msg = Message(
+        "Raport zajęć",
+        recipients=[recipient],
+        sender=current_app.config['MAIL_DEFAULT_SENDER'],
+    )
+    with open(output_path, "rb") as f:
+        msg.attach(
+            filename,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            f.read(),
+        )
+
+    try:
+        mail.send(msg)
+        flash("Raport wysłany ponownie.")
+    except SMTPException as exc:
+        current_app.logger.error("Failed to send session email: %s", exc)
+        flash("Nie udało się wysłać raportu.")
+    finally:
+        try:
+            os.remove(output_path)
+        except OSError:
+            current_app.logger.warning(
+                "Failed to remove generated DOCX %s", output_path
+            )
+
+    return redirect(url_for('lista_zajec'))
+
+
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     """Send a password reset link to the provided email address."""
