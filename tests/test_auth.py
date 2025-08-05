@@ -148,7 +148,7 @@ def test_register_email_failure(monkeypatch, client, app):
     def fail_send(msg):
         raise SMTPException('tls not supported')
 
-    monkeypatch.setattr('app.routes.mail.send', fail_send)
+    monkeypatch.setattr('app.routes.send_email', fail_send)
 
     response = client.post(
         '/register',
@@ -179,7 +179,7 @@ def test_register_sends_confirmation_email(monkeypatch, client, app):
     def fake_send(msg):
         sent.append(msg)
 
-    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.send_email', fake_send)
 
     response = client.post(
         '/register',
@@ -215,7 +215,7 @@ def test_password_reset_flow(monkeypatch, app):
     def fake_send(msg):
         sent.append(msg)
 
-    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.send_email', fake_send)
     client = app.test_client()
 
     response = client.post(

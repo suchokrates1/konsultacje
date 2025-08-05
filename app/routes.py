@@ -45,7 +45,7 @@ from .forms import (
     SettingsForm,
 )
 from .models import Beneficjent, User, Zajecia, Roles, Settings
-from . import mail
+from . import mail, send_email
 from .docx_generator import generate_docx
 from urllib.parse import urlparse
 from functools import wraps
@@ -137,7 +137,7 @@ def register():
                 f'{user.email}. Potwierdź konto: {confirm_url}'
             )
             try:
-                mail.send(msg)
+                send_email(msg)
             except SMTPException as e:
                 current_app.logger.error(
                     "Failed to send admin email: %s", e
@@ -236,7 +236,7 @@ def nowe_zajecia():
                             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                             f.read(),
                         )
-                    mail.send(msg)
+                    send_email(msg)
                     flash("Dokument wysłany.")
                 except (FileNotFoundError, SMTPException) as e:
                     current_app.logger.error(
@@ -334,7 +334,7 @@ def wyslij_docx(zajecia_id):
         )
 
     try:
-        mail.send(msg)
+        send_email(msg)
         flash("Raport wysłany ponownie.")
     except SMTPException as exc:
         current_app.logger.error("Failed to send session email: %s", exc)
@@ -372,7 +372,7 @@ def reset_password_request():
                 f'Kliknij link aby zresetować hasło: {reset_url}'
             )
             try:
-                mail.send(msg)
+                send_email(msg)
             except SMTPException as e:
                 current_app.logger.error(
                     "Failed to send password reset email: %s", e
@@ -879,7 +879,7 @@ def admin_ustawienia():
                 )
                 msg.body = 'To jest test konfiguracji SMTP.'
                 try:
-                    mail.send(msg)
+                    send_email(msg)
                     flash('Testowy email wysłany.')
                 except SMTPException as exc:
                     current_app.logger.error('Failed to send test email: %s', exc)
