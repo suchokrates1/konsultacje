@@ -202,6 +202,58 @@ def nowe_zajecia():
 
         db.session.add(zajecia)
         db.session.commit()
+
+        if form.submit_send.data:
+            recipient = (
+                current_user.document_recipient_email
+                or request.form.get("recipient_email")
+            )
+            if recipient and recipient != current_user.document_recipient_email:
+                current_user.document_recipient_email = recipient
+                db.session.commit()
+            if recipient:
+                output_dir = os.path.join(
+                    current_app.root_path, "static", "docx"
+                )
+                os.makedirs(output_dir, exist_ok=True)
+                first_name = beneficjent.imie if beneficjent else "beneficjent"
+                safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
+                date_str = zajecia.data.strftime("%Y-%m-%d")
+                filename = (
+                    f"Konsultacje dietetyczne {date_str} {safe_name}.docx"
+                )
+                output_path = os.path.join(output_dir, filename)
+                try:
+                    generate_docx(zajecia, [beneficjent], output_path)
+                    msg = Message(
+                        "Dokument z konsultacji",
+                        recipients=[recipient],
+                        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+                    )
+                    with open(output_path, "rb") as f:
+                        msg.attach(
+                            filename,
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            f.read(),
+                        )
+                    mail.send(msg)
+                    flash("Dokument wysłany.")
+                except (FileNotFoundError, SMTPException) as e:
+                    current_app.logger.error(
+                        "Failed to send consultation document: %s", e
+                    )
+                    flash("Nie udało się wysłać dokumentu.")
+                finally:
+                    try:
+                        os.remove(output_path)
+                    except OSError:
+                        current_app.logger.warning(
+                            "Failed to remove generated DOCX %s",
+                            output_path,
+                        )
+            else:
+                flash("Nie podano adresu email odbiorcy dokumentów.")
+
         flash('Zajęcia zapisane.')
         return redirect(url_for('lista_zajec'))
 
