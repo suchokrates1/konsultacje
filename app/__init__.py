@@ -1,7 +1,8 @@
 """Flask application factory and extension initialization."""
 
 import os
-from flask import Flask
+from threading import Thread
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -14,6 +15,14 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 mail = Mail()
 csrf = CSRFProtect()
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+
+def send_email(msg):
+    Thread(target=send_async_email, args=(current_app._get_current_object(), msg)).start()
 
 
 def create_app(test_config=None):
