@@ -306,6 +306,9 @@ def user_settings():
         current_user.email = form.email.data
         current_user.full_name = form.full_name.data
         current_user.default_duration = form.default_duration.data
+        current_user.document_recipient_email = (
+            form.document_recipient_email.data
+        )
         if form.new_password.data:
             if not current_user.check_password(form.old_password.data):
                 flash('Nieprawidłowe aktualne hasło.')
@@ -318,6 +321,9 @@ def user_settings():
         form.email.data = current_user.email
         form.full_name.data = current_user.full_name
         form.default_duration.data = current_user.default_duration
+        form.document_recipient_email.data = (
+            current_user.document_recipient_email
+        )
     return render_template('settings.html', form=form)
 
 
