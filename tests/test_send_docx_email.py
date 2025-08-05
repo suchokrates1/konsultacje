@@ -45,7 +45,7 @@ def test_submit_send_dispatches_email_with_attachment(monkeypatch, app, client):
     def fake_generate_docx(zajecia, beneficjenci, output_path):
         Path(output_path).write_bytes(b'dummy')
 
-    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.send_email', fake_send)
     monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
 
     resp = client.post(

@@ -132,7 +132,7 @@ def test_send_test_email_success(monkeypatch):
     def fake_send(msg):
         sent.append(msg)
 
-    monkeypatch.setattr("app.routes.mail.send", fake_send)
+    monkeypatch.setattr("app.routes.send_email", fake_send)
     client = app.test_client()
     login(client)
     resp = client.post(
@@ -163,7 +163,7 @@ def test_send_test_email_failure(monkeypatch):
     def fail_send(msg):
         raise SMTPException("boom")
 
-    monkeypatch.setattr("app.routes.mail.send", fail_send)
+    monkeypatch.setattr("app.routes.send_email", fail_send)
     client = app.test_client()
     login(client)
     resp = client.post(
