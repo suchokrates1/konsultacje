@@ -205,13 +205,12 @@ def nowe_zajecia():
         db.session.commit()
 
         if form.submit_send.data:
-            recipient = (
-                current_user.document_recipient_email
-                or request.form.get("recipient_email")
-            )
+            recipient = request.form.get("recipient_email")
             if recipient and recipient != current_user.document_recipient_email:
                 current_user.document_recipient_email = recipient
                 db.session.commit()
+            if not recipient:
+                recipient = current_user.document_recipient_email
             if recipient:
                 output_dir = os.path.join(
                     current_app.root_path, "static", "docx"
