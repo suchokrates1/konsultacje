@@ -142,7 +142,7 @@ class UserSettingsForm(FlaskForm):
         'Domyślny czas trwania (min)',
         validators=[DataRequired(), NumberRange(min=1)],
     )
-    session_type = StringField('Rodzaj zajęć', validators=[Optional()])
+    session_type = StringField('Konsultacje z', validators=[Optional()])
     document_recipient_email = EmailField(
         'Email odbiorcy dokumentów',
         validators=[Optional(), Email()],
