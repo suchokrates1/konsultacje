@@ -92,6 +92,24 @@ def test_delete_session(app, client):
         assert db.session.get(Zajecia, z_id) is None
 
 
+def test_ajax_list_and_delete_session(app, client):
+    user_id = create_user(app)
+    login(client)
+    z_id, _ = create_session(app, user_id)
+
+    resp = client.get("/zajecia", headers={"X-Requested-With": "XMLHttpRequest"})
+    assert resp.status_code == 200
+    text = resp.get_data(as_text=True)
+    assert f"/zajecia/{z_id}/usun" in text
+
+    resp = client.post(
+        f"/zajecia/{z_id}/usun", data={"submit": "1"}, follow_redirects=True
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        assert db.session.get(Zajecia, z_id) is None
+
+
 def test_cannot_edit_or_delete_foreign_session(app, client):
     owner_id = create_user(app, name="owner", email="owner@example.com")
     z_id, b_id = create_session(app, owner_id)
