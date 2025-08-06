@@ -24,7 +24,7 @@ def test_generate_docx_file_contains_text(app, tmp_path):
     """DOCX generated on disk should include rendered session data."""
 
     with app.app_context():
-        user = User(full_name="disk", email="disk@example.com")
+        user = User(full_name="Jan Kowalski", email="disk@example.com")
         user.set_password("pass")
         user.confirmed = True
         db.session.add(user)
@@ -36,7 +36,7 @@ def test_generate_docx_file_contains_text(app, tmp_path):
             data=date(2023, 3, 3),
             godzina_od=time(10, 0),
             godzina_do=time(11, 0),
-            specjalista="disk",
+            specjalista="psycholog",
             user_id=user.id,
         )
         zajecia.beneficjenci.append(benef)
@@ -47,7 +47,8 @@ def test_generate_docx_file_contains_text(app, tmp_path):
         generate_docx(zajecia, [benef], str(path))
         doc = Document(str(path))
         text = _docx_text(doc)
-        assert "disk" in text
+        assert zajecia.specjalista in text
+        assert user.full_name in text
         assert "Tomek" in text
         assert "dietetykiem" not in text
 

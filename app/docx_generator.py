@@ -45,12 +45,23 @@ def generate_docx(zajecia, beneficjenci, output_path):
                     for run in paragraph.runs:
                         run.text = run.text.replace("dietetykiem", zajecia.specjalista)
 
+    specialist_found = False
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
         if text.startswith("Imię i nazwisko beneficjenta:"):
             paragraph.text = "Imię i nazwisko beneficjenta: " + names
         if text.startswith("Województwo:"):
             paragraph.text = "Województwo: " + wojew
+        if text.startswith("Imię i nazwisko specjalisty:"):
+            paragraph.text = (
+                "Imię i nazwisko specjalisty: " + zajecia.user.full_name
+            )
+            specialist_found = True
+
+    if not specialist_found:
+        doc.add_paragraph(
+            f"Imię i nazwisko specjalisty: {zajecia.user.full_name}"
+        )
 
     if doc.tables:
         table = doc.tables[0]
