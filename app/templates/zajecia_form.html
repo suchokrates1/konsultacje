@@ -39,18 +39,21 @@
 </form>
 </div>
 
-<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="emailModalLabel">Podaj email</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <label for="modal-email" class="form-label">Email odbiorcy dokumentów</label>
-        <input type="email" id="modal-email" class="form-control">
-        <div class="form-text">Email można zmienić w ustawieniach.</div>
-      </div>
+  <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="emailModalLabel">Podaj email</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="modal-form" novalidate>
+            <label for="modal-email" class="form-label">Email odbiorcy dokumentów</label>
+            <input type="email" id="modal-email" class="form-control" required>
+            <div class="invalid-feedback">Podaj poprawny adres email.</div>
+            <div class="form-text">Email można zmienić w ustawieniach.</div>
+          </form>
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
         <button type="button" class="btn btn-primary" id="modal-submit">Wyślij</button>
@@ -66,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('zajecia-form');
   const modalEl = document.getElementById('emailModal');
   const modal = new bootstrap.Modal(modalEl);
+  const modalEmail = document.getElementById('modal-email');
 
   submitSend.addEventListener('click', function (event) {
     if (!recipientEmail) {
@@ -75,7 +79,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('modal-submit').addEventListener('click', function () {
-    const emailInput = document.getElementById('modal-email').value;
+    if (!modalEmail.checkValidity()) {
+      modalEmail.classList.add('is-invalid');
+      return;
+    }
+    modalEmail.classList.remove('is-invalid');
+    const emailInput = modalEmail.value;
     document.getElementById('recipient-email').value = emailInput;
     recipientEmail = emailInput;
     const sendField = document.createElement('input');

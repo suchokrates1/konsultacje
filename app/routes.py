@@ -29,6 +29,7 @@ from wtforms import PasswordField, SubmitField, BooleanField, EmailField
 from wtforms.validators import DataRequired, ValidationError, Email
 from flask_mail import Message
 from smtplib import SMTPException
+from email_validator import validate_email, EmailNotValidError
 
 from . import db
 from .forms import (
@@ -206,10 +207,17 @@ def nowe_zajecia():
 
         if form.submit_send.data:
             recipient = request.form.get("recipient_email")
-            if recipient and recipient != current_user.document_recipient_email:
-                current_user.document_recipient_email = recipient
-                db.session.commit()
-            if not recipient:
+            if recipient:
+                try:
+                    validate_email(recipient, check_deliverability=False)
+                except EmailNotValidError:
+                    flash("Niepoprawny adres email odbiorcy dokumentów.")
+                    flash('Zajęcia zapisane.')
+                    return redirect(url_for('lista_zajec'))
+                if recipient != current_user.document_recipient_email:
+                    current_user.document_recipient_email = recipient
+                    db.session.commit()
+            else:
                 recipient = current_user.document_recipient_email
             if recipient:
                 output_dir = os.path.join(
