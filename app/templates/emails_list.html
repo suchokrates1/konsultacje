@@ -1,3 +1,4 @@
+{% extends 'base.html' %}
 {% block title %}Wysłane wiadomości{% endblock %}
 {% block content %}
 <h2>Wysłane wiadomości</h2>
@@ -23,8 +24,12 @@
       <td>{{ email.status }}</td>
       <td>
         {% if email.zajecia %}
-        <a href="{{ url_for('pobierz_docx', zajecia_id=email.zajecia_id) }}" class="btn btn-sm btn-secondary">Pobierz</a>
-        <a href="{{ url_for('resend_email', email_id=email.id) }}" class="btn btn-sm btn-secondary">Wyślij ponownie</a>
+        <a href="{{ url_for('pobierz_docx', zajecia_id=email.zajecia_id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport">
+          <i class="bi bi-download"></i>
+        </a>
+        <a href="{{ url_for('resend_email', email_id=email.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie">
+          <i class="bi bi-arrow-repeat"></i>
+        </a>
         {% endif %}
       </td>
     </tr>
