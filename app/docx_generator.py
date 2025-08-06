@@ -1,6 +1,7 @@
 """Utilities for rendering session details into a DOCX document."""
 
 import os
+import io
 
 from flask import current_app
 from docx import Document
@@ -17,7 +18,9 @@ def generate_docx(zajecia, beneficjenci, output_path):
         current_app.logger.error("Missing DOCX template: %s", template_path)
         raise FileNotFoundError(f"Template file not found: {template_path}")
 
-    doc = Document(template_path)
+    # Load the template into memory to avoid mutating the file on disk.
+    with open(template_path, "rb") as f:
+        doc = Document(io.BytesIO(f.read()))
     start_time = zajecia.godzina_od.strftime("%H:%M")
     end_time = zajecia.godzina_do.strftime("%H:%M")
     names = "\n".join(b.imie for b in beneficjenci[:3])
@@ -30,6 +33,17 @@ def generate_docx(zajecia, beneficjenci, output_path):
         "specjalista": zajecia.specjalista,
     }
     current_app.config["_last_docx_context"] = context
+
+    # Replace occurrences of "dietetykiem" throughout the document.
+    for paragraph in doc.paragraphs:
+        for run in paragraph.runs:
+            run.text = run.text.replace("dietetykiem", zajecia.specjalista)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.text = run.text.replace("dietetykiem", zajecia.specjalista)
 
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
