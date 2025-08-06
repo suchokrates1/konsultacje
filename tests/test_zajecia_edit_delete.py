@@ -53,6 +53,12 @@ def test_session_list_shows_actions(app, client):
     text = resp.get_data(as_text=True)
     assert f"/zajecia/{z_id}/edytuj" in text
     assert f"/zajecia/{z_id}/usun" in text
+    assert "Konsultacje z" in text
+    assert "Specjalista" in text
+    assert "spec" in text
+    assert "user" in text
+    assert "bi bi-download" in text
+    assert "bi bi-envelope-arrow-up" in text
 
 
 def test_edit_session(app, client):
