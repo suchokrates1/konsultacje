@@ -33,7 +33,7 @@
     {{ form.beneficjenci(class="form-select") }}
   </div>
   <div class="text-center">
-    {{ form.submit(class="btn btn-success btn-sm me-2") }}
+    {{ form.save(class="btn btn-success btn-sm me-2") }}
     {{ form.submit_send(id="submit-send", class="btn btn-primary btn-sm") }}
   </div>
 </form>
@@ -82,7 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
     sendField.name = 'submit_send';
     sendField.value = '1';
     form.appendChild(sendField);
-    form.submit();
+    modal.hide();
+    form.requestSubmit();
   });
 });
 </script>

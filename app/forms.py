@@ -63,7 +63,7 @@ class ZajeciaForm(FlaskForm):
     beneficjenci = SelectField(
         'Beneficjent', coerce=int, validators=[DataRequired()]
     )
-    submit = SubmitField('Zapisz')
+    save = SubmitField('Zapisz')
     submit_send = SubmitField('Zapisz i wyślij')
 
     def validate(self, extra_validators=None):
