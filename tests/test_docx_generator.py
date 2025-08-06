@@ -51,6 +51,10 @@ def test_generate_docx_file_contains_text(app, tmp_path):
         assert user.full_name in text
         assert "Tomek" in text
         assert "dietetykiem" not in text
+        # The table column labeled "Imię i nazwisko specjalisty" should contain
+        # the instructor's full name for each listed session.
+        table = doc.tables[0]
+        assert table.rows[1].cells[3].text == user.full_name
 
         template = Document(os.path.join(app.root_path, "static", "wzor.docx"))
         assert "dietetykiem" in _docx_text(template)
