@@ -1,5 +1,6 @@
 """Tests ensuring generated DOCX files contain the expected text."""
 
+import os
 from datetime import date, time
 from docx import Document
 
@@ -48,3 +49,7 @@ def test_generate_docx_file_contains_text(app, tmp_path):
         text = _docx_text(doc)
         assert "disk" in text
         assert "Tomek" in text
+        assert "dietetykiem" not in text
+
+        template = Document(os.path.join(app.root_path, "static", "wzor.docx"))
+        assert "dietetykiem" in _docx_text(template)
