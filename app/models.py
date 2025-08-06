@@ -136,7 +136,7 @@ class SentEmail(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     zajecia_id = db.Column(
-        db.Integer, db.ForeignKey('zajecia.id'), nullable=False
+        db.Integer, db.ForeignKey('zajecia.id', ondelete='CASCADE'), nullable=False
     )
     recipient = db.Column(db.String(120), nullable=False)
     subject = db.Column(db.String(255), nullable=False)
@@ -144,4 +144,11 @@ class SentEmail(db.Model):
     status = db.Column(db.String(20), nullable=False)
     file_path = db.Column(db.String(255), nullable=True)
 
-    zajecia = db.relationship('Zajecia', backref='sent_emails')
+    zajecia = db.relationship(
+        'Zajecia',
+        backref=db.backref(
+            'sent_emails',
+            cascade='all, delete-orphan',
+            passive_deletes=True,
+        ),
+    )
