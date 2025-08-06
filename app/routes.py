@@ -170,6 +170,7 @@ def index():
 def nowe_zajecia():
     """Create a new consultation session."""
     form = ZajeciaForm()
+    messages = []
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
         for b in Beneficjent.query.filter_by(user_id=current_user.id)
@@ -212,7 +213,8 @@ def nowe_zajecia():
                     validate_email(recipient, check_deliverability=False)
                 except EmailNotValidError:
                     flash("Niepoprawny adres email odbiorcy dokumentów.")
-                    flash('Zajęcia zapisane.')
+                    messages.append("Zajęcia zapisane.")
+                    flash(" ".join(messages))
                     return redirect(url_for('lista_zajec'))
                 if recipient != current_user.document_recipient_email:
                     current_user.document_recipient_email = recipient
@@ -250,7 +252,7 @@ def nowe_zajecia():
                     sent_at = datetime.utcnow()
                     zajecia.doc_sent_at = sent_at
                     status = "sent"
-                    flash("Dokument wysłany.")
+                    messages.append("Dokument wysłany.")
                 except (FileNotFoundError, SMTPException) as e:
                     current_app.logger.error(
                         "Failed to send consultation document: %s", e
@@ -276,7 +278,8 @@ def nowe_zajecia():
             else:
                 flash("Nie podano adresu email odbiorcy dokumentów.")
 
-        flash('Zajęcia zapisane.')
+        messages.append("Zajęcia zapisane.")
+        flash(" ".join(messages))
         return redirect(url_for('lista_zajec'))
 
     return render_template('zajecia_form.html', form=form)

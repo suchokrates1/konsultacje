@@ -116,3 +116,41 @@ def test_submit_send_with_invalid_email_shows_error(monkeypatch, app, client):
     assert not messages
     html = resp.get_data(as_text=True)
     assert 'Niepoprawny adres email odbiorcy dokumentów.' in html
+
+
+def test_submit_send_shows_combined_message(monkeypatch, app, client):
+    user_id = create_user(app)
+    login(client)
+    with app.app_context():
+        benef = Beneficjent(
+            imie='Ala', wojewodztwo='Mazowieckie', user_id=user_id
+        )
+        db.session.add(benef)
+        db.session.commit()
+        b_id = benef.id
+
+    def fake_send(msg):
+        pass
+
+    def fake_generate_docx(zajecia, beneficjenci, output_path):
+        Path(output_path).write_bytes(b'dummy')
+
+    monkeypatch.setattr('app.routes.mail.send', fake_send)
+    monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
+
+    resp = client.post(
+        '/zajecia/nowe',
+        data={
+            'data': '2023-01-01',
+            'godzina_od': '10:00',
+            'godzina_do': '11:00',
+            'specjalista': 'spec',
+            'beneficjenci': str(b_id),
+            'submit_send': '1',
+        },
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    html = resp.get_data(as_text=True)
+    assert 'Dokument wysłany. Zajęcia zapisane.' in html
+    assert html.count('Dokument wysłany.') == 1
