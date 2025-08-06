@@ -30,7 +30,8 @@ def generate_docx(zajecia, beneficjenci, output_path):
         "time_range": f"{start_time} - {end_time}",
         "beneficjenci": names,
         "wojewodztwo": wojew,
-        "specjalista": zajecia.specjalista,
+        # full name of the instructor for later assertions/tests
+        "specjalista": zajecia.user.full_name,
     }
     current_app.config["_last_docx_context"] = context
 
@@ -68,7 +69,7 @@ def generate_docx(zajecia, beneficjenci, output_path):
         font_size = Pt(16)
         for idx, _ in enumerate(beneficjenci[:3]):
             row = table.rows[idx + 1]
-            values = [context["data"], context["time_range"], context["specjalista"]]
+            values = [context["data"], context["time_range"], zajecia.user.full_name]
             for cell, value in zip(row.cells[1:4], values):
                 cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
                 p = cell.paragraphs[0]
