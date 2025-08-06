@@ -114,13 +114,15 @@ def create_app(test_config=None):
             app.config["TIMEZONE"] = settings.timezone or app.config["TIMEZONE"]
         mail.init_app(app)
 
-        if admin_username and admin_password:
+        if admin_username and admin_password and admin_email:
             from .models import User, Roles
-            admin = User.query.filter_by(full_name=admin_username).first()
-            if admin and not admin.confirmed:
+            admin = User.query.filter_by(email=admin_email).first()
+            if admin:
+                admin.full_name = admin_username
+                admin.role = Roles.ADMIN
                 admin.confirmed = True
-                db.session.commit()
-            if not admin:
+                admin.set_password(admin_password)
+            else:
                 admin = User(
                     full_name=admin_username,
                     email=admin_email,
@@ -129,6 +131,6 @@ def create_app(test_config=None):
                 )
                 admin.set_password(admin_password)
                 db.session.add(admin)
-                db.session.commit()
+            db.session.commit()
 
     return app
