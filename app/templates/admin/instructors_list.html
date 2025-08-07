@@ -17,25 +17,45 @@
       <td>{{ u.full_name }}</td>
       <td>{{ u.email }}</td>
       <td>
-        <a href="{{ url_for('admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj">
+        <a href="{{ url_for('admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
         <form method="post" action="{{ url_for('admin_usun_instruktora', user_id=u.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń">
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>
           </button>
         </form>
         {% if not u.confirmed %}
         <form method="post" action="{{ url_for('admin_confirm_instruktora', user_id=u.id) }}" style="display:inline;">
           {{ confirm_form.csrf_token }}
-          <button type="submit" class="btn btn-sm btn-success">Potwierdź rejestrację</button>
+          <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Potwierdź rejestrację">Potwierdź rejestrację</button>
         </form>
         {% else %}
-        <form method="post" action="{{ url_for('admin_promote_instruktora', user_id=u.id) }}" style="display:inline;">
-          {{ promote_form.csrf_token }}
-          <button type="submit" class="btn btn-sm btn-warning">Nadaj admina</button>
-        </form>
+        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#promoteModal-{{ u.id }}" aria-label="Nadaj admina" title="Nadaj admina">
+          Nadaj admina
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="promoteModal-{{ u.id }}" tabindex="-1" aria-labelledby="promoteModalLabel-{{ u.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="promoteModalLabel-{{ u.id }}">Potwierdzenie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+              </div>
+              <div class="modal-body">
+                Czy na pewno chcesz nadać uprawnienia administratora użytkownikowi <strong>{{ u.full_name }}</strong>?
+              </div>
+              <div class="modal-footer">
+                <form method="post" action="{{ url_for('admin_promote_instruktora', user_id=u.id) }}">
+                  {{ promote_form.csrf_token }}
+                  <button type="submit" class="btn btn-warning">Nadaj admina</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
       </td>
     </tr>
@@ -45,4 +65,10 @@
   </tbody>
 </table>
 </div>
+<script>
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
 {% endblock %}

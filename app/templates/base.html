@@ -65,8 +65,30 @@
       <a href="mailto:kontakt@vestmedia.pl" class="text-light">kontakt@vestmedia.pl</a>
     </div>
   </footer>
+  <div id="global-loader" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:rgba(255,255,255,0.7);align-items:center;justify-content:center;">
+    <div class="spinner-border text-primary" role="status" aria-label="Ładowanie">
+      <span class="visually-hidden">Ładowanie...</span>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{{ url_for('static', filename='dropdown_search.js') }}"></script>
   <script src="{{ url_for('static', filename='live_search.js') }}"></script>
+  <script>
+    // Loader show/hide helpers
+    function showLoader() {
+      document.getElementById('global-loader').style.display = 'flex';
+    }
+    function hideLoader() {
+      document.getElementById('global-loader').style.display = 'none';
+    }
+    // Example: show loader on all form submits
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+          showLoader();
+        });
+      });
+    });
+  </script>
 </body>
 </html>

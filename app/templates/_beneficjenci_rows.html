@@ -3,13 +3,13 @@
   <td>{{ b.imie }}</td>
   <td>{{ b.wojewodztwo }}</td>
   <td>
-    <a href="{{ url_for('edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj">
-      <i class="bi bi-pencil"></i>
+    <a href="{{ url_for('edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
+      <i class="bi bi-pencil" aria-hidden="true"></i>
     </a>
     <form method="post" action="{{ url_for('usun_beneficjenta', beneficjent_id=b.id) }}" style="display:inline;">
       {{ delete_form.csrf_token }}
-      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń">
-        <i class="bi bi-trash"></i>
+      <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
+        <i class="bi bi-trash" aria-hidden="true"></i>
       </button>
     </form>
   </td>
@@ -17,3 +17,11 @@
 {% else %}
 <tr><td colspan="3">Brak beneficjentów.</td></tr>
 {% endfor %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>

@@ -9,36 +9,60 @@
       <div class="mb-3">
         {{ form.full_name.label(class="form-label") }}
         {{ form.full_name(class="form-control") }}
+        {% for error in form.full_name.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.email.label(class="form-label") }}
         {{ form.email(class="form-control") }}
+        {% for error in form.email.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.default_duration.label(class="form-label") }}
         {{ form.default_duration(class="form-control") }}
+        {% for error in form.default_duration.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.session_type.label(class="form-label") }}
         {{ form.session_type(class="form-control") }}
         <div class="form-text">Zwróć uwagę na poprawną odmianę wprowadzonego słowa.</div>
+        {% for error in form.session_type.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.document_recipient_email.label(class="form-label") }}
         {{ form.document_recipient_email(class="form-control") }}
+        {% for error in form.document_recipient_email.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <hr>
       <div class="mb-3">
         {{ form.old_password.label(class="form-label") }}
         {{ form.old_password(class="form-control", type="password") }}
+        {% for error in form.old_password.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.new_password.label(class="form-label") }}
         {{ form.new_password(class="form-control", type="password") }}
+        {% for error in form.new_password.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="mb-3">
         {{ form.confirm.label(class="form-label") }}
         {{ form.confirm(class="form-control", type="password") }}
+        {% for error in form.confirm.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
       </div>
       <div class="text-center">
         <button type="submit" class="btn btn-success btn-sm">{{ form.submit.label.text }}</button>

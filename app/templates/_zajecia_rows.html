@@ -6,23 +6,32 @@
   <td>{{ zaj.user.full_name }}</td>
   <td>{{ 'wysłano' if zaj.doc_sent_at else 'niewysłano' }}</td>
   <td>
-    <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport">
-      <i class="bi bi-download"></i>
+    <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport" data-bs-toggle="tooltip" title="Pobierz raport">
+      <i class="bi bi-download" aria-hidden="true"></i>
     </a>
-    <a href="{{ url_for('wyslij_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie">
-      <i class="bi bi-envelope-arrow-up"></i>
+    <a href="{{ url_for('wyslij_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie" data-bs-toggle="tooltip" title="Wyślij ponownie">
+      <i class="bi bi-envelope-arrow-up" aria-hidden="true"></i>
     </a>
   </td>
   <td>
-    <a href="{{ url_for('edytuj_zajecia', zajecia_id=zaj.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj">
-      <i class="bi bi-pencil"></i>
+    <a href="{{ url_for('edytuj_zajecia', zajecia_id=zaj.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
+      <i class="bi bi-pencil" aria-hidden="true"></i>
     </a>
     <form method="post" action="{{ url_for('usun_zajecia', zajecia_id=zaj.id) }}" style="display:inline;">
       {{ delete_form.hidden_tag() }}
-      {{ delete_form.submit(class='btn btn-sm btn-danger', onclick="return confirm('Na pewno chcesz usunąć?')") }}
+      {{ delete_form.submit(class='btn btn-sm btn-danger', onclick="return confirm('Na pewno chcesz usunąć?')", aria_label="Usuń", **{'data-bs-toggle': 'tooltip', 'title': 'Usuń'}) }}
     </form>
   </td>
 </tr>
 {% else %}
 <tr><td colspan="7">Brak zajęć.</td></tr>
 {% endfor %}
+<script>
+  // Inicjalizacja tooltipów
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>

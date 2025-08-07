@@ -19,12 +19,12 @@
       <td>{{ z.godzina_od.strftime('%H:%M') }} - {{ z.godzina_do.strftime('%H:%M') }}</td>
       <td>{{ z.user.full_name }}</td>
       <td>
-        <a href="{{ url_for('admin_edytuj_zajecia', zajecia_id=z.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj">
+        <a href="{{ url_for('admin_edytuj_zajecia', zajecia_id=z.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
         <form method="post" action="{{ url_for('admin_usun_zajecia', zajecia_id=z.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń">
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>
           </button>
         </form>
@@ -36,4 +36,12 @@
   </tbody>
 </table>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
 {% endblock %}
