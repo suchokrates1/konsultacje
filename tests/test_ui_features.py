@@ -13,7 +13,10 @@ def test_flash_message_displayed(client, app):
 def test_login_form_placeholders(client):
     response = client.get('/login')
     assert b'placeholder="adres@email.pl"' in response.data
-    assert b'placeholder="Has\xc5\x82o"' in response.data or b'placeholder="Hasło"' in response.data
+    assert (
+        b'placeholder="Has\xc5\x82o"' in response.data
+        or 'placeholder="Hasło"'.encode() in response.data
+    )
 
 def test_dark_mode_toggle_button(client):
     response = client.get('/')
@@ -29,5 +32,12 @@ def test_settings_form_password_section(client, auth):
     # Zaloguj się i przejdź do ustawień
     auth.login()
     response = client.get('/settings')
-    assert b'Zmiana has\xc5\x82a' in response.data or b'Zmiana hasła' in response.data
-    assert b'placeholder="Obecne has\xc5\x82o"' in response.data or b'placeholder="Obecne hasło"' in response.data
+    assert (
+        b'Zmiana has\xc5\x82a' in response.data
+        or 'Zmiana hasła'.encode() in response.data
+    )
+    assert (
+        b'placeholder="Obecne has\xc5\x82o"' in response.data
+        or 'placeholder="Obecne hasło"'.encode() in response.data
+    )
+
