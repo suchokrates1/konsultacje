@@ -7,6 +7,37 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    /* Sticky header for tables */
+    .table thead th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+    }
+    /* Dark mode styles */
+    body.dark-mode {
+      background-color: #181a1b !important;
+      color: #f8f9fa !important;
+    }
+    body.dark-mode .bg-white, body.dark-mode .table, body.dark-mode .table thead th {
+      background-color: #23272b !important;
+      color: #f8f9fa !important;
+    }
+    body.dark-mode .bg-dark {
+      background-color: #181a1b !important;
+    }
+    body.dark-mode .navbar, body.dark-mode .offcanvas, body.dark-mode .dropdown-menu {
+      background-color: #23272b !important;
+      color: #f8f9fa !important;
+    }
+    body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+      background-color: #23272b !important;
+    }
+    body.dark-mode .table-hover > tbody > tr:hover {
+      background-color: #343a40 !important;
+    }
+  </style>
 </head>
 <body class="bg-light text-dark pb-5">
   {% from '_nav_macros.html' import render_nav_items, render_user_items with context %}
@@ -14,6 +45,9 @@
     <div class="container d-flex align-items-center">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="me-2" style="height: 40px;">
       <h1 class="h5 m-0">Konsultacje</h1>
+      <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm ms-auto" type="button" aria-label="Przełącz tryb ciemny" title="Przełącz tryb ciemny">
+        <i class="bi bi-moon"></i>
+      </button>
     </div>
   </header>
   {% if current_user.is_authenticated %}
@@ -47,6 +81,7 @@
   </div>
   {% endif %}
     <div class="container mt-5 text-center">
+    <div aria-live="polite">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for message in messages %}
@@ -57,6 +92,7 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+    </div>
     {% block content %}{% endblock %}
   </div>
   <footer class="bg-dark text-light py-3 mt-5 fixed-bottom">
@@ -81,12 +117,24 @@
     function hideLoader() {
       document.getElementById('global-loader').style.display = 'none';
     }
-    // Example: show loader on all form submits
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('form').forEach(function(form) {
         form.addEventListener('submit', function() {
           showLoader();
         });
+      });
+      // Dark mode toggle
+      const darkModeBtn = document.getElementById('darkModeToggle');
+      darkModeBtn.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const icon = darkModeBtn.querySelector('i');
+        if(document.body.classList.contains('dark-mode')) {
+          icon.classList.remove('bi-moon');
+          icon.classList.add('bi-sun');
+        } else {
+          icon.classList.remove('bi-sun');
+          icon.classList.add('bi-moon');
+        }
       });
     });
   </script>

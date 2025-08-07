@@ -90,3 +90,105 @@ pytest
 
 `requirements-dev.txt` also includes **flake8** for optional style checks.
 This will create a temporary SQLite database in the `instance/` folder while the tests run. Each test passes a `SECRET_KEY` directly to `create_app`. If you add more tests, ensure `SECRET_KEY` is supplied via the configuration or environment.
+
+## Best practices
+
+- Przed wprowadzeniem zmian utwórz nową gałąź (`git checkout -b feature/nazwa-funkcji`).
+- Stosuj czytelne komunikaty commitów i opisuj zmiany.
+- Przeglądaj kod pod kątem powtarzających się fragmentów – przenoś je do funkcji lub modułów pomocniczych.
+- Regularnie uruchamiaj testy automatyczne przed wypchnięciem zmian.
+
+## Development workflow
+
+1. Sklonuj repozytorium i zainstaluj zależności.
+2. Pracuj na osobnej gałęzi.
+3. Przed commitem uruchom testy (`pytest`).
+4. Po zakończeniu pracy wykonaj code review (samodzielnie lub w zespole).
+5. Po akceptacji scalaj do głównej gałęzi (`main` lub `master`).
+
+## Testing
+
+- Testy znajdują się w katalogu `tests/`.
+- Do uruchamiania testów używaj `pytest`.
+- Dodawaj nowe testy dla każdej nowej funkcji lub poprawki błędu.
+- Przykład uruchomienia testów:
+  ```bash
+  pytest
+  ```
+- Jeśli dodajesz nową funkcjonalność, napisz testy jednostkowe i integracyjne.
+
+## Dependencies update
+
+- Regularnie aktualizuj zależności w `requirements.txt` i `requirements-dev.txt`.
+- Sprawdzaj nowe wersje np. Bootstrap, python-docx, Flask.
+- Po aktualizacji zależności uruchom testy, aby upewnić się, że wszystko działa poprawnie.
+- Przykład aktualizacji pakietu:
+  ```bash
+  pip install --upgrade python-docx
+  pip freeze > requirements.txt
+  ```
+
+## Code style
+
+- Stosuj PEP8 (możesz użyć `flake8` do sprawdzenia stylu).
+- Unikaj powielania kodu – korzystaj z funkcji pomocniczych i dziedziczenia.
+- Komentuj fragmenty wymagające wyjaśnienia.
+- Nazwy zmiennych i funkcji powinny być czytelne i opisowe.
+
+## Refaktoryzacja backendu
+
+- Jeśli zauważysz powtarzające się fragmenty kodu (np. obsługa formularzy, walidacja, generowanie raportów), przenieś je do osobnych funkcji lub modułów.
+- Przykład: funkcje do obsługi flash messages, generowania raportów, wysyłki maili – patrz `app/utils.py`.
+- Rozważ użycie blueprintów Flask do lepszej organizacji kodu.
+- Przykład refaktoryzacji:
+  ```python
+  # app/utils.py
+  from flask import flash
+
+  def flash_success(message):
+      flash(message, 'success')
+
+  def flash_error(message):
+      flash(message, 'danger')
+  ```
+  Następnie w widokach:
+  ```python
+  from app.utils import flash_success, flash_error
+
+  # ...w kodzie...
+  flash_success("Operacja zakończona sukcesem!")
+  flash_error("Wystąpił błąd.")
+  ```
+
+- Do renderowania pól formularzy używaj makra z `app/templates/_form_macros.html`:
+  ```html
+  {% from '_form_macros.html' import render_field %}
+  {{ render_field(form.email, 'adres@email.pl') }}
+  ```
+
+- W testach korzystaj z fixture do logowania (`tests/conftest.py`):
+  ```python
+  def test_dashboard_access(client, login):
+      login()
+      response = client.get('/dashboard')
+      assert response.status_code == 200
+  ```
+
+## Aktualizacja zależności frontendowych
+
+- Aby zaktualizować Bootstrap lub inne zależności frontendowe, zaktualizuj linki CDN w `base.html` lub zainstaluj nowszą wersję przez npm/yarn, jeśli korzystasz z bundlera.
+- Po aktualizacji sprawdź wygląd aplikacji i uruchom testy.
+
+## Przykładowy szablon testu automatycznego
+
+- Przykład testu dla rejestracji użytkownika (`tests/test_auth.py`):
+  ```python
+  def test_register(client):
+      response = client.post('/register', data={
+          'full_name': 'Test User',
+          'email': 'test@example.com',
+          'password': 'password',
+          'confirm': 'password'
+      }, follow_redirects=True)
+      assert b'konto' in response.data
+  ```

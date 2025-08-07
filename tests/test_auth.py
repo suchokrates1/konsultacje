@@ -264,3 +264,10 @@ def test_unconfirmed_user_cannot_login(app):
     assert 'Twoje konto nie zostało jeszcze potwierdzone.' in text
     assert 'Nieprawidłowe dane logowania.' not in text
     assert 'Nowe zajęcia' not in text
+
+
+def test_dashboard_access(client, login):
+    """Test access to the dashboard for logged-in users."""
+    login()
+    response = client.get('/dashboard')
+    assert response.status_code == 200

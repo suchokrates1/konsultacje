@@ -40,3 +40,15 @@ def client(app):
     """Return a test client for the given application."""
 
     return app.test_client()
+
+
+@pytest.fixture
+def login(client):
+    """Log in a test user."""
+
+    def do_login(email="test@example.com", password="password"):
+        return client.post(
+            "/login", data={"email": email, "password": password}
+        )
+
+    return do_login
