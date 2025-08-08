@@ -36,7 +36,6 @@ def generate_docx(zajecia, beneficjenci, output_path):
         # full name of the instructor for later assertions/tests
         "specjalista": zajecia.user.full_name,
     }
-    current_app.config["_last_docx_context"] = context
 
     # Replace occurrences of "dietetykiem" throughout the document.
     for paragraph in doc.paragraphs:
@@ -82,3 +81,4 @@ def generate_docx(zajecia, beneficjenci, output_path):
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     doc.save(output_path)
+    return context
