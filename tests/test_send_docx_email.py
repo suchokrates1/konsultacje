@@ -42,11 +42,11 @@ def test_submit_send_dispatches_email_with_attachment(monkeypatch, app, client):
     def fake_send(msg):
         messages.append(msg)
 
-    def fake_generate_docx(zajecia, beneficjenci, output_path):
-        Path(output_path).write_bytes(b'dummy')
+    def fake_generate_docx(zajecia, beneficjenci, output):
+        output.write(b'dummy')
 
     monkeypatch.setattr('app.routes.mail.send', fake_send)
-    monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
+    monkeypatch.setattr('app.utils.generate_docx', fake_generate_docx)
 
     resp = client.post(
         '/zajecia/nowe',
@@ -93,11 +93,11 @@ def test_submit_send_with_invalid_email_shows_error(monkeypatch, app, client):
     def fake_send(msg):
         messages.append(msg)
 
-    def fake_generate_docx(zajecia, beneficjenci, output_path):
-        Path(output_path).write_bytes(b'dummy')
+    def fake_generate_docx(zajecia, beneficjenci, output):
+        output.write(b'dummy')
 
     monkeypatch.setattr('app.routes.mail.send', fake_send)
-    monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
+    monkeypatch.setattr('app.utils.generate_docx', fake_generate_docx)
 
     resp = client.post(
         '/zajecia/nowe',
@@ -132,11 +132,11 @@ def test_submit_send_shows_combined_message(monkeypatch, app, client):
     def fake_send(msg):
         pass
 
-    def fake_generate_docx(zajecia, beneficjenci, output_path):
-        Path(output_path).write_bytes(b'dummy')
+    def fake_generate_docx(zajecia, beneficjenci, output):
+        output.write(b'dummy')
 
     monkeypatch.setattr('app.routes.mail.send', fake_send)
-    monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
+    monkeypatch.setattr('app.utils.generate_docx', fake_generate_docx)
 
     resp = client.post(
         '/zajecia/nowe',

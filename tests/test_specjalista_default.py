@@ -49,4 +49,4 @@ def test_specjalista_default_and_filename(app, client):
     resp = client.get(f"/zajecia/{z_id}/docx")
     assert resp.status_code == 200
     disposition = resp.headers.get("Content-Disposition", "")
-    assert "Konsultacje z Dr Who" in disposition
+    assert "Konsultacje z Dr_Who" in disposition
