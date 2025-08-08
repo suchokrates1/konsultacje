@@ -1,7 +1,6 @@
 """Views related to session management and beneficiaries."""
 
-import os
-import re
+from io import BytesIO
 from datetime import datetime, timedelta
 
 import pytz
@@ -9,7 +8,6 @@ from email_validator import EmailNotValidError, validate_email
 from flask import (
     Blueprint,
     abort,
-    after_this_request,
     current_app,
     flash,
     jsonify,
@@ -25,7 +23,7 @@ from wtforms.validators import ValidationError
 from .. import db
 from ..forms import BeneficjentForm, DeleteForm, ZajeciaForm
 from ..models import Beneficjent, SentEmail, User, Zajecia
-from ..utils import send_session_docx
+from ..utils import send_session_docx, build_docx_filename
 
 
 sessions_bp = Blueprint("sessions", __name__)
@@ -142,28 +140,20 @@ def pobierz_docx(zajecia_id):
         return redirect(url_for("sessions.index"))
 
     beneficjenci = zajecia.beneficjenci
-    output_dir = os.path.join(current_app.root_path, "static", "docx")
-    os.makedirs(output_dir, exist_ok=True)
-
-    first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
-    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
-    date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
-    output_path = os.path.join(output_dir, filename)
+    filename = build_docx_filename(zajecia)
 
     from .. import routes
 
-    routes.generate_docx(zajecia, beneficjenci, output_path)
+    buffer = BytesIO()
+    routes.generate_docx(zajecia, beneficjenci, buffer)
+    buffer.seek(0)
 
-    @after_this_request
-    def remove_file(response):
-        try:
-            os.remove(output_path)
-        except OSError:
-            current_app.logger.warning("Failed to remove generated DOCX %s", output_path)
-        return response
-
-    return send_file(output_path, as_attachment=True, download_name=filename)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
 
 
 @sessions_bp.route("/zajecia/<int:zajecia_id>/send")
