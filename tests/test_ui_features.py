@@ -86,3 +86,27 @@ def test_dark_mode_persists_after_refresh(live_server, driver):
     body = driver.find_element("tag name", "body")
     assert "dark-mode" in body.get_attribute("class")
 
+
+def test_select_search_filters_options(live_server, driver, login):
+    login()  # ensure user exists
+    driver.get(live_server + "/login")
+    driver.find_element("name", "email").send_keys("test@example.com")
+    driver.find_element("name", "password").send_keys("password")
+    driver.find_element("css selector", "form button[type=submit]").click()
+
+    driver.get(live_server + "/beneficjenci/nowy")
+    container = driver.find_element("css selector", "#wojewodztwo + .choices")
+    container.click()
+    search_input = container.find_element("css selector", ".choices__input--cloned")
+    assert search_input.get_attribute("aria-label") == "Wyszukaj"
+    search_input.send_keys("Zach")
+    time.sleep(0.5)
+    visible = [
+        el.text
+        for el in container.find_elements(
+            "css selector", ".choices__list--dropdown .choices__item--selectable"
+        )
+        if el.is_displayed()
+    ]
+    assert visible == ["Zachodniopomorskie"]
+
