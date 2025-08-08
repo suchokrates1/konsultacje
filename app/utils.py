@@ -15,6 +15,49 @@ def flash_success(message):
 def flash_error(message):
     flash(message, 'danger')
 
+
+def send_email(subject, recipients, body, attachments=None):
+    """Send an email using the configured Flask-Mail extension.
+
+    Parameters
+    ----------
+    subject: str
+        Subject line for the message.
+    recipients: list[str]
+        List of recipient email addresses.
+    body: str
+        Plain text body of the message.
+    attachments: iterable[tuple[str, str, bytes]], optional
+        Iterable of ``(filename, content_type, data)`` tuples representing
+        attachments to include in the message.
+
+    Returns
+    -------
+    tuple[datetime | None, str]
+        A tuple containing the time the email was sent (``None`` on
+        failure) and a status string (``"sent"`` or ``"error"``).
+    """
+
+    msg = Message(
+        subject,
+        recipients=recipients,
+        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+    )
+    msg.body = body
+    if attachments:
+        for filename, content_type, data in attachments:
+            msg.attach(filename, content_type, data)
+
+    status = "error"
+    sent_at = None
+    try:
+        mail.send(msg)
+        sent_at = datetime.utcnow()
+        status = "sent"
+    except SMTPException as exc:
+        current_app.logger.error("Failed to send email: %s", exc)
+    return sent_at, status
+
 def send_session_docx(zajecia, recipient, subject="Raport zajęć"):
     """Generate a DOCX report for ``zajecia`` and send it via email.
 

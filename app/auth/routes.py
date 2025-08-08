@@ -18,10 +18,9 @@ from flask_login import (
     login_user,
     logout_user,
 )
-from flask_mail import Message
-from smtplib import SMTPException
 
-from .. import db, mail
+from .. import db
+from ..utils import send_email
 from ..forms import (
     LoginForm,
     RegisterForm,
@@ -80,11 +79,6 @@ def register():
         elif admin_cfg:
             admin_email = admin_cfg
         if admin_email:
-            msg = Message(
-                "Nowa rejestracja użytkownika",
-                recipients=[admin_email],
-                sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            )
             token = user.get_confirm_token()
             confirm_url = url_for(
                 "admin.admin_confirm_instruktora",
@@ -92,14 +86,14 @@ def register():
                 token=token,
                 _external=True,
             )
-            msg.body = (
+            body = (
                 f"Użytkownik {user.full_name} zarejestrował się z adresem "
                 f"{user.email}. Potwierdź konto: {confirm_url}"
             )
-            try:
-                mail.send(msg)
-            except SMTPException as e:
-                current_app.logger.error("Failed to send admin email: %s", e)
+            _, status = send_email(
+                "Nowa rejestracja użytkownika", [admin_email], body
+            )
+            if status == "error":
                 flash("Nie udało się wysłać powiadomienia do administratora.")
 
         flash(
@@ -128,16 +122,9 @@ def reset_password_request():
         if user:
             token = user.get_reset_token()
             reset_url = url_for("auth.reset_password", token=token, _external=True)
-            msg = Message(
-                "Reset hasła",
-                recipients=[user.email],
-                sender=current_app.config["MAIL_DEFAULT_SENDER"],
-            )
-            msg.body = f"Kliknij link aby zresetować hasło: {reset_url}"
-            try:
-                mail.send(msg)
-            except SMTPException as e:
-                current_app.logger.error("Failed to send password reset email: %s", e)
+            body = f"Kliknij link aby zresetować hasło: {reset_url}"
+            _, status = send_email("Reset hasła", [user.email], body)
+            if status == "error":
                 flash("Nie udało się wysłać emaila z linkiem resetującym.")
         flash(
             "Jeśli podany email istnieje, wysłano instrukcje resetowania hasła."
