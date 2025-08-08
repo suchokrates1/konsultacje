@@ -10,7 +10,7 @@ def create_users(app):
         admin = User(
             full_name='admin',
             email='admin@example.com',
-            role='admin',
+            role=Roles.ADMIN,
         )
         admin.set_password('pass')
         admin.confirmed = True

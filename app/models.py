@@ -6,9 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from . import login_manager
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
+import enum
 
 
-class Roles:
+class Roles(enum.Enum):
     """Enumeration of user roles available in the system."""
 
     ADMIN = "admin"
@@ -24,7 +25,7 @@ class User(UserMixin, db.Model):
     document_recipient_email = db.Column(db.String(120), nullable=True)
     password_hash = db.Column(db.String(128))
     default_duration = db.Column(db.Integer, default=90)
-    role = db.Column(db.String(20), default=Roles.INSTRUCTOR)
+    role = db.Column(db.Enum(Roles), default=Roles.INSTRUCTOR)
     confirmed = db.Column(db.Boolean, default=False)
     session_type = db.Column(db.String(100))
 
@@ -66,6 +67,9 @@ class User(UserMixin, db.Model):
             return None
         return db.session.get(User, data.get('user_id'))
 
+    def __repr__(self):
+        return f"<User {self.id} {self.full_name} ({self.role.value})>"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -84,6 +88,9 @@ class Beneficjent(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User')
 
+    def __repr__(self):
+        return f"<Beneficjent {self.id} {self.imie}>"
+
 
 class Zajecia(db.Model):
     """Scheduled consultation session with related beneficiaries."""
@@ -101,6 +108,9 @@ class Zajecia(db.Model):
     beneficjenci = db.relationship(
         'Beneficjent', secondary='zajecia_beneficjenci'
     )
+
+    def __repr__(self):
+        return f"<Zajecia {self.id} {self.data} {self.specjalista}>"
 
 
 # Tabela relacyjna: wielu beneficjentów na zajęciach
@@ -152,3 +162,6 @@ class SentEmail(db.Model):
             passive_deletes=True,
         ),
     )
+
+    def __repr__(self):
+        return f"<SentEmail {self.id} to {self.recipient} status={self.status}>"
