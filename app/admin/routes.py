@@ -161,29 +161,31 @@ def admin_usun_zajecia(zajecia_id):
     return redirect(url_for("admin.admin_zajecia"))
 
 
-@admin_bp.route("/instruktorzy")
+@admin_bp.route("/uzytkownicy")
 @login_required
 @admin_required
-def admin_instruktorzy():
-    """List all instructor accounts."""
+def admin_uzytkownicy():
+    """List all instructor and admin accounts."""
     instructors = User.query.filter_by(role=Roles.INSTRUCTOR).all()
+    admins = User.query.filter_by(role=Roles.ADMIN).all()
     delete_form = DeleteForm()
     promote_form = PromoteForm()
     confirm_form = ConfirmForm()
     return render_template(
-        "admin/instructors_list.html",
+        "admin/users_list.html",
         instructors=instructors,
+        admins=admins,
         delete_form=delete_form,
         promote_form=promote_form,
         confirm_form=confirm_form,
     )
 
 
-@admin_bp.route("/instruktorzy/<int:user_id>/edytuj", methods=["GET", "POST"])
+@admin_bp.route("/uzytkownicy/<int:user_id>/edytuj", methods=["GET", "POST"])
 @login_required
 @admin_required
-def admin_edytuj_instruktora(user_id):
-    """Admin view for editing an instructor account."""
+def admin_edytuj_uzytkownika(user_id):
+    """Admin view for editing a user account."""
     instr = db.session.get(User, user_id)
     if instr is None:
         abort(404)
@@ -192,18 +194,18 @@ def admin_edytuj_instruktora(user_id):
         instr.full_name = form.full_name.data
         instr.email = form.email.data
         db.session.commit()
-        flash("Instruktor zaktualizowany.")
-        return redirect(url_for("admin.admin_instruktorzy"))
+        flash("Użytkownik zaktualizowany.")
+        return redirect(url_for("admin.admin_uzytkownicy"))
     return render_template(
-        "instructor_form.html", form=form, title="Edytuj instruktora"
+        "instructor_form.html", form=form, title="Edytuj użytkownika"
     )
 
 
-@admin_bp.route("/instruktorzy/<int:user_id>/usun", methods=["POST"])
+@admin_bp.route("/uzytkownicy/<int:user_id>/usun", methods=["POST"])
 @login_required
 @admin_required
-def admin_usun_instruktora(user_id):
-    """Admin action to delete an instructor."""
+def admin_usun_uzytkownika(user_id):
+    """Admin action to delete a user."""
     form = DeleteForm()
     if form.validate_on_submit():
         instr = db.session.get(User, user_id)
@@ -211,15 +213,15 @@ def admin_usun_instruktora(user_id):
             abort(404)
         db.session.delete(instr)
         db.session.commit()
-        flash("Instruktor usunięty.")
-    return redirect(url_for("admin.admin_instruktorzy"))
+        flash("Użytkownik usunięty.")
+    return redirect(url_for("admin.admin_uzytkownicy"))
 
 
-@admin_bp.route("/instruktorzy/<int:user_id>/promote", methods=["POST"])
+@admin_bp.route("/uzytkownicy/<int:user_id>/promote", methods=["POST"])
 @login_required
 @admin_required
-def admin_promote_instruktora(user_id):
-    """Grant admin role to the selected instructor."""
+def admin_promote_uzytkownika(user_id):
+    """Grant admin role to the selected user."""
     form = PromoteForm()
     if form.validate_on_submit():
         instr = db.session.get(User, user_id)
@@ -227,25 +229,25 @@ def admin_promote_instruktora(user_id):
             abort(404)
         instr.role = Roles.ADMIN
         db.session.commit()
-        flash("Instruktor ma teraz uprawnienia admina.")
-    return redirect(url_for("admin.admin_instruktorzy"))
+        flash("Użytkownik ma teraz uprawnienia admina.")
+    return redirect(url_for("admin.admin_uzytkownicy"))
 
 
-@admin_bp.route("/instruktorzy/<int:user_id>/confirm", methods=["GET", "POST"])
+@admin_bp.route("/uzytkownicy/<int:user_id>/confirm", methods=["GET", "POST"])
 @login_required
 @admin_required
-def admin_confirm_instruktora(user_id):
-    """Confirm an instructor account registration."""
+def admin_confirm_uzytkownika(user_id):
+    """Confirm a user account registration."""
     if request.method == "GET":
         token = request.args.get("token")
         user = User.verify_confirm_token(token)
         if user and user.id == user_id:
             user.confirmed = True
             db.session.commit()
-            flash("Instruktor został potwierdzony.")
+            flash("Użytkownik został potwierdzony.")
         else:
             flash("Nieprawidłowy token potwierdzenia.")
-        return redirect(url_for("admin.admin_instruktorzy"))
+        return redirect(url_for("admin.admin_uzytkownicy"))
 
     form = ConfirmForm()
     if form.validate_on_submit():
@@ -254,8 +256,8 @@ def admin_confirm_instruktora(user_id):
             abort(404)
         instr.confirmed = True
         db.session.commit()
-        flash("Instruktor został potwierdzony.")
-    return redirect(url_for("admin.admin_instruktorzy"))
+        flash("Użytkownik został potwierdzony.")
+    return redirect(url_for("admin.admin_uzytkownicy"))
 
 
 @admin_bp.route("/ustawienia", methods=["GET", "POST"])

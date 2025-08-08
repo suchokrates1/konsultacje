@@ -81,7 +81,7 @@ def register():
         if admin_email:
             token = user.get_confirm_token()
             confirm_url = url_for(
-                "admin.admin_confirm_instruktora",
+                "admin.admin_confirm_uzytkownika",
                 user_id=user.id,
                 token=token,
                 _external=True,
