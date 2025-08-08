@@ -55,8 +55,9 @@ def send_session_docx(zajecia, recipient, subject="Raport zajęć"):
     beneficjenci = zajecia.beneficjenci
     first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
+    safe_specjalista = re.sub(r"[^A-Za-z0-9_.-]", "_", zajecia.specjalista)
     date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
+    filename = f"Konsultacje z {safe_specjalista} {date_str} {safe_name}.docx"
     output_path = os.path.join(output_dir, filename)
 
     status = "error"
