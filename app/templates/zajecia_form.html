@@ -12,14 +12,17 @@
     {{ render_field(form.godzina_od, "Godzina rozpoczęcia") }}
     {{ render_field(form.godzina_do, "Godzina zakończenia") }}
     {{ render_field(form.specjalista, "Specjalista") }}
-    {{ render_field(form.beneficjenci) }}
-    {% if form.beneficjenci.choices|length == 0 %}
-      <p>Brak beneficjentów. <a href="{{ url_for('sessions.nowy_beneficjent') }}">Dodaj nowego</a></p>
+    {% if form.beneficjenci.choices %}
+        {{ render_field(form.beneficjenci) }}
+    {% else %}
+        <p>Brak beneficjentów. <a href="{{ url_for('sessions.nowy_beneficjent') }}">Dodaj nowego</a></p>
     {% endif %}
+    {% if form.beneficjenci.choices %}
     <div class="text-center mt-4">
       {{ form.save(class="btn btn-success btn-lg me-2 px-4") }}
       {{ form.submit_send(id="submit-send", class="btn btn-primary btn-lg px-4") }}
     </div>
+    {% endif %}
   </form>
 </div>
 
