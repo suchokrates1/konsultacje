@@ -77,7 +77,7 @@ def test_email_log_and_resend(monkeypatch, app, client):
     assert len(messages) == 2
 
     with app.app_context():
-        log = SentEmail.query.get(email_id)
+        log = db.session.get(SentEmail, email_id)
         assert log.status == 'sent'
         assert log.sent_at != first_sent_at
 
