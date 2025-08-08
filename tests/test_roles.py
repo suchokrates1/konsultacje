@@ -49,7 +49,7 @@ def login(client, username):
 
 
 def test_admin_access(app):
-    """Admin should be able to view all beneficiaries and instructors."""
+    """Admin should be able to view all beneficiaries and users."""
     admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'admin')
@@ -58,9 +58,11 @@ def test_admin_access(app):
     text = resp.get_data(as_text=True)
     assert 'Ben1' in text and 'Ben2' in text
 
-    resp = client.get('/admin/instruktorzy')
+    resp = client.get('/admin/uzytkownicy')
     assert resp.status_code == 200
-    assert 'inst1' in resp.get_data(as_text=True)
+    text = resp.get_data(as_text=True)
+    assert 'inst1' in text
+    assert 'Instruktorzy' in text and 'Administratorzy' in text
 
 
 def test_instructor_cannot_access_admin(app):
@@ -89,7 +91,7 @@ def test_promote_instructor(app):
     client = app.test_client()
     login(client, 'admin')
     resp = client.post(
-        f'/admin/instruktorzy/{inst1_id}/promote',
+        f'/admin/uzytkownicy/{inst1_id}/promote',
         data={'submit': '1'},
         follow_redirects=True,
     )
@@ -99,7 +101,7 @@ def test_promote_instructor(app):
         assert user.role == Roles.ADMIN
     # Instructor should now have admin rights
     login(client, 'inst1')
-    resp = client.get('/admin/instruktorzy')
+    resp = client.get('/admin/uzytkownicy')
     assert resp.status_code == 200
 
 
@@ -124,11 +126,11 @@ def test_confirm_instructor(app):
 
     login(client, 'admin')
     # Page should show confirmation button for the new user
-    resp = client.get('/admin/instruktorzy')
+    resp = client.get('/admin/uzytkownicy')
     assert 'Potwierdź rejestrację' in resp.get_data(as_text=True)
 
     resp = client.post(
-        f'/admin/instruktorzy/{new_id}/confirm',
+        f'/admin/uzytkownicy/{new_id}/confirm',
         data={'submit': '1'},
         follow_redirects=True,
     )

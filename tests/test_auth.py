@@ -198,8 +198,8 @@ def test_register_sends_confirmation_email(monkeypatch, client, app):
     with app.app_context():
         user = User.query.filter_by(full_name='jan').first()
         assert user is not None
-        assert f'/admin/instruktorzy/{user.id}/confirm' in msg.body
-        assert f'/admin/instruktorzy/{user.id}/confirm' in msg.html
+        assert f'/admin/uzytkownicy/{user.id}/confirm' in msg.body
+        assert f'/admin/uzytkownicy/{user.id}/confirm' in msg.html
         assert '<a ' in msg.html and 'style=' in msg.html
 
 
