@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from '_form_macros.html' import render_field %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}Ustawienia użytkownika{% endblock %}
 {% block content %}
 <h2>Ustawienia użytkownika</h2>
@@ -11,13 +11,13 @@
       {{ render_field(form.full_name, "Imię i nazwisko") }}
       {{ render_field(form.email, "adres@email.pl") }}
       {{ render_field(form.default_duration, "Domyślny czas trwania (minuty)") }}
-      {{ render_field(form.session_type, "Typ zajęć") }}
+      {{ render_field(form.session_type, "Typ zajęć", "Zwróć uwagę na poprawną odmianę wprowadzonego słowa.") }}
       {{ render_field(form.document_recipient_email, "Email do raportów") }}
       <hr>
       <h5 class="mt-4">Zmiana hasła</h5>
-      {{ render_field(form.old_password, "Obecne hasło") }}
-      {{ render_field(form.new_password, "Nowe hasło") }}
-      {{ render_field(form.confirm, "Powtórz nowe hasło") }}
+      {{ render_password_field(form.old_password, "Obecne hasło", "current-password") }}
+      {{ render_password_field(form.new_password, "Nowe hasło", "new-password") }}
+      {{ render_password_field(form.confirm, "Powtórz nowe hasło", "new-password") }}
       <div class="text-center mt-4">
         <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
       </div>
@@ -25,51 +25,4 @@
   </div>
 </div>
 {% endblock %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <div class="mb-3">
-        {{ form.session_type.label(class="form-label") }}
-        {{ form.session_type(class="form-control", placeholder="Typ zajęć") }}
-        <div class="form-text">Zwróć uwagę na poprawną odmianę wprowadzonego słowa.</div>
-        {% for error in form.session_type.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <div class="mb-3">
-        {{ form.document_recipient_email.label(class="form-label") }}
-        {{ form.document_recipient_email(class="form-control", placeholder="Email do raportów") }}
-        {% for error in form.document_recipient_email.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <hr>
-      <h5 class="mt-4">Zmiana hasła</h5>
-      <div class="mb-3">
-        {{ form.old_password.label(class="form-label") }}
-        {{ form.old_password(class="form-control", type="password", placeholder="Obecne hasło", autocomplete="current-password") }}
-        {% for error in form.old_password.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <div class="mb-3">
-        {{ form.new_password.label(class="form-label") }}
-        {{ form.new_password(class="form-control", type="password", placeholder="Nowe hasło", autocomplete="new-password") }}
-        {% for error in form.new_password.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <div class="mb-3">
-        {{ form.confirm.label(class="form-label") }}
-        {{ form.confirm(class="form-control", type="password", placeholder="Powtórz nowe hasło", autocomplete="new-password") }}
-        {% for error in form.confirm.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-      <div class="text-center mt-4">
-        <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
-      </div>
-    </form>
-  </div>
-</div>
-{% endblock %}
+

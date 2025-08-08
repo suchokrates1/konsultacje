@@ -159,10 +159,18 @@ def logout():
 
 
 @app.route('/')
-@login_required
 def index():
-    """Redirect authenticated users to the new session form."""
-    return redirect(url_for('nowe_zajecia'))
+    """Serve the dashboard for authenticated users or the login page otherwise."""
+    if current_user.is_authenticated:
+        return redirect(url_for('nowe_zajecia'))
+    return login()
+
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    """Provide a dashboard view for tests, showing the session list."""
+    return lista_zajec()
 
 
 @app.route('/zajecia/nowe', methods=['GET', 'POST'])

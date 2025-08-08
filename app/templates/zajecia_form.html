@@ -1,40 +1,40 @@
 {% extends "base.html" %}
-{% from '_form_macros.html' import render_field %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}Nowe zajęcia{% endblock %}
 {% block content %}
 <h2>Nowe zajęcia</h2>
 <p class="mb-4 text-muted">Wypełnij formularz, aby dodać nowe zajęcia.</p>
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start w-100" style="max-width: 400px;" id="zajecia-form">
-  {{ form.hidden_tag() }}
-  <input type="hidden" name="recipient_email" id="recipient-email" value="{{ current_user.document_recipient_email or '' }}">
-  {{ render_field(form.data, "Data zajęć") }}
-  {{ render_field(form.godzina_od, "Godzina rozpoczęcia") }}
-  {{ render_field(form.godzina_do, "Godzina zakończenia") }}
-  {{ render_field(form.specjalista, "Specjalista") }}
-  {{ render_field(form.beneficjenci) }}
-  <div class="text-center mt-4">
-    {{ form.save(class="btn btn-success btn-lg me-2 px-4") }}
-    {{ form.submit_send(id="submit-send", class="btn btn-primary btn-lg px-4") }}
-  </div>
-</form>
+  <form method="post" class="text-start w-100" style="max-width: 400px;" id="zajecia-form">
+    {{ form.hidden_tag() }}
+    <input type="hidden" name="recipient_email" id="recipient-email" value="{{ current_user.document_recipient_email or '' }}">
+    {{ render_field(form.data, "Data zajęć") }}
+    {{ render_field(form.godzina_od, "Godzina rozpoczęcia") }}
+    {{ render_field(form.godzina_do, "Godzina zakończenia") }}
+    {{ render_field(form.specjalista, "Specjalista") }}
+    {{ render_field(form.beneficjenci) }}
+    <div class="text-center mt-4">
+      {{ form.save(class="btn btn-success btn-lg me-2 px-4") }}
+      {{ form.submit_send(id="submit-send", class="btn btn-primary btn-lg px-4") }}
+    </div>
+  </form>
 </div>
 
-  <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="emailModalLabel">Podaj email</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="modal-form" novalidate>
-            <label for="modal-email" class="form-label">Email odbiorcy dokumentów</label>
-            <input type="email" id="modal-email" class="form-control" required>
-            <div class="invalid-feedback">Podaj poprawny adres email.</div>
-            <div class="form-text">Email można zmienić w ustawieniach.</div>
-          </form>
-        </div>
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="emailModalLabel">Podaj email</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="modal-form" novalidate>
+          <label for="modal-email" class="form-label">Email odbiorcy dokumentów</label>
+          <input type="email" id="modal-email" class="form-control" required>
+          <div class="invalid-feedback">Podaj poprawny adres email.</div>
+          <div class="form-text">Email można zmienić w ustawieniach.</div>
+        </form>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
         <button type="button" class="btn btn-primary" id="modal-submit">Wyślij</button>
@@ -79,32 +79,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endblock %}
-  const modalEmail = document.getElementById('modal-email');
 
-  submitSend.addEventListener('click', function (event) {
-    if (!recipientEmail) {
-      event.preventDefault();
-      modal.show();
-    }
-  });
-
-  document.getElementById('modal-submit').addEventListener('click', function () {
-    if (!modalEmail.checkValidity()) {
-      modalEmail.classList.add('is-invalid');
-      return;
-    }
-    modalEmail.classList.remove('is-invalid');
-    const emailInput = modalEmail.value;
-    document.getElementById('recipient-email').value = emailInput;
-    recipientEmail = emailInput;
-    const sendField = document.createElement('input');
-    sendField.type = 'hidden';
-    sendField.name = 'submit_send';
-    sendField.value = '1';
-    form.appendChild(sendField);
-    modal.hide();
-    form.requestSubmit();
-  });
-});
-</script>
-{% endblock %}
