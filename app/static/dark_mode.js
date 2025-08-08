@@ -1,8 +1,8 @@
 // Dark mode toggle with persistence
-function applyDarkMode(isDark) {
+function applyDarkMode(theme) {
   const body = document.body;
   const icon = document.getElementById('darkModeToggle').querySelector('i');
-  if (isDark) {
+  if (theme === 'dark') {
     body.classList.add('dark-mode');
     icon.classList.remove('bi-moon');
     icon.classList.add('bi-sun');
@@ -15,20 +15,13 @@ function applyDarkMode(isDark) {
 
 document.addEventListener('DOMContentLoaded', function () {
   const darkModeBtn = document.getElementById('darkModeToggle');
-  const savedMode = localStorage.getItem('darkMode');
-  applyDarkMode(savedMode === 'enabled');
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  applyDarkMode(savedTheme);
 
   darkModeBtn.addEventListener('click', function () {
-    const isDark = document.body.classList.toggle('dark-mode');
-    const icon = darkModeBtn.querySelector('i');
-    if (isDark) {
-      icon.classList.remove('bi-moon');
-      icon.classList.add('bi-sun');
-      localStorage.setItem('darkMode', 'enabled');
-    } else {
-      icon.classList.remove('bi-sun');
-      icon.classList.add('bi-moon');
-      localStorage.setItem('darkMode', 'disabled');
-    }
+    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyDarkMode(newTheme);
+    localStorage.setItem('theme', newTheme);
   });
 });
