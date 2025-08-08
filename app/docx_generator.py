@@ -70,7 +70,17 @@ def generate_docx(zajecia, beneficjenci, output_path):
         table = doc.tables[0]
         font_size = Pt(16)
         for idx, _ in enumerate(beneficjenci[:3]):
-            row = table.rows[idx + 1]
+            target_idx = idx + 1
+            if len(table.rows) <= target_idx:
+                try:
+                    while len(table.rows) <= target_idx:
+                        table.add_row()
+                except Exception as exc:
+                    current_app.logger.error(
+                        "Unable to extend table rows: %s", exc
+                    )
+                    raise ValueError("DOCX template is missing required rows") from exc
+            row = table.rows[target_idx]
             values = [context["data"], context["time_range"], zajecia.user.full_name]
             for cell, value in zip(row.cells[1:4], values):
                 cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER

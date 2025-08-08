@@ -58,3 +58,48 @@ def test_generate_docx_file_contains_text(app, tmp_path):
 
         template = Document(os.path.join(app.root_path, "static", "wzor.docx"))
         assert "dietetykiem" in _docx_text(template)
+
+
+def test_generate_docx_adds_missing_rows(app, tmp_path, monkeypatch):
+    """Generator should expand table when template lacks enough rows."""
+
+    with app.app_context():
+        template_dir = tmp_path / "tmpl"
+        static_dir = template_dir / "static"
+        static_dir.mkdir(parents=True)
+        template_path = static_dir / "wzor.docx"
+
+        doc = Document()
+        doc.add_table(rows=1, cols=4)
+        doc.save(str(template_path))
+
+        monkeypatch.setattr(app, "root_path", str(template_dir))
+
+        user = User(full_name="Jan Kowalski", email="dyn@example.com")
+        user.set_password("pass")
+        user.confirmed = True
+        db.session.add(user)
+        db.session.commit()
+
+        b1 = Beneficjent(imie="Anna", wojewodztwo="Mazowieckie", user_id=user.id)
+        b2 = Beneficjent(imie="Ewa", wojewodztwo="Mazowieckie", user_id=user.id)
+        db.session.add_all([b1, b2])
+
+        zajecia = Zajecia(
+            data=date(2023, 3, 3),
+            godzina_od=time(10, 0),
+            godzina_do=time(11, 0),
+            specjalista="psycholog",
+            user_id=user.id,
+        )
+        zajecia.beneficjenci.extend([b1, b2])
+        db.session.add(zajecia)
+        db.session.commit()
+
+        output = tmp_path / "report.docx"
+        generate_docx(zajecia, [b1, b2], str(output))
+
+        out_doc = Document(str(output))
+        table = out_doc.tables[0]
+        assert len(table.rows) == 3
+        assert table.rows[2].cells[3].text == user.full_name
