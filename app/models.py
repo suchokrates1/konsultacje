@@ -25,7 +25,10 @@ class User(UserMixin, db.Model):
     document_recipient_email = db.Column(db.String(120), nullable=True)
     password_hash = db.Column(db.String(128))
     default_duration = db.Column(db.Integer, default=90)
-    role = db.Column(db.Enum(Roles), default=Roles.INSTRUCTOR)
+    role = db.Column(
+        db.Enum(Roles, values_callable=lambda e: [r.value for r in e]),
+        default=Roles.INSTRUCTOR,
+    )
     confirmed = db.Column(db.Boolean, default=False)
     session_type = db.Column(db.String(100))
 
