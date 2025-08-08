@@ -10,11 +10,12 @@ branch_labels = None
 depends_on = None
 
 
-roles_enum = sa.Enum('admin', 'instructor', name='roles')
+roles_enum = sa.Enum('ADMIN', 'INSTRUCTOR', name='roles')
 
 
 def upgrade():
     roles_enum.create(op.get_bind(), checkfirst=True)
+    op.execute("UPDATE user SET role = UPPER(role)")
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.alter_column(
             'role',
