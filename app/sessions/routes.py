@@ -59,6 +59,9 @@ def nowe_zajecia():
         .all()
     ]
 
+    if not form.beneficjenci.choices:
+        flash("Brak beneficjentów. Dodaj nowego, aby utworzyć zajęcia.")
+
     if request.method == "GET":
         tz = pytz.timezone(current_app.config["TIMEZONE"])
         now = datetime.now(tz)
@@ -72,7 +75,7 @@ def nowe_zajecia():
         ).time()
         form.specjalista.data = current_user.session_type
 
-    if form.validate_on_submit():
+    if form.validate_on_submit() and form.beneficjenci.choices:
         zajecia = Zajecia(
             data=form.data.data,
             godzina_od=form.godzina_od.data,
