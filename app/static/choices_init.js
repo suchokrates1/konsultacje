@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const instance = new Choices(select, {
       searchEnabled: true,
       shouldSort: false,
+      noResultsText: 'Brak wyników',
+      noChoicesText: 'Brak beneficjentów',
     });
     const container = select.nextElementSibling;
     if (container) {
