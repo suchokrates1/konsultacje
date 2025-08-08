@@ -14,11 +14,10 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
-from flask_mail import Message
-from smtplib import SMTPException
 from wtforms.validators import ValidationError
 
 from .. import db, mail
+from ..utils import send_email
 from ..forms import (
     BeneficjentForm,
     ConfirmForm,
@@ -286,19 +285,14 @@ def admin_ustawienia():
         if form.send_test.data:
             admin_email = settings.admin_email or os.environ.get("ADMIN_EMAIL")
             if admin_email:
-                msg = Message(
+                _, status = send_email(
                     "Test email",
-                    recipients=[admin_email],
-                    sender=current_app.config["MAIL_DEFAULT_SENDER"],
+                    [admin_email],
+                    "To jest test konfiguracji SMTP.",
                 )
-                msg.body = "To jest test konfiguracji SMTP."
-                try:
-                    mail.send(msg)
+                if status == "sent":
                     flash("Testowy email wysłany.")
-                except SMTPException as exc:
-                    current_app.logger.error(
-                        "Failed to send test email: %s", exc
-                    )
+                else:
                     flash("Nie udało się wysłać testowego emaila.")
             else:
                 flash("Adres administratora nie jest skonfigurowany.")
