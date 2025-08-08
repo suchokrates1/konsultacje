@@ -11,3 +11,42 @@
     opacity: 0.85;
 }
 
+/* Sticky header for tables */
+.table thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #181a1b !important;
+    color: #f8f9fa !important;
+}
+
+body.dark-mode .bg-white,
+body.dark-mode .table,
+body.dark-mode .table thead th {
+    background-color: #23272b !important;
+    color: #f8f9fa !important;
+}
+
+body.dark-mode .bg-dark {
+    background-color: #181a1b !important;
+}
+
+body.dark-mode .navbar,
+body.dark-mode .offcanvas,
+body.dark-mode .dropdown-menu {
+    background-color: #23272b !important;
+    color: #f8f9fa !important;
+}
+
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #23272b !important;
+}
+
+body.dark-mode .table-hover > tbody > tr:hover {
+    background-color: #343a40 !important;
+}
