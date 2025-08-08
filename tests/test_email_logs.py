@@ -1,3 +1,5 @@
+from sqlalchemy import select
+
 from app import db
 from app.models import User, Beneficjent, SentEmail
 
@@ -62,7 +64,7 @@ def test_email_log_and_resend(monkeypatch, app, client):
     assert len(messages) == 1
 
     with app.app_context():
-        log = SentEmail.query.one()
+        log = db.session.execute(select(SentEmail)).scalar_one()
         assert log.recipient == 'dest@example.com'
         assert log.status == 'sent'
         first_sent_at = log.sent_at
@@ -80,4 +82,3 @@ def test_email_log_and_resend(monkeypatch, app, client):
         log = db.session.get(SentEmail, email_id)
         assert log.status == 'sent'
         assert log.sent_at != first_sent_at
-
