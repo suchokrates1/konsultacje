@@ -17,17 +17,17 @@
       <td>{{ u.full_name }}</td>
       <td>{{ u.email }}</td>
       <td>
-        <a href="{{ url_for('admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
+        <a href="{{ url_for('admin.admin_edytuj_instruktora', user_id=u.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
-        <form method="post" action="{{ url_for('admin_usun_instruktora', user_id=u.id) }}" style="display:inline;">
+        <form method="post" action="{{ url_for('admin.admin_usun_instruktora', user_id=u.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
           <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>
           </button>
         </form>
         {% if not u.confirmed %}
-        <form method="post" action="{{ url_for('admin_confirm_instruktora', user_id=u.id) }}" style="display:inline;">
+        <form method="post" action="{{ url_for('admin.admin_confirm_instruktora', user_id=u.id) }}" style="display:inline;">
           {{ confirm_form.csrf_token }}
           <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Potwierdź rejestrację">Potwierdź rejestrację</button>
         </form>
@@ -47,7 +47,7 @@
                 Czy na pewno chcesz nadać uprawnienia administratora użytkownikowi <strong>{{ u.full_name }}</strong>?
               </div>
               <div class="modal-footer">
-                <form method="post" action="{{ url_for('admin_promote_instruktora', user_id=u.id) }}">
+                <form method="post" action="{{ url_for('admin.admin_promote_instruktora', user_id=u.id) }}">
                   {{ promote_form.csrf_token }}
                   <button type="submit" class="btn btn-warning">Nadaj admina</button>
                 </form>

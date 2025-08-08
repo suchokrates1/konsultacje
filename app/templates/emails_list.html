@@ -24,10 +24,10 @@
       <td>{{ email.status }}</td>
       <td>
         {% if email.zajecia %}
-        <a href="{{ url_for('pobierz_docx', zajecia_id=email.zajecia_id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport" data-bs-toggle="tooltip" title="Pobierz raport">
+        <a href="{{ url_for('sessions.pobierz_docx', zajecia_id=email.zajecia_id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport" data-bs-toggle="tooltip" title="Pobierz raport">
           <i class="bi bi-download"></i>
         </a>
-        <a href="{{ url_for('resend_email', email_id=email.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie" data-bs-toggle="tooltip" title="Wyślij ponownie">
+        <a href="{{ url_for('sessions.resend_email', email_id=email.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie" data-bs-toggle="tooltip" title="Wyślij ponownie">
           <i class="bi bi-arrow-repeat"></i>
         </a>
         {% endif %}
