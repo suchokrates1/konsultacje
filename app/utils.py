@@ -17,7 +17,7 @@ def flash_error(message):
     flash(message, 'danger')
 
 
-def send_email(subject, recipients, body, attachments=None):
+def send_email(subject, recipients, body, attachments=None, html_body=None):
     """Send an email using the configured Flask-Mail extension.
 
     Parameters
@@ -31,6 +31,9 @@ def send_email(subject, recipients, body, attachments=None):
     attachments: iterable[tuple[str, str, bytes]], optional
         Iterable of ``(filename, content_type, data)`` tuples representing
         attachments to include in the message.
+    html_body: str, optional
+        HTML body of the message. If provided, the email will contain both a
+        plain text and HTML version.
 
     Returns
     -------
@@ -45,6 +48,8 @@ def send_email(subject, recipients, body, attachments=None):
         sender=current_app.config["MAIL_DEFAULT_SENDER"],
     )
     msg.body = body
+    if html_body is not None:
+        msg.html = html_body
     if attachments:
         for filename, content_type, data in attachments:
             msg.attach(filename, content_type, data)

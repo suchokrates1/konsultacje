@@ -90,8 +90,11 @@ def register():
                 f"Użytkownik {user.full_name} zarejestrował się z adresem "
                 f"{user.email}. Potwierdź konto: {confirm_url}"
             )
+            html_body = render_template(
+                "email/new_registration.html", confirm_url=confirm_url
+            )
             _, status = send_email(
-                "Nowa rejestracja użytkownika", [admin_email], body
+                "Nowa rejestracja użytkownika", [admin_email], body, html_body=html_body
             )
             if status == "error":
                 flash("Nie udało się wysłać powiadomienia do administratora.")
