@@ -1,4 +1,11 @@
+import time
+import tempfile
+from threading import Thread
+
 import pytest
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from werkzeug.serving import make_server
 
 def test_flash_message_displayed(client, app):
     # Przykład: sprawdź czy komunikat flash pojawia się po rejestracji
@@ -40,4 +47,42 @@ def test_settings_form_password_section(client, auth):
         b'placeholder="Obecne has\xc5\x82o"' in response.data
         or 'placeholder="Obecne hasło"'.encode() in response.data
     )
+
+
+@pytest.fixture
+def live_server(app):
+    server = make_server("127.0.0.1", 5001, app)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+    time.sleep(1)
+    yield "http://127.0.0.1:5001"
+    server.shutdown()
+    thread.join()
+
+
+@pytest.fixture
+def driver():
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    profile = tempfile.mkdtemp(prefix="chrome-profile-")
+    options.add_argument(f"--user-data-dir={profile}")
+    try:
+        drv = webdriver.Chrome(options=options)
+    except Exception as exc:
+        pytest.skip(f"Chrome not available: {exc}")
+    else:
+        yield drv
+        drv.quit()
+
+
+def test_dark_mode_persists_after_refresh(live_server, driver):
+    driver.get(live_server + "/")
+    driver.find_element("id", "darkModeToggle").click()
+    body = driver.find_element("tag name", "body")
+    assert "dark-mode" in body.get_attribute("class")
+    driver.refresh()
+    body = driver.find_element("tag name", "body")
+    assert "dark-mode" in body.get_attribute("class")
 
