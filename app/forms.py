@@ -53,6 +53,15 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = CheckboxInput()
 
 
+class LoginForm(FlaskForm):
+    """Form used by users to authenticate to the application."""
+
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Hasło', validators=[DataRequired()])
+    remember_me = BooleanField('Zapamiętaj mnie')
+    submit = SubmitField('Zaloguj się')
+
+
 class ZajeciaForm(FlaskForm):
     """Form for scheduling a consultation session."""
 
