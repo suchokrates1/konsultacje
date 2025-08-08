@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 
-from flask import flash, abort, current_app
+from flask import flash, current_app
 from flask_mail import Message
 from smtplib import SMTPException
 
@@ -14,12 +14,6 @@ def flash_success(message):
 
 def flash_error(message):
     flash(message, 'danger')
-
-def get_object_or_404(model, id):
-    obj = model.query.get(id)
-    if obj is None:
-        abort(404)
-    return obj
 
 def validate_form(form):
     if form.validate_on_submit():
