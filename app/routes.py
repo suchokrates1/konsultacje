@@ -1,9 +1,9 @@
 """Flask view functions and the login form."""
 
 import os
-import re
 from datetime import datetime, timedelta
 import pytz
+from io import BytesIO
 
 from flask import (
     current_app as app,
@@ -16,7 +16,6 @@ from flask import (
     jsonify,
     send_file,
     url_for,
-    after_this_request,
 )
 from flask_login import (
     current_user,
@@ -48,7 +47,7 @@ from .forms import (
 from .models import Beneficjent, User, Zajecia, Roles, Settings, SentEmail
 from . import mail
 from .docx_generator import generate_docx
-from .utils import send_session_docx
+from .utils import send_session_docx, build_docx_filename
 from urllib.parse import urlparse
 from functools import wraps
 
@@ -270,29 +269,18 @@ def pobierz_docx(zajecia_id):
         return redirect(url_for('index'))
 
     beneficjenci = zajecia.beneficjenci
-    output_dir = os.path.join(current_app.root_path, "static", "docx")
-    os.makedirs(output_dir, exist_ok=True)
+    filename = build_docx_filename(zajecia)
 
-    first_name = beneficjenci[0].imie if beneficjenci else "beneficjent"
-    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", first_name)
-    date_str = zajecia.data.strftime("%Y-%m-%d")
-    filename = f"Konsultacje z {zajecia.specjalista} {date_str} {safe_name}.docx"
-    output_path = os.path.join(output_dir, filename)
+    output = BytesIO()
+    generate_docx(zajecia, beneficjenci, output)
+    output.seek(0)
 
-    generate_docx(zajecia, beneficjenci, output_path)
-
-    @after_this_request
-    def remove_file(response):
-        try:
-            os.remove(output_path)
-        except OSError:
-            current_app.logger.warning(
-                "Failed to remove generated DOCX %s",
-                output_path,
-            )
-        return response
-
-    return send_file(output_path, as_attachment=True, download_name=filename)
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
 
 
 @app.route('/zajecia/<int:zajecia_id>/send')

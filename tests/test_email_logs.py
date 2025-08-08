@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from app import db
 from app.models import User, Beneficjent, SentEmail
 
@@ -42,11 +40,11 @@ def test_email_log_and_resend(monkeypatch, app, client):
     def fake_send(msg):
         messages.append(msg)
 
-    def fake_generate_docx(zajecia, beneficjenci, output_path):
-        Path(output_path).write_bytes(b'dummy')
+    def fake_generate_docx(zajecia, beneficjenci, output):
+        output.write(b'dummy')
 
     monkeypatch.setattr('app.routes.mail.send', fake_send)
-    monkeypatch.setattr('app.routes.generate_docx', fake_generate_docx)
+    monkeypatch.setattr('app.utils.generate_docx', fake_generate_docx)
 
     resp = client.post(
         '/zajecia/nowe',
