@@ -19,10 +19,10 @@
       <td>{{ b.wojewodztwo }}</td>
       <td>{{ b.user.full_name }}</td>
       <td>
-        <a href="{{ url_for('admin_edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
+        <a href="{{ url_for('admin.admin_edytuj_beneficjenta', beneficjent_id=b.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
-        <form method="post" action="{{ url_for('admin_usun_beneficjenta', beneficjent_id=b.id) }}" style="display:inline;">
+        <form method="post" action="{{ url_for('admin.admin_usun_beneficjenta', beneficjent_id=b.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
           <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>

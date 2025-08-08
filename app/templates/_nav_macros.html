@@ -1,25 +1,25 @@
 {% macro render_nav_items(admin_id) %}
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'nowe_zajecia' %} active{% endif %}" href="{{ url_for('nowe_zajecia') }}"{% if request.endpoint == 'nowe_zajecia' %} aria-current="page"{% endif %}>Nowe zajęcia</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.nowe_zajecia' %} active{% endif %}" href="{{ url_for('sessions.nowe_zajecia') }}"{% if request.endpoint == 'sessions.nowe_zajecia' %} aria-current="page"{% endif %}>Nowe zajęcia</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'lista_zajec' %} active{% endif %}" href="{{ url_for('lista_zajec') }}"{% if request.endpoint == 'lista_zajec' %} aria-current="page"{% endif %}>Lista zajęć</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_zajec' %} active{% endif %}" href="{{ url_for('sessions.lista_zajec') }}"{% if request.endpoint == 'sessions.lista_zajec' %} aria-current="page"{% endif %}>Lista zajęć</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'emails_list' %} active{% endif %}" href="{{ url_for('emails_list') }}"{% if request.endpoint == 'emails_list' %} aria-current="page"{% endif %}>Wiadomości</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.emails_list' %} active{% endif %}" href="{{ url_for('sessions.emails_list') }}"{% if request.endpoint == 'sessions.emails_list' %} aria-current="page"{% endif %}>Wiadomości</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'lista_beneficjentow' %} active{% endif %}" href="{{ url_for('lista_beneficjentow') }}"{% if request.endpoint == 'lista_beneficjentow' %} aria-current="page"{% endif %}>Beneficjenci</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_beneficjentow' %} active{% endif %}" href="{{ url_for('sessions.lista_beneficjentow') }}"{% if request.endpoint == 'sessions.lista_beneficjentow' %} aria-current="page"{% endif %}>Beneficjenci</a>
   </li>
   {% if current_user.is_authenticated and current_user.role == 'admin' %}
-  {% set admin_endpoints = ['admin_instruktorzy', 'admin_beneficjenci', 'admin_zajecia', 'admin_ustawienia'] %}
+  {% set admin_endpoints = ['admin.admin_instruktorzy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle{% if request.endpoint in admin_endpoints %} active{% endif %}" href="#" id="{{ admin_id }}" role="button" data-bs-toggle="dropdown" aria-expanded="false"{% if request.endpoint in admin_endpoints %} aria-current="page"{% endif %}>Admin</a>
     <ul class="dropdown-menu" aria-labelledby="{{ admin_id }}">
-      <li><a class="dropdown-item{% if request.endpoint == 'admin_instruktorzy' %} active{% endif %}" href="{{ url_for('admin_instruktorzy') }}"{% if request.endpoint == 'admin_instruktorzy' %} aria-current="page"{% endif %}>Instruktorzy</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin_beneficjenci' %} active{% endif %}" href="{{ url_for('admin_beneficjenci') }}"{% if request.endpoint == 'admin_beneficjenci' %} aria-current="page"{% endif %}>Beneficjenci</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin_zajecia' %} active{% endif %}" href="{{ url_for('admin_zajecia') }}"{% if request.endpoint == 'admin_zajecia' %} aria-current="page"{% endif %}>Zajęcia</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin_ustawienia') }}"{% if request.endpoint == 'admin_ustawienia' %} aria-current="page"{% endif %}>Ustawienia</a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_instruktorzy' %} active{% endif %}" href="{{ url_for('admin.admin_instruktorzy') }}"{% if request.endpoint == 'admin.admin_instruktorzy' %} aria-current="page"{% endif %}>Instruktorzy</a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_beneficjenci' %} active{% endif %}" href="{{ url_for('admin.admin_beneficjenci') }}"{% if request.endpoint == 'admin.admin_beneficjenci' %} aria-current="page"{% endif %}>Beneficjenci</a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>Zajęcia</a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>Ustawienia</a></li>
     </ul>
   </li>
   {% endif %}
@@ -28,10 +28,10 @@
 {% macro render_user_items() %}
   {% if current_user.is_authenticated %}
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'user_settings' %} active{% endif %}" href="{{ url_for('user_settings') }}"{% if request.endpoint == 'user_settings' %} aria-current="page"{% endif %}>Ustawienia</a>
+    <a class="nav-link{% if request.endpoint == 'auth.user_settings' %} active{% endif %}" href="{{ url_for('auth.user_settings') }}"{% if request.endpoint == 'auth.user_settings' %} aria-current="page"{% endif %}>Ustawienia</a>
   </li>
   <li class="nav-item">
-    <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('logout') }}">Wyloguj</a>
+    <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('auth.logout') }}">Wyloguj</a>
   </li>
   {% endif %}
 {% endmacro %}
