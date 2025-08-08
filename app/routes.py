@@ -77,6 +77,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Zaloguj się')
 
 
+@app.route('/login/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Authenticate a user and redirect to the next page."""
