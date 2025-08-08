@@ -162,6 +162,19 @@ class UserSettingsForm(FlaskForm):
     )
     submit = SubmitField('Zapisz')
 
+    def validate(self, extra_validators=None):
+        """Ensure both password fields are provided together."""
+        rv = super().validate(extra_validators)
+        if self.new_password.data or self.confirm.data:
+            if not self.new_password.data or not self.confirm.data:
+                message = 'Oba pola hasła są wymagane'
+                if not self.new_password.data:
+                    self.new_password.errors.append(message)
+                if not self.confirm.data:
+                    self.confirm.errors.append(message)
+                rv = False
+        return rv
+
 
 class BeneficjentForm(FlaskForm):
     """Form for adding or editing a beneficiary."""

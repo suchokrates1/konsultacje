@@ -65,6 +65,48 @@ def test_settings_wrong_old_password(app, client):
     assert 'Nieprawidłowe aktualne hasło' in resp.get_data(as_text=True)
 
 
+def test_settings_password_change_missing_confirm(app, client):
+    create_user(app)
+    login(client)
+    resp = client.post(
+        '/settings',
+        data={
+            'email': 'c@example.com',
+            'full_name': 'change',
+            'default_duration': 90,
+            'old_password': 'old',
+            'new_password': 'new',
+        },
+        follow_redirects=True,
+    )
+    html = resp.get_data(as_text=True)
+    assert 'Oba pola hasła są wymagane' in html
+    with app.app_context():
+        user = User.query.filter_by(full_name='change').first()
+        assert user.check_password('old')
+
+
+def test_settings_password_change_missing_new_password(app, client):
+    create_user(app)
+    login(client)
+    resp = client.post(
+        '/settings',
+        data={
+            'email': 'c@example.com',
+            'full_name': 'change',
+            'default_duration': 90,
+            'old_password': 'old',
+            'confirm': 'new',
+        },
+        follow_redirects=True,
+    )
+    html = resp.get_data(as_text=True)
+    assert 'Oba pola hasła są wymagane' in html
+    with app.app_context():
+        user = User.query.filter_by(full_name='change').first()
+        assert user.check_password('old')
+
+
 def test_settings_form_prefilled_with_user_data(app, client):
     """GET /settings should render form fields populated with current user data."""
     create_user(app)
