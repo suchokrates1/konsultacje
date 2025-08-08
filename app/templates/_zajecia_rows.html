@@ -6,18 +6,18 @@
   <td>{{ zaj.user.full_name }}</td>
   <td>{{ 'wysłano' if zaj.doc_sent_at else 'niewysłano' }}</td>
   <td>
-    <a href="{{ url_for('pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport" data-bs-toggle="tooltip" title="Pobierz raport">
+    <a href="{{ url_for('sessions.pobierz_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Pobierz raport" data-bs-toggle="tooltip" title="Pobierz raport">
       <i class="bi bi-download" aria-hidden="true"></i>
     </a>
-    <a href="{{ url_for('wyslij_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie" data-bs-toggle="tooltip" title="Wyślij ponownie">
+    <a href="{{ url_for('sessions.wyslij_docx', zajecia_id=zaj.id) }}" class="btn btn-sm btn-secondary" aria-label="Wyślij ponownie" data-bs-toggle="tooltip" title="Wyślij ponownie">
       <i class="bi bi-envelope-arrow-up" aria-hidden="true"></i>
     </a>
   </td>
   <td>
-    <a href="{{ url_for('edytuj_zajecia', zajecia_id=zaj.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
+    <a href="{{ url_for('sessions.edytuj_zajecia', zajecia_id=zaj.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
       <i class="bi bi-pencil" aria-hidden="true"></i>
     </a>
-    <form method="post" action="{{ url_for('usun_zajecia', zajecia_id=zaj.id) }}" style="display:inline;">
+    <form method="post" action="{{ url_for('sessions.usun_zajecia', zajecia_id=zaj.id) }}" style="display:inline;">
       {{ delete_form.hidden_tag() }}
       {{ delete_form.submit(class='btn btn-sm btn-danger', onclick="return confirm('Na pewno chcesz usunąć?')", aria_label="Usuń", **{'data-bs-toggle': 'tooltip', 'title': 'Usuń'}) }}
     </form>

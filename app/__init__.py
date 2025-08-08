@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'auth.login'
 mail = Mail()
 csrf = CSRFProtect()
 
@@ -89,8 +89,18 @@ def create_app(test_config=None):
     csrf.init_app(app)
     Migrate(app, db)
 
+    from .auth.routes import auth_bp
+    from .sessions.routes import sessions_bp
+    from .admin.routes import admin_bp
+    from .errors import register_error_handlers
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(sessions_bp)
+    app.register_blueprint(admin_bp, url_prefix="/admin")
+    register_error_handlers(app)
+
     with app.app_context():
-        from . import routes, models  # noqa: F401
+        from . import models  # noqa: F401
         from flask_migrate import upgrade
         upgrade()
 
