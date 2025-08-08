@@ -24,7 +24,10 @@ def generate_docx(zajecia, beneficjenci, output_path):
     start_time = zajecia.godzina_od.strftime("%H:%M")
     end_time = zajecia.godzina_do.strftime("%H:%M")
     names = "\n".join(b.imie for b in beneficjenci[:3])
-    wojew = ", ".join({b.wojewodztwo for b in beneficjenci[:3]})
+    # Using dict.fromkeys to keep the order of provinces aligned with
+    # the order of beneficiaries while removing duplicates.
+    wojewodztwa = dict.fromkeys(b.wojewodztwo for b in beneficjenci[:3])
+    wojew = ", ".join(wojewodztwa)
     context = {
         "data": zajecia.data.strftime("%d.%m.%Y"),
         "time_range": f"{start_time} - {end_time}",
