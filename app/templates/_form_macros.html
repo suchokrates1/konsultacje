@@ -2,7 +2,7 @@
   <div class="mb-3">
     {{ field.label(class="form-label") }}
     {% if field.type in ['SelectField', 'SelectMultipleField'] %}
-      {{ field(class="form-select", placeholder=placeholder) }}
+      {{ field(class="form-select", placeholder=placeholder, data_choices="true") }}
     {% elif field.type == 'EmailField' %}
       {{ field(class="form-control", placeholder=placeholder, autocomplete="email") }}
     {% elif field.name in ['full_name'] %}
