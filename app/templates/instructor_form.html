@@ -1,28 +1,18 @@
 {% extends "base.html" %}
-{% from '_form_macros.html' import render_field %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}Edytuj instruktora{% endblock %}
 {% block content %}
 <h2>Edytuj instruktora</h2>
 <p class="mb-4 text-muted">Zmień dane instruktora.</p>
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start w-100" style="max-width: 400px;">
-  {{ form.csrf_token }}
-  {{ render_field(form.full_name, "Imię i nazwisko") }}
-  {{ render_field(form.email, "adres@email.pl") }}
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-primary btn-lg px-4">Zapisz</button>
-  </div>
-</form>
+  <form method="post" class="text-start w-100" style="max-width: 400px;">
+    {{ form.csrf_token }}
+    {{ render_field(form.full_name, "Imię i nazwisko") }}
+    {{ render_field(form.email, "adres@email.pl") }}
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary btn-lg px-4">Zapisz</button>
+    </div>
+  </form>
 </div>
 {% endblock %}
-    {{ form.email(class="form-control", placeholder="adres@email.pl") }}
-    {% for error in form.email.errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-primary btn-lg px-4">Zapisz</button>
-  </div>
-</form>
-</div>
-{% endblock %}
+

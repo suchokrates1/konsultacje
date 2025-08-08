@@ -3,7 +3,8 @@
 import os
 import sys
 import pytest
-from app import create_app
+from app import create_app, db
+from app.models import User
 
 
 @pytest.fixture
@@ -43,12 +44,28 @@ def client(app):
 
 
 @pytest.fixture
-def login(client):
+def login(client, app):
     """Log in a test user."""
 
     def do_login(email="test@example.com", password="password"):
-        return client.post(
-            "/login", data={"email": email, "password": password}
-        )
+        with app.app_context():
+            if not User.query.filter_by(email=email).first():
+                user = User(full_name="Test", email=email)
+                user.set_password(password)
+                user.confirmed = True
+                db.session.add(user)
+                db.session.commit()
+        return client.post("/login", data={"email": email, "password": password})
 
     return do_login
+
+
+@pytest.fixture
+def auth(login):
+    """Provide authentication actions for tests."""
+
+    class AuthActions:
+        def login(self, email="test@example.com", password="password"):
+            return login(email, password)
+
+    return AuthActions()

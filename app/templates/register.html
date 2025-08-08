@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from '_form_macros.html' import render_field %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}Rejestracja{% endblock %}
 {% block content %}
 <h2>Rejestracja</h2>
@@ -7,73 +7,17 @@
 <div class="row justify-content-center text-center">
   <div class="col-12 col-md-6 d-flex justify-content-center">
     <form method="post" class="text-start w-100" style="max-width: 400px;">
-  {{ form.hidden_tag() }}
-  {{ render_field(form.full_name, "Imię i nazwisko") }}
-  {{ render_field(form.email, "adres@email.pl") }}
-  <hr>
-  {{ render_field(form.password, "Hasło") }}
-  {{ render_field(form.confirm, "Powtórz hasło") }}
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
-  </div>
+      {{ form.hidden_tag() }}
+      {{ render_field(form.full_name, "Imię i nazwisko") }}
+      {{ render_field(form.email, "adres@email.pl") }}
+      <hr>
+      {{ render_password_field(form.password, "Hasło", "new-password") }}
+      {{ render_password_field(form.confirm, "Powtórz hasło", "new-password") }}
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
+      </div>
     </form>
   </div>
 </div>
-{% endblock %}
-  </div>
-  <hr>
-  <div class="mb-3">
-    {{ form.password.label(class="form-label") }}
-    <div class="input-group">
-      {{ form.password(class="form-control", type="password", id=form.password.id, placeholder="Hasło", autocomplete="new-password", **{'aria-label': 'Hasło'}) }}
-      <span class="input-group-text" tabindex="0" data-bs-toggle="tooltip" title="Pokaż/ukryj hasło">
-        <i class="bi bi-eye-slash toggle-password" data-target="{{ form.password.id }}" role="button"></i>
-      </span>
-    </div>
-    {% for error in form.password.errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <div class="mb-3">
-    {{ form.confirm.label(class="form-label") }}
-    <div class="input-group">
-      {{ form.confirm(class="form-control", type="password", id=form.confirm.id, placeholder="Powtórz hasło", autocomplete="new-password", **{'aria-label': 'Potwierdź hasło'}) }}
-      <span class="input-group-text" tabindex="0" data-bs-toggle="tooltip" title="Pokaż/ukryj hasło">
-        <i class="bi bi-eye-slash toggle-password" data-target="{{ form.confirm.id }}" role="button"></i>
-      </span>
-    </div>
-    {% for error in form.confirm.errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
-  </div>
-    </form>
-  </div>
-</div>
-<script>
-  document.querySelectorAll('.toggle-password').forEach(function(icon) {
-    icon.addEventListener('click', function() {
-      const target = document.getElementById(this.dataset.target);
-      if (target.type === 'password') {
-        target.type = 'text';
-        this.classList.remove('bi-eye-slash');
-        this.classList.add('bi-eye');
-      } else {
-        target.type = 'password';
-        this.classList.add('bi-eye-slash');
-        this.classList.remove('bi-eye');
-      }
-    });
-  });
-  // Tooltip init
-  document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-      new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  });
-</script>
 {% endblock %}
 

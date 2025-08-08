@@ -1,28 +1,18 @@
 {% extends "base.html" %}
-{% from '_form_macros.html' import render_field %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
 <h2>{{ title }}</h2>
 <p class="mb-4 text-muted">Wypełnij dane beneficjenta.</p>
 <div class="d-flex justify-content-center">
-<form method="post" class="text-start w-100" style="max-width: 400px;">
-  {{ form.hidden_tag() }}
-  {{ render_field(form.imie, "Imię i nazwisko") }}
-  {{ render_field(form.wojewodztwo) }}
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
-  </div>
-</form>
+  <form method="post" class="text-start w-100" style="max-width: 400px;">
+    {{ form.hidden_tag() }}
+    {{ render_field(form.imie, "Imię i nazwisko") }}
+    {{ render_field(form.wojewodztwo) }}
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
+    </div>
+  </form>
 </div>
 {% endblock %}
-    {{ form.wojewodztwo(class="form-select") }}
-    {% for error in form.wojewodztwo.errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-  <div class="text-center mt-4">
-    <button type="submit" class="btn btn-success btn-lg px-4">{{ form.submit.label.text }}</button>
-  </div>
-</form>
-</div>
-{% endblock %}
+

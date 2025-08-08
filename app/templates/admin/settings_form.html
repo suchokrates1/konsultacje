@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from '_form_macros.html' import render_field, render_password_field, render_checkbox_field %}
 {% block title %}Ustawienia{% endblock %}
 {% block content %}
 <h2>Ustawienia</h2>
@@ -6,42 +7,15 @@
   <div class="col-12 col-md-6 d-flex justify-content-center">
     <form method="post" class="text-start w-100" style="max-width: 400px;">
       {{ form.csrf_token }}
-      <div class="mb-3">
-        {{ form.mail_server.label(class="form-label") }}
-        {{ form.mail_server(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.mail_port.label(class="form-label") }}
-        {{ form.mail_port(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.mail_username.label(class="form-label") }}
-        {{ form.mail_username(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.mail_password.label(class="form-label") }}
-        {{ form.mail_password(class="form-control") }}
-      </div>
-      <div class="form-check form-switch mb-3">
-        {{ form.mail_use_tls(class="form-check-input") }}
-        {{ form.mail_use_tls.label(class="form-check-label") }}
-      </div>
-      <div class="form-check form-switch mb-3">
-        {{ form.mail_use_ssl(class="form-check-input") }}
-        {{ form.mail_use_ssl.label(class="form-check-label") }}
-      </div>
-      <div class="mb-3">
-        {{ form.admin_email.label(class="form-label") }}
-        {{ form.admin_email(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.sender_name.label(class="form-label") }}
-        {{ form.sender_name(class="form-control") }}
-      </div>
-      <div class="mb-3">
-        {{ form.timezone.label(class="form-label") }}
-        {{ form.timezone(class="form-select") }}
-      </div>
+      {{ render_field(form.mail_server) }}
+      {{ render_field(form.mail_port) }}
+      {{ render_field(form.mail_username) }}
+      {{ render_password_field(form.mail_password) }}
+      {{ render_checkbox_field(form.mail_use_tls) }}
+      {{ render_checkbox_field(form.mail_use_ssl) }}
+      {{ render_field(form.admin_email) }}
+      {{ render_field(form.sender_name) }}
+      {{ render_field(form.timezone) }}
       <div class="text-center">
         {{ form.submit(class="btn btn-primary btn-sm me-2") }}
         {{ form.send_test(class="btn btn-secondary btn-sm") }}

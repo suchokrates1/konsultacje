@@ -136,6 +136,28 @@
           icon.classList.add('bi-moon');
         }
       });
+
+      // Password visibility toggles
+      document.querySelectorAll('.toggle-password').forEach(function(icon) {
+        icon.addEventListener('click', function() {
+          const target = document.getElementById(this.dataset.target);
+          if (target.type === 'password') {
+            target.type = 'text';
+            this.classList.remove('bi-eye-slash');
+            this.classList.add('bi-eye');
+          } else {
+            target.type = 'password';
+            this.classList.add('bi-eye-slash');
+            this.classList.remove('bi-eye');
+          }
+        });
+      });
+
+      // Tooltip init
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     });
   </script>
 </body>

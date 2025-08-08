@@ -1,7 +1,43 @@
-{% macro render_field(field, placeholder='') %}
+{% macro render_field(field, placeholder='', help_text='') %}
   <div class="mb-3">
     {{ field.label(class="form-label") }}
-    {{ field(class="form-control", placeholder=placeholder) }}
+    {% if field.type in ['SelectField', 'SelectMultipleField'] %}
+      {{ field(class="form-select", placeholder=placeholder) }}
+    {% elif field.type == 'EmailField' %}
+      {{ field(class="form-control", placeholder=placeholder, autocomplete="email") }}
+    {% elif field.name in ['full_name'] %}
+      {{ field(class="form-control", placeholder=placeholder, autocomplete="name") }}
+    {% else %}
+      {{ field(class="form-control", placeholder=placeholder) }}
+    {% endif %}
+    {% if help_text %}
+      <div class="form-text">{{ help_text }}</div>
+    {% endif %}
+    {% for error in field.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro render_password_field(field, placeholder='', autocomplete='current-password') %}
+  <div class="mb-3">
+    {{ field.label(class="form-label") }}
+    <div class="input-group">
+      {{ field(class="form-control", type="password", id=field.id, placeholder=placeholder, autocomplete=autocomplete) }}
+      <span class="input-group-text" tabindex="0" data-bs-toggle="tooltip" title="Pokaż/ukryj hasło">
+        <i class="bi bi-eye-slash toggle-password" data-target="{{ field.id }}" role="button"></i>
+      </span>
+    </div>
+    {% for error in field.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro render_checkbox_field(field) %}
+  <div class="form-check mb-3">
+    {{ field(class="form-check-input") }}
+    {{ field.label(class="form-check-label") }}
     {% for error in field.errors %}
       <div class="text-danger">{{ error }}</div>
     {% endfor %}
