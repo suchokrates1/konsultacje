@@ -6,7 +6,7 @@ import pytest
 from smtplib import SMTPException
 
 from app import create_app, db
-from app.models import User
+from app.models import User, Roles
 
 DB_PATH = os.path.join(
     os.path.dirname(__file__),
@@ -69,7 +69,7 @@ def test_admin_created_from_env(monkeypatch):
         assert admin is not None
         assert admin.email == 'admin@example.com'
         assert admin.check_password('adminpass')
-        assert admin.role == 'admin'
+        assert admin.role == Roles.ADMIN
         assert admin.confirmed
 
     # create_app called again should not alter admin confirmation status
