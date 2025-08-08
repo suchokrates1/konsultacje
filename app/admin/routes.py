@@ -67,7 +67,9 @@ def admin_beneficjenci():
 @admin_required
 def admin_edytuj_beneficjenta(beneficjent_id):
     """Admin view for editing any beneficiary."""
-    benef = Beneficjent.query.get_or_404(beneficjent_id)
+    benef = db.session.get(Beneficjent, beneficjent_id)
+    if benef is None:
+        abort(404)
     form = BeneficjentForm(obj=benef)
     if form.validate_on_submit():
         benef.imie = form.imie.data
@@ -87,7 +89,9 @@ def admin_usun_beneficjenta(beneficjent_id):
     """Admin action to delete a beneficiary."""
     form = DeleteForm()
     if form.validate_on_submit():
-        benef = Beneficjent.query.get_or_404(beneficjent_id)
+        benef = db.session.get(Beneficjent, beneficjent_id)
+        if benef is None:
+            abort(404)
         db.session.delete(benef)
         db.session.commit()
         flash("Beneficjent usunięty.")
@@ -115,7 +119,9 @@ def admin_zajecia():
 @admin_required
 def admin_edytuj_zajecia(zajecia_id):
     """Admin view for editing any session."""
-    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    zajecia = db.session.get(Zajecia, zajecia_id)
+    if zajecia is None:
+        abort(404)
     form = ZajeciaForm(obj=zajecia)
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
@@ -146,7 +152,9 @@ def admin_usun_zajecia(zajecia_id):
     """Admin action to remove a session."""
     form = DeleteForm()
     if form.validate_on_submit():
-        zajecia = Zajecia.query.get_or_404(zajecia_id)
+        zajecia = db.session.get(Zajecia, zajecia_id)
+        if zajecia is None:
+            abort(404)
         db.session.delete(zajecia)
         db.session.commit()
         flash("Zajęcia usunięte.")
@@ -176,7 +184,9 @@ def admin_instruktorzy():
 @admin_required
 def admin_edytuj_instruktora(user_id):
     """Admin view for editing an instructor account."""
-    instr = User.query.get_or_404(user_id)
+    instr = db.session.get(User, user_id)
+    if instr is None:
+        abort(404)
     form = UserEditForm(obj=instr)
     if form.validate_on_submit():
         instr.full_name = form.full_name.data
@@ -196,7 +206,9 @@ def admin_usun_instruktora(user_id):
     """Admin action to delete an instructor."""
     form = DeleteForm()
     if form.validate_on_submit():
-        instr = User.query.get_or_404(user_id)
+        instr = db.session.get(User, user_id)
+        if instr is None:
+            abort(404)
         db.session.delete(instr)
         db.session.commit()
         flash("Instruktor usunięty.")
@@ -210,7 +222,9 @@ def admin_promote_instruktora(user_id):
     """Grant admin role to the selected instructor."""
     form = PromoteForm()
     if form.validate_on_submit():
-        instr = User.query.get_or_404(user_id)
+        instr = db.session.get(User, user_id)
+        if instr is None:
+            abort(404)
         instr.role = Roles.ADMIN
         db.session.commit()
         flash("Instruktor ma teraz uprawnienia admina.")
@@ -235,7 +249,9 @@ def admin_confirm_instruktora(user_id):
 
     form = ConfirmForm()
     if form.validate_on_submit():
-        instr = User.query.get_or_404(user_id)
+        instr = db.session.get(User, user_id)
+        if instr is None:
+            abort(404)
         instr.confirmed = True
         db.session.commit()
         flash("Instruktor został potwierdzony.")
