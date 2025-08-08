@@ -22,7 +22,7 @@ from wtforms.validators import ValidationError
 
 from .. import db
 from ..forms import BeneficjentForm, DeleteForm, ZajeciaForm
-from ..models import Beneficjent, SentEmail, User, Zajecia
+from ..models import Beneficjent, SentEmail, Zajecia
 from ..utils import send_session_docx, build_docx_filename
 
 
@@ -134,7 +134,9 @@ def nowe_zajecia():
 @login_required
 def pobierz_docx(zajecia_id):
     """Generate and return a DOCX report for the given session."""
-    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    zajecia = db.session.get(Zajecia, zajecia_id)
+    if zajecia is None:
+        abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.index"))
@@ -160,7 +162,9 @@ def pobierz_docx(zajecia_id):
 @login_required
 def wyslij_docx(zajecia_id):
     """Regenerate a DOCX report and email it to the configured recipient."""
-    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    zajecia = db.session.get(Zajecia, zajecia_id)
+    if zajecia is None:
+        abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.lista_zajec"))
@@ -207,7 +211,9 @@ def emails_list():
 @login_required
 def resend_email(email_id):
     """Regenerate attachment and resend the email."""
-    sent_email = SentEmail.query.get_or_404(email_id)
+    sent_email = db.session.get(SentEmail, email_id)
+    if sent_email is None:
+        abort(404)
     if not sent_email.zajecia or sent_email.zajecia.user_id != current_user.id:
         flash("Brak dostępu do tej wiadomości.")
         return redirect(url_for("sessions.emails_list"))
@@ -257,7 +263,9 @@ def lista_zajec():
 @login_required
 def edytuj_zajecia(zajecia_id):
     """Edit an existing session belonging to the current user."""
-    zajecia = Zajecia.query.get_or_404(zajecia_id)
+    zajecia = db.session.get(Zajecia, zajecia_id)
+    if zajecia is None:
+        abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.lista_zajec"))
@@ -292,7 +300,9 @@ def usun_zajecia(zajecia_id):
     """Delete a session owned by the current user."""
     form = DeleteForm()
     if form.validate_on_submit():
-        zajecia = Zajecia.query.get_or_404(zajecia_id)
+        zajecia = db.session.get(Zajecia, zajecia_id)
+        if zajecia is None:
+            abort(404)
         if zajecia.user_id != current_user.id:
             flash("Brak dostępu do tych zajęć.")
             return redirect(url_for("sessions.lista_zajec"))
@@ -394,7 +404,9 @@ def nowy_beneficjent():
 @login_required
 def edytuj_beneficjenta(beneficjent_id):
     """Edit an existing beneficiary belonging to the user."""
-    benef = Beneficjent.query.get_or_404(beneficjent_id)
+    benef = db.session.get(Beneficjent, beneficjent_id)
+    if benef is None:
+        abort(404)
     if benef.user_id != current_user.id:
         flash("Brak dostępu do tego beneficjenta.")
         return redirect(url_for("sessions.lista_beneficjentow"))
@@ -416,7 +428,9 @@ def usun_beneficjenta(beneficjent_id):
     """Delete a beneficiary owned by the current user."""
     form = DeleteForm()
     if form.validate_on_submit():
-        benef = Beneficjent.query.get_or_404(beneficjent_id)
+        benef = db.session.get(Beneficjent, beneficjent_id)
+        if benef is None:
+            abort(404)
         if benef.user_id != current_user.id:
             flash("Brak dostępu do tego beneficjenta.")
             return redirect(url_for("sessions.lista_beneficjentow"))
