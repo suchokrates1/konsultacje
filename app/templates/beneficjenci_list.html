@@ -5,9 +5,11 @@
 <form method="get" class="mb-3">
   <div class="input-group">
     <input id="beneficjenci-search" data-live-search="#beneficjenci-rows" type="text" name="q" class="form-control" placeholder="Szukaj" value="{{ q }}">
+    <a href="{{ url_for('nowy_beneficjent') }}" class="btn btn-success btn-sm" aria-label="Dodaj beneficjenta" title="Dodaj beneficjenta">
+      <i class="bi bi-person-plus"></i>
+    </a>
   </div>
 </form>
-<a href="{{ url_for('nowy_beneficjent') }}" class="btn btn-success btn-sm mb-3">Dodaj beneficjenta</a>
 <div class="table-responsive">
 <table class="table mx-auto text-start">
   <thead>
