@@ -182,3 +182,19 @@ def test_only_superadmin_can_demote_admin(app):
     with app.app_context():
         user = db.session.get(User, admin_id)
         assert user.role == Roles.INSTRUCTOR
+
+
+def test_superadmin_cannot_demote_instructor(app):
+    """Superadmin should not be able to demote a user who is not an admin."""
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
+    client = app.test_client()
+
+    login(client, 'superadmin')
+    resp = client.post(
+        f'/admin/uzytkownicy/{inst1_id}/demote',
+        data={'submit': '1'},
+    )
+    assert resp.status_code == 403
+    with app.app_context():
+        user = db.session.get(User, inst1_id)
+        assert user.role == Roles.INSTRUCTOR
