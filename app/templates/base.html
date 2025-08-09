@@ -18,14 +18,19 @@
       <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm ms-auto" type="button" aria-label="Przełącz tryb ciemny" title="Przełącz tryb ciemny">
         <i class="bi bi-moon"></i>
       </button>
+      <button class="btn btn-outline-secondary btn-sm ms-2 d-lg-none"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#mobileMenu"
+              aria-controls="mobileMenu"
+              aria-label="Otwórz menu">
+        <i class="bi bi-list"></i>
+      </button>
     </div>
   </header>
   {% if current_user.is_authenticated %}
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       <div class="d-none d-lg-flex flex-grow-1 justify-content-between" id="navbarNav">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-center">
           {{ render_nav_items('adminMenu') }}
