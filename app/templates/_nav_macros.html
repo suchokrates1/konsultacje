@@ -1,25 +1,43 @@
 {% macro render_nav_items(admin_id) %}
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'sessions.nowe_zajecia' %} active{% endif %}" href="{{ url_for('sessions.nowe_zajecia') }}"{% if request.endpoint == 'sessions.nowe_zajecia' %} aria-current="page"{% endif %}>Nowe zajęcia</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.nowe_zajecia' %} active{% endif %}" href="{{ url_for('sessions.nowe_zajecia') }}"{% if request.endpoint == 'sessions.nowe_zajecia' %} aria-current="page"{% endif %}>
+      <i class="bi bi-calendar-plus me-2"></i>Nowe zajęcia
+    </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'sessions.lista_zajec' %} active{% endif %}" href="{{ url_for('sessions.lista_zajec') }}"{% if request.endpoint == 'sessions.lista_zajec' %} aria-current="page"{% endif %}>Lista zajęć</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_zajec' %} active{% endif %}" href="{{ url_for('sessions.lista_zajec') }}"{% if request.endpoint == 'sessions.lista_zajec' %} aria-current="page"{% endif %}>
+      <i class="bi bi-list-check me-2"></i>Lista zajęć
+    </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'sessions.emails_list' %} active{% endif %}" href="{{ url_for('sessions.emails_list') }}"{% if request.endpoint == 'sessions.emails_list' %} aria-current="page"{% endif %}>Wiadomości</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.emails_list' %} active{% endif %}" href="{{ url_for('sessions.emails_list') }}"{% if request.endpoint == 'sessions.emails_list' %} aria-current="page"{% endif %}>
+      <i class="bi bi-envelope me-2"></i>Wiadomości
+    </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'sessions.lista_beneficjentow' %} active{% endif %}" href="{{ url_for('sessions.lista_beneficjentow') }}"{% if request.endpoint == 'sessions.lista_beneficjentow' %} aria-current="page"{% endif %}>Beneficjenci</a>
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_beneficjentow' %} active{% endif %}" href="{{ url_for('sessions.lista_beneficjentow') }}"{% if request.endpoint == 'sessions.lista_beneficjentow' %} aria-current="page"{% endif %}>
+      <i class="bi bi-people me-2"></i>Beneficjenci
+    </a>
   </li>
   {% if current_user.is_authenticated and current_user.role.value in ('admin', 'superadmin') %}
   {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle{% if request.endpoint in admin_endpoints %} active{% endif %}" href="#" id="{{ admin_id }}" role="button" data-bs-toggle="dropdown" aria-expanded="false"{% if request.endpoint in admin_endpoints %} aria-current="page"{% endif %}>Admin</a>
+    <a class="nav-link dropdown-toggle{% if request.endpoint in admin_endpoints %} active{% endif %}" href="#" id="{{ admin_id }}" role="button" data-bs-toggle="dropdown" aria-expanded="false"{% if request.endpoint in admin_endpoints %} aria-current="page"{% endif %}>
+      <i class="bi bi-gear me-2"></i>Admin
+    </a>
     <ul class="dropdown-menu" aria-labelledby="{{ admin_id }}">
-      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_uzytkownicy' %} active{% endif %}" href="{{ url_for('admin.admin_uzytkownicy') }}"{% if request.endpoint == 'admin.admin_uzytkownicy' %} aria-current="page"{% endif %}>Użytkownicy</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_beneficjenci' %} active{% endif %}" href="{{ url_for('admin.admin_beneficjenci') }}"{% if request.endpoint == 'admin.admin_beneficjenci' %} aria-current="page"{% endif %}>Beneficjenci</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>Zajęcia</a></li>
-      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>Ustawienia</a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_uzytkownicy' %} active{% endif %}" href="{{ url_for('admin.admin_uzytkownicy') }}"{% if request.endpoint == 'admin.admin_uzytkownicy' %} aria-current="page"{% endif %}>
+        <i class="bi bi-person me-2"></i>Użytkownicy
+      </a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_beneficjenci' %} active{% endif %}" href="{{ url_for('admin.admin_beneficjenci') }}"{% if request.endpoint == 'admin.admin_beneficjenci' %} aria-current="page"{% endif %}>
+        <i class="bi bi-people me-2"></i>Beneficjenci
+      </a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>
+        <i class="bi bi-calendar-event me-2"></i>Zajęcia
+      </a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>
+        <i class="bi bi-sliders me-2"></i>Ustawienia
+      </a></li>
     </ul>
   </li>
   {% endif %}
@@ -28,7 +46,9 @@
 {% macro render_settings_item() %}
   {% if current_user.is_authenticated %}
   <li class="nav-item">
-    <a class="nav-link{% if request.endpoint == 'auth.user_settings' %} active{% endif %}" href="{{ url_for('auth.user_settings') }}"{% if request.endpoint == 'auth.user_settings' %} aria-current="page"{% endif %}>Ustawienia</a>
+    <a class="nav-link{% if request.endpoint == 'auth.user_settings' %} active{% endif %}" href="{{ url_for('auth.user_settings') }}"{% if request.endpoint == 'auth.user_settings' %} aria-current="page"{% endif %}>
+      <i class="bi bi-gear me-2"></i>Ustawienia
+    </a>
   </li>
   {% endif %}
 {% endmacro %}
