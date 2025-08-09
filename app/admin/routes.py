@@ -82,6 +82,9 @@ def admin_edytuj_beneficjenta(beneficjent_id):
     """Admin view for editing any beneficiary."""
     benef = db.session.get(Beneficjent, beneficjent_id)
     if benef is None:
+        current_app.logger.warning(
+            "admin_edytuj_beneficjenta: beneficjent %s not found", beneficjent_id
+        )
         abort(404)
     form = BeneficjentForm(obj=benef)
     if form.validate_on_submit():
@@ -104,6 +107,9 @@ def admin_usun_beneficjenta(beneficjent_id):
     if form.validate_on_submit():
         benef = db.session.get(Beneficjent, beneficjent_id)
         if benef is None:
+            current_app.logger.warning(
+                "admin_usun_beneficjenta: beneficjent %s not found", beneficjent_id
+            )
             abort(404)
         db.session.delete(benef)
         db.session.commit()
@@ -134,6 +140,9 @@ def admin_edytuj_zajecia(zajecia_id):
     """Admin view for editing any session."""
     zajecia = db.session.get(Zajecia, zajecia_id)
     if zajecia is None:
+        current_app.logger.warning(
+            "admin_edytuj_zajecia: zajecia %s not found", zajecia_id
+        )
         abort(404)
     form = ZajeciaForm(obj=zajecia)
     form.beneficjenci.choices = [
@@ -167,6 +176,9 @@ def admin_usun_zajecia(zajecia_id):
     if form.validate_on_submit():
         zajecia = db.session.get(Zajecia, zajecia_id)
         if zajecia is None:
+            current_app.logger.warning(
+                "admin_usun_zajecia: zajecia %s not found", zajecia_id
+            )
             abort(404)
         db.session.delete(zajecia)
         db.session.commit()
@@ -204,6 +216,9 @@ def admin_edytuj_uzytkownika(user_id):
     """Admin view for editing a user account."""
     instr = db.session.get(User, user_id)
     if instr is None:
+        current_app.logger.warning(
+            "admin_edytuj_uzytkownika: user %s not found", user_id
+        )
         abort(404)
     if instr.role == Roles.ADMIN and current_user.role != Roles.SUPERADMIN:
         abort(403)
@@ -228,6 +243,9 @@ def admin_usun_uzytkownika(user_id):
     if form.validate_on_submit():
         instr = db.session.get(User, user_id)
         if instr is None:
+            current_app.logger.warning(
+                "admin_usun_uzytkownika: user %s not found", user_id
+            )
             abort(404)
         if instr.role == Roles.ADMIN and current_user.role != Roles.SUPERADMIN:
             abort(403)
@@ -246,6 +264,9 @@ def admin_promote_uzytkownika(user_id):
     if form.validate_on_submit():
         instr = db.session.get(User, user_id)
         if instr is None:
+            current_app.logger.warning(
+                "admin_promote_uzytkownika: user %s not found", user_id
+            )
             abort(404)
         instr.role = Roles.ADMIN
         db.session.commit()
@@ -262,8 +283,14 @@ def admin_demote_admin(user_id):
     if form.validate_on_submit():
         user = db.session.get(User, user_id)
         if user is None:
+            current_app.logger.warning(
+                "admin_demote_admin: user %s not found", user_id
+            )
             abort(404)
         if user.role != Roles.ADMIN:
+            current_app.logger.warning(
+                "admin_demote_admin: user %s is not admin", user_id
+            )
             abort(404)
         user.role = Roles.INSTRUCTOR
         db.session.commit()
@@ -291,6 +318,9 @@ def admin_confirm_uzytkownika(user_id):
     if form.validate_on_submit():
         instr = db.session.get(User, user_id)
         if instr is None:
+            current_app.logger.warning(
+                "admin_confirm_uzytkownika: user %s not found", user_id
+            )
             abort(404)
         instr.confirmed = True
         db.session.commit()
