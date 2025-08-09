@@ -291,7 +291,7 @@ def admin_demote_admin(user_id):
             current_app.logger.warning(
                 "admin_demote_admin: user %s is not admin", user_id
             )
-            abort(404)
+            abort(403)
         user.role = Roles.INSTRUCTOR
         db.session.commit()
         flash("Użytkownik został zdegradowany.")
