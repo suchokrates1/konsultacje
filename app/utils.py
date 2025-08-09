@@ -1,7 +1,7 @@
 import os
 import re
 import io
-from datetime import datetime
+from datetime import datetime, UTC
 
 from flask import flash, current_app
 from flask_mail import Message
@@ -58,7 +58,7 @@ def send_email(subject, recipients, body, attachments=None, html_body=None):
     sent_at = None
     try:
         mail.send(msg)
-        sent_at = datetime.utcnow()
+        sent_at = datetime.now(UTC)
         status = "sent"
     except SMTPException as exc:
         current_app.logger.error("Failed to send email: %s", exc)
