@@ -139,6 +139,7 @@ def pobierz_docx(zajecia_id):
     """Generate and return a DOCX report for the given session."""
     zajecia = db.session.get(Zajecia, zajecia_id)
     if zajecia is None:
+        current_app.logger.warning("pobierz_docx: zajecia %s not found", zajecia_id)
         abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
@@ -167,6 +168,7 @@ def wyslij_docx(zajecia_id):
     """Regenerate a DOCX report and email it to the configured recipient."""
     zajecia = db.session.get(Zajecia, zajecia_id)
     if zajecia is None:
+        current_app.logger.warning("wyslij_docx: zajecia %s not found", zajecia_id)
         abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
@@ -216,6 +218,7 @@ def resend_email(email_id):
     """Regenerate attachment and resend the email."""
     sent_email = db.session.get(SentEmail, email_id)
     if sent_email is None:
+        current_app.logger.warning("resend_email: email %s not found", email_id)
         abort(404)
     if not sent_email.zajecia or sent_email.zajecia.user_id != current_user.id:
         flash("Brak dostępu do tej wiadomości.")
@@ -268,6 +271,7 @@ def edytuj_zajecia(zajecia_id):
     """Edit an existing session belonging to the current user."""
     zajecia = db.session.get(Zajecia, zajecia_id)
     if zajecia is None:
+        current_app.logger.warning("edytuj_zajecia: zajecia %s not found", zajecia_id)
         abort(404)
     if zajecia.user_id != current_user.id:
         flash("Brak dostępu do tych zajęć.")
@@ -305,6 +309,7 @@ def usun_zajecia(zajecia_id):
     if form.validate_on_submit():
         zajecia = db.session.get(Zajecia, zajecia_id)
         if zajecia is None:
+            current_app.logger.warning("usun_zajecia: zajecia %s not found", zajecia_id)
             abort(404)
         if zajecia.user_id != current_user.id:
             flash("Brak dostępu do tych zajęć.")
@@ -409,6 +414,9 @@ def edytuj_beneficjenta(beneficjent_id):
     """Edit an existing beneficiary belonging to the user."""
     benef = db.session.get(Beneficjent, beneficjent_id)
     if benef is None:
+        current_app.logger.warning(
+            "edytuj_beneficjenta: beneficjent %s not found", beneficjent_id
+        )
         abort(404)
     if benef.user_id != current_user.id:
         flash("Brak dostępu do tego beneficjenta.")
@@ -433,6 +441,9 @@ def usun_beneficjenta(beneficjent_id):
     if form.validate_on_submit():
         benef = db.session.get(Beneficjent, beneficjent_id)
         if benef is None:
+            current_app.logger.warning(
+                "usun_beneficjenta: beneficjent %s not found", beneficjent_id
+            )
             abort(404)
         if benef.user_id != current_user.id:
             flash("Brak dostępu do tego beneficjenta.")

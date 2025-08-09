@@ -1,6 +1,7 @@
 """Flask application factory and extension initialization."""
 
 import os
+import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -36,6 +37,11 @@ def create_app(test_config=None):
     env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
     load_dotenv(env_path)
     app = Flask(__name__)
+    if not app.logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
+    app.logger.setLevel(logging.INFO)
     # Flask loads configuration from environment variables such as `FLASK_ENV`.
     secret_key = None
     if test_config is not None:
