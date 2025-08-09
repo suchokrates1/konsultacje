@@ -11,7 +11,7 @@
   <li class="nav-item">
     <a class="nav-link{% if request.endpoint == 'sessions.lista_beneficjentow' %} active{% endif %}" href="{{ url_for('sessions.lista_beneficjentow') }}"{% if request.endpoint == 'sessions.lista_beneficjentow' %} aria-current="page"{% endif %}>Beneficjenci</a>
   </li>
-  {% if current_user.is_authenticated and current_user.role.value == 'admin' %}
+  {% if current_user.is_authenticated and current_user.role.value in ('admin', 'superadmin') %}
   {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle{% if request.endpoint in admin_endpoints %} active{% endif %}" href="#" id="{{ admin_id }}" role="button" data-bs-toggle="dropdown" aria-expanded="false"{% if request.endpoint in admin_endpoints %} aria-current="page"{% endif %}>Admin</a>

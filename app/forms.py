@@ -209,6 +209,12 @@ class PromoteForm(FlaskForm):
     submit = SubmitField('Nadaj admina')
 
 
+class DemoteForm(FlaskForm):
+    """Form used by superadmin to demote an admin to instructor."""
+
+    submit = SubmitField('Degraduj')
+
+
 class ConfirmForm(FlaskForm):
     """Form used by admin to confirm a new instructor's account."""
 

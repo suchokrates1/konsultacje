@@ -22,6 +22,7 @@ from ..forms import (
     BeneficjentForm,
     ConfirmForm,
     DeleteForm,
+    DemoteForm,
     PromoteForm,
     SettingsForm,
     UserEditForm,
@@ -34,14 +35,26 @@ admin_bp = Blueprint("admin", __name__)
 
 
 def admin_required(view_func):
-    """Decorate ``view_func`` to allow access only for admin users."""
+    """Decorate ``view_func`` to allow access for admin or superadmin users."""
 
     @wraps(view_func)
     def wrapper(*args, **kwargs):
         if (
             not current_user.is_authenticated
-            or current_user.role != Roles.ADMIN
+            or current_user.role not in {Roles.ADMIN, Roles.SUPERADMIN}
         ):
+            return abort(403)
+        return view_func(*args, **kwargs)
+
+    return wrapper
+
+
+def superadmin_required(view_func):
+    """Decorate ``view_func`` to allow access only for superadmin users."""
+
+    @wraps(view_func)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != Roles.SUPERADMIN:
             return abort(403)
         return view_func(*args, **kwargs)
 
@@ -170,6 +183,7 @@ def admin_uzytkownicy():
     admins = User.query.filter_by(role=Roles.ADMIN).all()
     delete_form = DeleteForm()
     promote_form = PromoteForm()
+    demote_form = DemoteForm()
     confirm_form = ConfirmForm()
     return render_template(
         "admin/users_list.html",
@@ -177,7 +191,9 @@ def admin_uzytkownicy():
         admins=admins,
         delete_form=delete_form,
         promote_form=promote_form,
+        demote_form=demote_form,
         confirm_form=confirm_form,
+        Roles=Roles,
     )
 
 
@@ -189,6 +205,8 @@ def admin_edytuj_uzytkownika(user_id):
     instr = db.session.get(User, user_id)
     if instr is None:
         abort(404)
+    if instr.role == Roles.ADMIN and current_user.role != Roles.SUPERADMIN:
+        abort(403)
     form = UserEditForm(obj=instr)
     if form.validate_on_submit():
         instr.full_name = form.full_name.data
@@ -211,6 +229,8 @@ def admin_usun_uzytkownika(user_id):
         instr = db.session.get(User, user_id)
         if instr is None:
             abort(404)
+        if instr.role == Roles.ADMIN and current_user.role != Roles.SUPERADMIN:
+            abort(403)
         db.session.delete(instr)
         db.session.commit()
         flash("Użytkownik usunięty.")
@@ -230,6 +250,24 @@ def admin_promote_uzytkownika(user_id):
         instr.role = Roles.ADMIN
         db.session.commit()
         flash("Użytkownik ma teraz uprawnienia admina.")
+    return redirect(url_for("admin.admin_uzytkownicy"))
+
+
+@admin_bp.route("/uzytkownicy/<int:user_id>/demote", methods=["POST"])
+@login_required
+@superadmin_required
+def admin_demote_admin(user_id):
+    """Demote an admin user back to instructor."""
+    form = DemoteForm()
+    if form.validate_on_submit():
+        user = db.session.get(User, user_id)
+        if user is None:
+            abort(404)
+        if user.role != Roles.ADMIN:
+            abort(404)
+        user.role = Roles.INSTRUCTOR
+        db.session.commit()
+        flash("Użytkownik został zdegradowany.")
     return redirect(url_for("admin.admin_uzytkownicy"))
 
 
