@@ -3,8 +3,20 @@
 import os
 import sys
 import pytest
+from datetime import datetime, UTC
+import flask_login.login_manager as login_manager
 from app import create_app, db
 from app.models import User
+
+
+# Use timezone-aware datetimes in flask-login to avoid deprecation warnings
+class _AwareDatetime(datetime):
+    @classmethod
+    def utcnow(cls):  # pragma: no cover - simple patch
+        return datetime.now(UTC)
+
+
+login_manager.datetime = _AwareDatetime
 
 
 @pytest.fixture
