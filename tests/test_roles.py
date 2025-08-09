@@ -7,6 +7,13 @@ from app.models import User, Beneficjent, Roles
 def create_users(app):
     """Create admin and instructor accounts with sample beneficiaries."""
     with app.app_context():
+        superadmin = User(
+            full_name='superadmin',
+            email='superadmin@example.com',
+            role=Roles.SUPERADMIN,
+        )
+        superadmin.set_password('pass')
+        superadmin.confirmed = True
         admin = User(
             full_name='admin',
             email='admin@example.com',
@@ -20,7 +27,7 @@ def create_users(app):
         inst2 = User(full_name='inst2', email='i2@example.com')
         inst2.set_password('pass')
         inst2.confirmed = True
-        db.session.add_all([admin, inst1, inst2])
+        db.session.add_all([superadmin, admin, inst1, inst2])
         db.session.commit()
         b1 = Beneficjent(
             imie='Ben1', wojewodztwo='Maz', user_id=inst1.id
@@ -30,13 +37,14 @@ def create_users(app):
         )
         db.session.add_all([b1, b2])
         db.session.commit()
-        return admin.id, inst1.id, inst2.id
+        return superadmin.id, admin.id, inst1.id, inst2.id
 
 
 def login(client, username):
     """Authenticate a test user and return the response."""
 
     email_map = {
+        'superadmin': 'superadmin@example.com',
         'admin': 'admin@example.com',
         'inst1': 'i1@example.com',
         'inst2': 'i2@example.com',
@@ -50,24 +58,25 @@ def login(client, username):
 
 def test_admin_access(app):
     """Admin should be able to view all beneficiaries and users."""
-    admin_id, inst1_id, inst2_id = create_users(app)
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
-    login(client, 'admin')
-    resp = client.get('/admin/beneficjenci')
-    assert resp.status_code == 200
-    text = resp.get_data(as_text=True)
-    assert 'Ben1' in text and 'Ben2' in text
-
-    resp = client.get('/admin/uzytkownicy')
-    assert resp.status_code == 200
-    text = resp.get_data(as_text=True)
-    assert 'inst1' in text
-    assert 'Instruktorzy' in text and 'Administratorzy' in text
+    for user in ['admin', 'superadmin']:
+        login(client, user)
+        resp = client.get('/admin/beneficjenci')
+        assert resp.status_code == 200
+        text = resp.get_data(as_text=True)
+        assert 'Ben1' in text and 'Ben2' in text
+        resp = client.get('/admin/uzytkownicy')
+        assert resp.status_code == 200
+        text = resp.get_data(as_text=True)
+        assert 'inst1' in text
+        assert 'Instruktorzy' in text and 'Administratorzy' in text
+        client.get('/logout')
 
 
 def test_instructor_cannot_access_admin(app):
     """Non-admin users must receive 403 when accessing admin pages."""
-    admin_id, inst1_id, inst2_id = create_users(app)
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'inst1')
     resp = client.get('/admin/beneficjenci')
@@ -76,7 +85,7 @@ def test_instructor_cannot_access_admin(app):
 
 def test_instructor_sees_own_beneficiaries(app):
     """Instructor pages show only beneficiaries belonging to that user."""
-    admin_id, inst1_id, inst2_id = create_users(app)
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'inst1')
     resp = client.get('/beneficjenci')
@@ -87,7 +96,7 @@ def test_instructor_sees_own_beneficiaries(app):
 
 def test_promote_instructor(app):
     """Admin can promote an instructor who then gains admin access."""
-    admin_id, inst1_id, inst2_id = create_users(app)
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
     client = app.test_client()
     login(client, 'admin')
     resp = client.post(
@@ -107,7 +116,7 @@ def test_promote_instructor(app):
 
 def test_confirm_instructor(app):
     """Admin can confirm an instructor so they can log in."""
-    admin_id, inst1_id, inst2_id = create_users(app)
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
     with app.app_context():
         new_user = User(full_name='newbie', email='newbie@example.com')
         new_user.set_password('pass')
@@ -146,3 +155,30 @@ def test_confirm_instructor(app):
         follow_redirects=True,
     )
     assert 'Nowe zajęcia' in resp.get_data(as_text=True)
+
+
+def test_only_superadmin_can_demote_admin(app):
+    """Only superadmin should be able to demote an admin to instructor."""
+    superadmin_id, admin_id, inst1_id, inst2_id = create_users(app)
+    client = app.test_client()
+
+    # regular admin cannot demote another admin
+    login(client, 'admin')
+    resp = client.post(
+        f'/admin/uzytkownicy/{admin_id}/demote',
+        data={'submit': '1'},
+    )
+    assert resp.status_code == 403
+    client.get('/logout')
+
+    # superadmin can demote admin
+    login(client, 'superadmin')
+    resp = client.post(
+        f'/admin/uzytkownicy/{admin_id}/demote',
+        data={'submit': '1'},
+        follow_redirects=True,
+    )
+    assert resp.status_code == 200
+    with app.app_context():
+        user = db.session.get(User, admin_id)
+        assert user.role == Roles.INSTRUCTOR

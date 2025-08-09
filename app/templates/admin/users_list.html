@@ -82,15 +82,23 @@
       <td>{{ u.full_name }}</td>
       <td>{{ u.email }}</td>
       <td>
+        {% if current_user.role == Roles.SUPERADMIN %}
         <a href="{{ url_for('admin.admin_edytuj_uzytkownika', user_id=u.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
+        <form method="post" action="{{ url_for('admin.admin_demote_admin', user_id=u.id) }}" style="display:inline;">
+          {{ demote_form.csrf_token }}
+          <button type="submit" class="btn btn-sm btn-warning" aria-label="Degraduj" data-bs-toggle="tooltip" title="Degraduj do instruktora">
+            <i class="bi bi-arrow-down"></i>
+          </button>
+        </form>
         <form method="post" action="{{ url_for('admin.admin_usun_uzytkownika', user_id=u.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
           <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>
           </button>
         </form>
+        {% endif %}
       </td>
     </tr>
     {% else %}

@@ -17,7 +17,7 @@ depends_on = None
 
 
 old_roles = sa.Enum("ADMIN", "INSTRUCTOR", name="roles")
-new_roles = sa.Enum("admin", "instructor", name="roles")
+new_roles = sa.Enum("admin", "instructor", "superadmin", name="roles")
 
 
 def upgrade():

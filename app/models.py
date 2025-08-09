@@ -13,6 +13,7 @@ class Roles(enum.Enum):
     """Enumeration of user roles available in the system."""
 
     ADMIN = "admin"
+    SUPERADMIN = "superadmin"
     INSTRUCTOR = "instructor"
 
 

@@ -44,9 +44,15 @@ def create_app(test_config=None):
     if not secret_key:
         secret_key = os.environ.get("SECRET_KEY")
 
-    admin_username = os.environ.get("ADMIN_USERNAME")
-    admin_password = os.environ.get("ADMIN_PASSWORD")
-    admin_email = os.environ.get("ADMIN_EMAIL")
+    superadmin_username = os.environ.get("SUPERADMIN_USERNAME") or os.environ.get(
+        "ADMIN_USERNAME"
+    )
+    superadmin_password = os.environ.get("SUPERADMIN_PASSWORD") or os.environ.get(
+        "ADMIN_PASSWORD"
+    )
+    superadmin_email = os.environ.get("SUPERADMIN_EMAIL") or os.environ.get(
+        "ADMIN_EMAIL"
+    )
 
     if not secret_key:
         raise RuntimeError(
@@ -79,7 +85,7 @@ def create_app(test_config=None):
         MAIL_PASSWORD=mail_password,
         MAIL_USE_TLS=mail_use_tls,
         MAIL_USE_SSL=mail_use_ssl,
-        MAIL_DEFAULT_SENDER=os.environ.get("MAIL_DEFAULT_SENDER", admin_email),
+        MAIL_DEFAULT_SENDER=os.environ.get("MAIL_DEFAULT_SENDER", superadmin_email),
         TIMEZONE=timezone,
     )
 
@@ -124,22 +130,22 @@ def create_app(test_config=None):
             app.config["TIMEZONE"] = settings.timezone or app.config["TIMEZONE"]
         mail.init_app(app)
 
-        if admin_username and admin_password and admin_email:
+        if superadmin_username and superadmin_password and superadmin_email:
             from .models import User, Roles
-            admin = User.query.filter_by(email=admin_email).first()
+            admin = User.query.filter_by(email=superadmin_email).first()
             if admin:
-                admin.full_name = admin_username
-                admin.role = Roles.ADMIN
+                admin.full_name = superadmin_username
+                admin.role = Roles.SUPERADMIN
                 admin.confirmed = True
-                admin.set_password(admin_password)
+                admin.set_password(superadmin_password)
             else:
                 admin = User(
-                    full_name=admin_username,
-                    email=admin_email,
-                    role=Roles.ADMIN,
+                    full_name=superadmin_username,
+                    email=superadmin_email,
+                    role=Roles.SUPERADMIN,
                     confirmed=True,
                 )
-                admin.set_password(admin_password)
+                admin.set_password(superadmin_password)
                 db.session.add(admin)
             db.session.commit()
 
