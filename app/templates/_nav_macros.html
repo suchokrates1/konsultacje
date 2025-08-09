@@ -25,13 +25,19 @@
   {% endif %}
 {% endmacro %}
 
-{% macro render_user_items() %}
+{% macro render_settings_item() %}
   {% if current_user.is_authenticated %}
   <li class="nav-item">
     <a class="nav-link{% if request.endpoint == 'auth.user_settings' %} active{% endif %}" href="{{ url_for('auth.user_settings') }}"{% if request.endpoint == 'auth.user_settings' %} aria-current="page"{% endif %}>Ustawienia</a>
   </li>
-  <li class="nav-item">
-    <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('auth.logout') }}">Wyloguj</a>
-  </li>
+  {% endif %}
+{% endmacro %}
+
+{% macro render_user_items() %}
+  {% if current_user.is_authenticated %}
+    {{ render_settings_item() }}
+    <li class="nav-item">
+      <a class="btn btn-danger btn-sm logout-btn" href="{{ url_for('auth.logout') }}">Wyloguj</a>
+    </li>
   {% endif %}
 {% endmacro %}
