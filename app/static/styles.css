@@ -11,6 +11,10 @@
     opacity: 0.85;
 }
 
+#mobileMenu {
+    width: 80vw;
+}
+
 /* Sticky header for tables */
 .table thead th {
     position: sticky;
@@ -49,4 +53,8 @@ body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
 
 body.dark-mode .table-hover > tbody > tr:hover {
     background-color: #343a40 !important;
+}
+
+body.dark-mode #mobileMenu {
+    width: 80vw;
 }
