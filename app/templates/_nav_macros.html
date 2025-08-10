@@ -43,6 +43,54 @@
   {% endif %}
 {% endmacro %}
 
+{% macro render_nav_items_mobile() %}
+  <li class="nav-item">
+    <a class="nav-link{% if request.endpoint == 'sessions.nowe_zajecia' %} active{% endif %}" href="{{ url_for('sessions.nowe_zajecia') }}"{% if request.endpoint == 'sessions.nowe_zajecia' %} aria-current="page"{% endif %}>
+      <i class="bi bi-calendar-plus me-2"></i>Nowe zajęcia
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_zajec' %} active{% endif %}" href="{{ url_for('sessions.lista_zajec') }}"{% if request.endpoint == 'sessions.lista_zajec' %} aria-current="page"{% endif %}>
+      <i class="bi bi-list-check me-2"></i>Lista zajęć
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link{% if request.endpoint == 'sessions.emails_list' %} active{% endif %}" href="{{ url_for('sessions.emails_list') }}"{% if request.endpoint == 'sessions.emails_list' %} aria-current="page"{% endif %}>
+      <i class="bi bi-envelope me-2"></i>Wiadomości
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link{% if request.endpoint == 'sessions.lista_beneficjentow' %} active{% endif %}" href="{{ url_for('sessions.lista_beneficjentow') }}"{% if request.endpoint == 'sessions.lista_beneficjentow' %} aria-current="page"{% endif %}>
+      <i class="bi bi-people me-2"></i>Beneficjenci
+    </a>
+  </li>
+  {% if current_user.is_authenticated and current_user.role.value in ('admin', 'superadmin') %}
+  {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
+  <li class="nav-item">
+    <button class="btn nav-link w-100 text-start d-flex justify-content-between align-items-center{% if request.endpoint in admin_endpoints %} active{% endif %}"
+            data-bs-toggle="collapse" data-bs-target="#adminLinksMobile"
+            aria-expanded="{% if request.endpoint in admin_endpoints %}true{% else %}false{% endif %}">
+      <span><i class="bi bi-gear me-2"></i>Admin</span>
+      <i class="bi bi-chevron-down small"></i>
+    </button>
+    <ul id="adminLinksMobile" class="collapse list-unstyled ps-4{% if request.endpoint in admin_endpoints %} show{% endif %}">
+      <li><a class="nav-link{% if request.endpoint == 'admin.admin_uzytkownicy' %} active{% endif %}" href="{{ url_for('admin.admin_uzytkownicy') }}"{% if request.endpoint == 'admin.admin_uzytkownicy' %} aria-current="page"{% endif %}>
+        <i class="bi bi-person me-2"></i>Użytkownicy
+      </a></li>
+      <li><a class="nav-link{% if request.endpoint == 'admin.admin_beneficjenci' %} active{% endif %}" href="{{ url_for('admin.admin_beneficjenci') }}"{% if request.endpoint == 'admin.admin_beneficjenci' %} aria-current="page"{% endif %}>
+        <i class="bi bi-people me-2"></i>Beneficjenci
+      </a></li>
+      <li><a class="nav-link{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>
+        <i class="bi bi-calendar-event me-2"></i>Zajęcia
+      </a></li>
+      <li><a class="nav-link{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>
+        <i class="bi bi-sliders me-2"></i>Ustawienia
+      </a></li>
+    </ul>
+  </li>
+  {% endif %}
+{% endmacro %}
+
 {% macro render_settings_item() %}
   {% if current_user.is_authenticated %}
   <li class="nav-item">
