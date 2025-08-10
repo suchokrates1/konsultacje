@@ -21,13 +21,13 @@ a:focus {
 }
 
 #mobileMenu .nav-link {
-    font-size: 1.2rem;
-    padding: 1rem 1.5rem;
+    font-size: 1.4rem;
+    padding: 1.25rem 2rem;
     border-bottom: 1px solid #dee2e6;
 }
 
 #mobileMenu .navbar-nav {
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 /* Sticky header for tables */
