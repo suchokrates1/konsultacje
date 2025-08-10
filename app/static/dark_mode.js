@@ -24,4 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
     applyDarkMode(newTheme);
     localStorage.setItem('theme', newTheme);
   });
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (mobileMenu) {
+    mobileMenu.addEventListener('shown.bs.offcanvas', function () {
+      const firstLink = mobileMenu.querySelector('a');
+      if (firstLink) {
+        firstLink.focus();
+      }
+    });
+  }
 });
