@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="bg-light text-dark pb-5">
-  {% from '_nav_macros.html' import render_nav_items, render_user_items, render_settings_item with context %}
+  {% from '_nav_macros.html' import render_nav_items, render_nav_items_mobile, render_user_items, render_settings_item with context %}
   <header class="bg-white border-bottom py-2 mb-3">
     <div class="container d-flex align-items-center">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="me-2" style="height: 40px;">
@@ -49,7 +49,7 @@
     </div>
     <div class="offcanvas-body d-flex flex-column">
       <ul class="navbar-nav flex-grow-1 pe-3 justify-content-center">
-        {{ render_nav_items('adminMenuMobile') }}
+        {{ render_nav_items_mobile() }}
         {{ render_settings_item() }}
       </ul>
       <a class="btn btn-danger w-75 mx-auto mt-auto" href="{{ url_for('auth.logout') }}">
