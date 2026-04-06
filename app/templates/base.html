@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body class="bg-light text-dark pb-5">
+<body class="bg-light text-dark min-vh-100 d-flex flex-column">
   {% from '_nav_macros.html' import render_nav_items, render_nav_items_mobile, render_user_items, render_settings_item with context %}
   <header class="bg-white border-bottom py-2 mb-3">
     <div class="container d-flex align-items-center">
@@ -58,7 +58,7 @@
     </div>
   </div>
   {% endif %}
-    <div class="container mt-5 text-center">
+    <div class="container mt-5 text-center flex-grow-1">
     <div aria-live="polite">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -73,7 +73,7 @@
     </div>
     {% block content %}{% endblock %}
   </div>
-  <footer class="bg-dark text-light py-3 mt-5 fixed-bottom">
+  <footer class="bg-dark text-light py-3 mt-5">
     <div class="container text-center">
       Powered by <a href="https://vestmedia.pl/" class="text-light">Vest Media</a> |
       <a href="mailto:kontakt@vestmedia.pl" class="text-light">kontakt@vestmedia.pl</a>

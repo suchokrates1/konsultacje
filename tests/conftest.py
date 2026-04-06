@@ -1,6 +1,5 @@
 """Common pytest fixtures used across test modules."""
 
-import os
 import sys
 import pytest
 from datetime import datetime, UTC
@@ -19,33 +18,35 @@ class _AwareDatetime(datetime):
 login_manager.datetime = _AwareDatetime
 
 
+def build_test_config(db_path):
+    return {
+        "TESTING": True,
+        "WTF_CSRF_ENABLED": False,
+        "MAIL_SUPPRESS_SEND": True,
+        "SECRET_KEY": "test-secret",
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path.as_posix()}",
+    }
+
+
+def dispose_app(app):
+    with app.app_context():
+        db.session.remove()
+        db.engine.dispose()
+
+
 @pytest.fixture
-def app(monkeypatch):
+def app(monkeypatch, tmp_path):
     """Create a new application instance for testing."""
 
-    db_path = os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        "instance",
-        "konsultacje.db",
-    )
-    if os.path.exists(db_path):
-        os.remove(db_path)
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     # Reload routes so they register on a fresh app instance
     sys.modules.pop("app.routes", None)
     import app as app_package  # noqa: F401
     if hasattr(app_package, "routes"):
         delattr(app_package, "routes")
 
-    config = {
-        "TESTING": True,
-        "WTF_CSRF_ENABLED": False,
-        "MAIL_SUPPRESS_SEND": True,
-        "SECRET_KEY": "test-secret",
-    }
-    app = create_app(config)
-    return app
+    app = create_app(build_test_config(tmp_path / "konsultacje.db"))
+    yield app
+    dispose_app(app)
 
 
 @pytest.fixture

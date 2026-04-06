@@ -1,0 +1,22 @@
+services:
+  web:
+    image: ${KONSULTACJE_IMAGE:?set KONSULTACJE_IMAGE to the GHCR image reference}
+    container_name: konsultacje-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: production
+    ports:
+      - "8080:5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.konsultacje.rule=Host(`konsultacje.vestmedia.pl`)"
+      - "traefik.http.routers.konsultacje.entrypoints=https"
+      - "traefik.http.routers.konsultacje.tls=true"
+      - "traefik.http.services.konsultacje.loadbalancer.server.port=5000"
+    volumes:
+      - konsultacje-instance:/app/instance
+
+volumes:
+  konsultacje-instance:

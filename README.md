@@ -78,6 +78,25 @@ docker run --env-file .env -p 8080:5000 konsultacje
 
 Alternatively run `docker-compose up` to use the provided compose file which exposes the app on port `8080`.
 
+## Production deployment
+
+Production uses GitHub Actions to:
+
+1. run `pytest` and `flake8`
+2. build the Docker image on GitHub
+3. push the image to `ghcr.io/suchokrates1/konsultacje`
+4. connect to `minipc` over Tailscale and update the service with `docker-compose.prod.yml`
+
+The production stack expects:
+
+- a server-side `.env` file in `/home/suchokrates1/konsultacje/.env`
+- the repository cloned on the server in `/home/suchokrates1/konsultacje`
+- Docker Compose deployment from `docker-compose.prod.yml`
+
+The production container keeps SQLite data in the named volume `konsultacje-instance`, so the app no longer depends on bind-mounting the full repository into `/app`.
+
+See `DEPLOYMENT.md` for the exact server preparation steps and required GitHub secrets.
+
 ## Running tests
 
 The project uses **pytest** for the test suite located in `tests/`. Install the

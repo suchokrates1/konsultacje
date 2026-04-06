@@ -10,3 +10,4 @@ Flask-Mail
 email_validator
 selenium
 pytz
+gunicorn

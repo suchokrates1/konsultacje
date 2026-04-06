@@ -1,33 +1,18 @@
 """Tests for authentication and password reset flows."""
 
-import os
 import re
 import pytest
 from smtplib import SMTPException
 
 from app import create_app, db
 from app.models import User, Roles
-
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "instance",
-    "konsultacje.db",
-)
-
-
-def setup_database():
-    """Remove the test database if it exists and recreate directories."""
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+from tests.conftest import build_test_config, dispose_app
 
 
 @pytest.fixture
-def app(monkeypatch):
+def app(monkeypatch, tmp_path):
     """Provide a configured Flask app for tests."""
 
-    setup_database()
     # Reload routes so they register on the fresh app instance
     import sys
     sys.modules.pop("app.routes", None)
@@ -35,14 +20,9 @@ def app(monkeypatch):
     if hasattr(app_package, "routes"):
         delattr(app_package, "routes")
 
-    config = {
-        "TESTING": True,
-        "WTF_CSRF_ENABLED": False,
-        "MAIL_SUPPRESS_SEND": True,
-        "SECRET_KEY": "test-secret",
-    }
-    app = create_app(config)
-    return app
+    app = create_app(build_test_config(tmp_path / "konsultacje.db"))
+    yield app
+    dispose_app(app)
 
 
 @pytest.fixture
@@ -52,17 +32,12 @@ def client(app):
     return app.test_client()
 
 
-def test_superadmin_created_from_env(monkeypatch):
+def test_superadmin_created_from_env(monkeypatch, tmp_path):
     """Verify that a superadmin user is created from environment variables."""
-    setup_database()
     monkeypatch.setenv('SUPERADMIN_USERNAME', 'superadmin')
     monkeypatch.setenv('SUPERADMIN_PASSWORD', 'adminpass')
     monkeypatch.setenv('SUPERADMIN_EMAIL', 'admin@example.com')
-    config = {
-        "TESTING": True,
-        "WTF_CSRF_ENABLED": False,
-        "SECRET_KEY": "test-secret",
-    }
+    config = build_test_config(tmp_path / "konsultacje.db")
     app = create_app(config)
     with app.app_context():
         admin = User.query.filter_by(full_name='superadmin').first()
@@ -73,11 +48,13 @@ def test_superadmin_created_from_env(monkeypatch):
         assert admin.confirmed
 
     # create_app called again should not alter admin confirmation status
+    dispose_app(app)
     app2 = create_app(config)
     with app2.app_context():
         admin = User.query.filter_by(full_name='superadmin').first()
         assert admin is not None
         assert admin.confirmed
+    dispose_app(app2)
 
 
 def test_register_and_login_remember_me(client, app):

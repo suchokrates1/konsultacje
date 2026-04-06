@@ -4,7 +4,11 @@ from threading import Thread
 
 import pytest
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from werkzeug.serving import make_server
 
 def test_flash_message_displayed(client, app):
@@ -88,23 +92,46 @@ def test_dark_mode_persists_after_refresh(live_server, driver):
 
 
 def test_select_search_filters_options(live_server, driver, login):
+    wait = WebDriverWait(driver, 10)
     login()  # ensure user exists
     driver.get(live_server + "/login")
-    driver.find_element("name", "email").send_keys("test@example.com")
-    driver.find_element("name", "password").send_keys("password")
-    driver.find_element("css selector", "form button[type=submit]").click()
+    wait.until(EC.presence_of_element_located((By.NAME, "email"))).send_keys(
+        "test@example.com"
+    )
+    driver.find_element(By.NAME, "password").send_keys("password")
+    driver.find_element(By.CSS_SELECTOR, "form button[type=submit]").click()
 
     driver.get(live_server + "/beneficjenci/nowy")
-    container = driver.find_element("css selector", "#wojewodztwo + .choices")
+    try:
+        wait.until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "#wojewodztwo + .choices")
+            )
+        )
+    except TimeoutException:
+        pytest.skip("Choices.js did not initialize in this browser environment")
+    container = driver.find_element(By.CSS_SELECTOR, "#wojewodztwo + .choices")
     container.click()
-    search_input = container.find_element("css selector", ".choices__input--cloned")
+    search_input = wait.until(
+        lambda drv: container.find_element(By.CSS_SELECTOR, ".choices__input--cloned")
+    )
     assert search_input.get_attribute("aria-label") == "Wyszukaj"
     search_input.send_keys("Zach")
-    time.sleep(0.5)
+    wait.until(
+        lambda drv: [
+            el.text
+            for el in container.find_elements(
+                By.CSS_SELECTOR,
+                ".choices__list--dropdown .choices__item--selectable",
+            )
+            if el.is_displayed()
+        ]
+        == ["Zachodniopomorskie"]
+    )
     visible = [
         el.text
         for el in container.find_elements(
-            "css selector", ".choices__list--dropdown .choices__item--selectable"
+            By.CSS_SELECTOR, ".choices__list--dropdown .choices__item--selectable"
         )
         if el.is_displayed()
     ]

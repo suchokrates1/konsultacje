@@ -9,6 +9,7 @@ from flask_mail import Mail
 from flask_wtf import CSRFProtect
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+from sqlalchemy import text
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -70,11 +71,20 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    # Ścieżka do bazy SQLite w katalogu 'instance'
-    instance_path = os.path.join(app.root_path, '..', 'instance')
-    os.makedirs(instance_path, exist_ok=True)
-    db_path = os.path.join(instance_path, 'konsultacje.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    database_uri = None
+    if test_config is not None:
+        database_uri = test_config.get("SQLALCHEMY_DATABASE_URI")
+
+    if not database_uri:
+        database_uri = os.environ.get("DATABASE_URL")
+
+    if not database_uri:
+        instance_path = os.path.join(app.root_path, '..', 'instance')
+        os.makedirs(instance_path, exist_ok=True)
+        db_path = os.path.join(instance_path, 'konsultacje.db')
+        database_uri = f'sqlite:///{db_path}'
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     mail_server = os.environ.get("MAIL_SERVER", "localhost")
@@ -110,6 +120,15 @@ def create_app(test_config=None):
     app.register_blueprint(sessions_bp)
     app.register_blueprint(admin_bp, url_prefix="/admin")
     register_error_handlers(app)
+
+    @app.get("/healthz")
+    def healthz():
+        try:
+            db.session.execute(text("SELECT 1"))
+        except Exception as exc:  # pragma: no cover - defensive path for runtime checks
+            app.logger.exception("healthz failed: %s", exc)
+            return {"status": "error"}, 503
+        return {"status": "ok"}, 200
 
     with app.app_context():
         from . import models  # noqa: F401
