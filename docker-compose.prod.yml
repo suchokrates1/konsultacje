@@ -20,3 +20,4 @@ services:
 
 volumes:
   konsultacje-instance:
+    name: konsultacje-instance
