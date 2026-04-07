@@ -20,4 +20,5 @@ services:
 
 volumes:
   konsultacje-instance:
+    external: true
     name: konsultacje-instance

@@ -35,6 +35,7 @@ Fill `.env` with the real values. Do not commit it.
 Then perform the first manual deployment:
 
 ```bash
+docker volume create konsultacje-instance
 export KONSULTACJE_IMAGE=ghcr.io/suchokrates1/konsultacje:latest
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
@@ -44,7 +45,7 @@ curl -fsS http://127.0.0.1:8080/healthz
 ## Runtime data
 
 - secrets stay in `.env` on the server
-- SQLite data persists in the Docker volume `konsultacje-instance`
+- SQLite data persists in the external Docker volume `konsultacje-instance`
 - the DOCX template remains in the image because `app/static/wzor.docx` is committed to the repository
 
 ## Updating production

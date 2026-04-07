@@ -10,6 +10,10 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 env:
   IMAGE_NAME: ghcr.io/suchokrates1/konsultacje
 
@@ -80,11 +84,13 @@ jobs:
 
     steps:
       - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
+        uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
+          ping: 100.110.194.46
+          version: latest
 
       - name: Deploy on minipc
         uses: appleboy/ssh-action@v1.2.0
@@ -95,6 +101,7 @@ jobs:
           username: suchokrates1
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: KONSULTACJE_IMAGE
+          command_timeout: 5m
           script_stop: true
           script: |
             set -euo pipefail
@@ -104,4 +111,11 @@ jobs:
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
             docker image prune -f
-            curl -fsS http://127.0.0.1:8080/healthz >/dev/null
+            for attempt in $(seq 1 20); do
+              if curl -fsS http://127.0.0.1:8080/healthz >/dev/null; then
+                exit 0
+              fi
+              sleep 3
+            done
+            docker logs --tail 50 konsultacje-web
+            exit 1
