@@ -12,11 +12,11 @@
 <body class="bg-light text-dark min-vh-100 d-flex flex-column">
   {% from '_nav_macros.html' import render_nav_items, render_nav_items_mobile, render_user_items, render_settings_item with context %}
   <header class="bg-white border-bottom py-2 mb-3">
-    <div class="container d-flex align-items-center">
+    <div class="container d-flex align-items-center flex-wrap gap-1">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="me-2" style="height: 40px;">
       <h1 class="h5 m-0">Konsultacje</h1>
       {% if current_user.is_authenticated and aktywny_projekt %}
-      <span class="badge bg-primary ms-2">Projekt: {{ aktywny_projekt.nazwa }}</span>
+      <span class="badge bg-primary text-truncate" style="max-width: min(12rem, 45vw);">Projekt: {{ aktywny_projekt.nazwa }}</span>
       {% endif %}
       <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm ms-auto" type="button" aria-label="Przełącz tryb ciemny" title="Przełącz tryb ciemny">
         <i class="bi bi-moon"></i>
