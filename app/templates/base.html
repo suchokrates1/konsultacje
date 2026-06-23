@@ -15,6 +15,9 @@
     <div class="container d-flex align-items-center">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="me-2" style="height: 40px;">
       <h1 class="h5 m-0">Konsultacje</h1>
+      {% if current_user.is_authenticated and aktywny_projekt %}
+      <span class="badge bg-primary ms-2">Projekt: {{ aktywny_projekt.nazwa }}</span>
+      {% endif %}
       <button id="darkModeToggle" class="btn btn-outline-secondary btn-sm ms-auto" type="button" aria-label="Przełącz tryb ciemny" title="Przełącz tryb ciemny">
         <i class="bi bi-moon"></i>
       </button>

@@ -20,7 +20,7 @@
     </a>
   </li>
   {% if current_user.is_authenticated and current_user.role.value in ('admin', 'superadmin') %}
-  {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
+  {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_projekty', 'admin.admin_ustawienia'] %}
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle{% if request.endpoint in admin_endpoints %} active{% endif %}" href="#" id="{{ admin_id }}" role="button" data-bs-toggle="dropdown" aria-expanded="false"{% if request.endpoint in admin_endpoints %} aria-current="page"{% endif %}>
       <i class="bi bi-gear me-2"></i>Admin
@@ -34,6 +34,9 @@
       </a></li>
       <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>
         <i class="bi bi-calendar-event me-2"></i>Zajęcia
+      </a></li>
+      <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_projekty' %} active{% endif %}" href="{{ url_for('admin.admin_projekty') }}"{% if request.endpoint == 'admin.admin_projekty' %} aria-current="page"{% endif %}>
+        <i class="bi bi-folder me-2"></i>Projekty
       </a></li>
       <li><a class="dropdown-item{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>
         <i class="bi bi-sliders me-2"></i>Ustawienia
@@ -65,7 +68,7 @@
     </a>
   </li>
   {% if current_user.is_authenticated and current_user.role.value in ('admin', 'superadmin') %}
-  {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_ustawienia'] %}
+  {% set admin_endpoints = ['admin.admin_uzytkownicy', 'admin.admin_beneficjenci', 'admin.admin_zajecia', 'admin.admin_projekty', 'admin.admin_ustawienia'] %}
   <li class="nav-item">
     <button class="btn nav-link w-100 text-start d-flex justify-content-between align-items-center{% if request.endpoint in admin_endpoints %} active{% endif %}"
             data-bs-toggle="collapse" data-bs-target="#adminLinksMobile"
@@ -82,6 +85,9 @@
       </a></li>
       <li><a class="nav-link{% if request.endpoint == 'admin.admin_zajecia' %} active{% endif %}" href="{{ url_for('admin.admin_zajecia') }}"{% if request.endpoint == 'admin.admin_zajecia' %} aria-current="page"{% endif %}>
         <i class="bi bi-calendar-event me-2"></i>Zajęcia
+      </a></li>
+      <li><a class="nav-link{% if request.endpoint == 'admin.admin_projekty' %} active{% endif %}" href="{{ url_for('admin.admin_projekty') }}"{% if request.endpoint == 'admin.admin_projekty' %} aria-current="page"{% endif %}>
+        <i class="bi bi-folder me-2"></i>Projekty
       </a></li>
       <li><a class="nav-link{% if request.endpoint == 'admin.admin_ustawienia' %} active{% endif %}" href="{{ url_for('admin.admin_ustawienia') }}"{% if request.endpoint == 'admin.admin_ustawienia' %} aria-current="page"{% endif %}>
         <i class="bi bi-sliders me-2"></i>Ustawienia

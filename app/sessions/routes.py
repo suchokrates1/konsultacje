@@ -23,10 +23,36 @@ from wtforms.validators import ValidationError
 from .. import db
 from ..forms import BeneficjentForm, DeleteForm, ZajeciaForm
 from ..models import Beneficjent, SentEmail, Zajecia
+from ..projekt_utils import get_aktywny_projekt
 from ..utils import send_session_docx, build_docx_filename
 
 
 sessions_bp = Blueprint("sessions", __name__)
+
+
+def _aktywny_projekt_or_redirect():
+    """Return the active project or redirect with an error message."""
+    projekt = get_aktywny_projekt()
+    if projekt is None:
+        flash("Brak aktywnego projektu. Skontaktuj się z administratorem.")
+        return None
+    return projekt
+
+
+def _zajecia_dostepne(zajecia):
+    """Return True if the session belongs to the user and active project."""
+    projekt = get_aktywny_projekt()
+    if projekt is None or zajecia.project_id != projekt.id:
+        return False
+    return zajecia.user_id == current_user.id
+
+
+def _beneficjent_dostepny(benef):
+    """Return True if the beneficiary belongs to the user and active project."""
+    projekt = get_aktywny_projekt()
+    if projekt is None or benef.project_id != projekt.id:
+        return False
+    return benef.user_id == current_user.id
 
 
 @sessions_bp.route("/")
@@ -50,11 +76,17 @@ def dashboard():
 @login_required
 def nowe_zajecia():
     """Create a new consultation session."""
+    projekt = _aktywny_projekt_or_redirect()
+    if projekt is None:
+        return redirect(url_for("sessions.lista_zajec"))
+
     form = ZajeciaForm()
     messages = []
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
-        for b in Beneficjent.query.filter_by(user_id=current_user.id)
+        for b in Beneficjent.query.filter_by(
+            user_id=current_user.id, project_id=projekt.id
+        )
         .order_by(Beneficjent.imie)
         .all()
     ]
@@ -82,6 +114,7 @@ def nowe_zajecia():
             godzina_do=form.godzina_do.data,
             specjalista=form.specjalista.data,
             user_id=current_user.id,
+            project_id=projekt.id,
         )
         beneficjent = db.session.get(Beneficjent, form.beneficjenci.data)
         zajecia.beneficjenci = [beneficjent]
@@ -141,7 +174,7 @@ def pobierz_docx(zajecia_id):
     if zajecia is None:
         current_app.logger.warning("pobierz_docx: zajecia %s not found", zajecia_id)
         abort(404)
-    if zajecia.user_id != current_user.id:
+    if zajecia.user_id != current_user.id or not _zajecia_dostepne(zajecia):
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.index"))
 
@@ -170,7 +203,7 @@ def wyslij_docx(zajecia_id):
     if zajecia is None:
         current_app.logger.warning("wyslij_docx: zajecia %s not found", zajecia_id)
         abort(404)
-    if zajecia.user_id != current_user.id:
+    if zajecia.user_id != current_user.id or not _zajecia_dostepne(zajecia):
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.lista_zajec"))
 
@@ -203,12 +236,11 @@ def wyslij_docx(zajecia_id):
 @login_required
 def emails_list():
     """List sent emails for the current user."""
-    emails = (
-        SentEmail.query.join(Zajecia)
-        .filter(Zajecia.user_id == current_user.id)
-        .order_by(SentEmail.sent_at.desc())
-        .all()
-    )
+    projekt = get_aktywny_projekt()
+    query = SentEmail.query.join(Zajecia).filter(Zajecia.user_id == current_user.id)
+    if projekt:
+        query = query.filter(Zajecia.project_id == projekt.id)
+    emails = query.order_by(SentEmail.sent_at.desc()).all()
     return render_template("emails_list.html", emails=emails)
 
 
@@ -220,7 +252,7 @@ def resend_email(email_id):
     if sent_email is None:
         current_app.logger.warning("resend_email: email %s not found", email_id)
         abort(404)
-    if not sent_email.zajecia or sent_email.zajecia.user_id != current_user.id:
+    if not sent_email.zajecia or not _zajecia_dostepne(sent_email.zajecia):
         flash("Brak dostępu do tej wiadomości.")
         return redirect(url_for("sessions.emails_list"))
 
@@ -245,8 +277,11 @@ def resend_email(email_id):
 @login_required
 def lista_zajec():
     """List sessions belonging to the current user with optional search."""
+    projekt = get_aktywny_projekt()
     q = request.args.get("q", "").strip()
     query = Zajecia.query.filter_by(user_id=current_user.id)
+    if projekt:
+        query = query.filter_by(project_id=projekt.id)
     if q:
         query = query.filter(
             db.cast(Zajecia.data, db.String).ilike(f"%{q}%")
@@ -273,14 +308,17 @@ def edytuj_zajecia(zajecia_id):
     if zajecia is None:
         current_app.logger.warning("edytuj_zajecia: zajecia %s not found", zajecia_id)
         abort(404)
-    if zajecia.user_id != current_user.id:
+    if zajecia.user_id != current_user.id or not _zajecia_dostepne(zajecia):
         flash("Brak dostępu do tych zajęć.")
         return redirect(url_for("sessions.lista_zajec"))
 
     form = ZajeciaForm(obj=zajecia)
+    projekt = get_aktywny_projekt()
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
-        for b in Beneficjent.query.filter_by(user_id=current_user.id).all()
+        for b in Beneficjent.query.filter_by(
+            user_id=current_user.id, project_id=projekt.id
+        ).all()
     ]
     if request.method == "GET":
         if zajecia.beneficjenci:
@@ -311,7 +349,7 @@ def usun_zajecia(zajecia_id):
         if zajecia is None:
             current_app.logger.warning("usun_zajecia: zajecia %s not found", zajecia_id)
             abort(404)
-        if zajecia.user_id != current_user.id:
+        if zajecia.user_id != current_user.id or not _zajecia_dostepne(zajecia):
             flash("Brak dostępu do tych zajęć.")
             return redirect(url_for("sessions.lista_zajec"))
         db.session.delete(zajecia)
@@ -324,11 +362,14 @@ def usun_zajecia(zajecia_id):
 @login_required
 def kalendarz():
     """Display a calendar with upcoming sessions for the user."""
+    projekt = get_aktywny_projekt()
     tz = pytz.timezone(current_app.config["TIMEZONE"])
     today = datetime.now(tz).date()
+    query = Zajecia.query.filter_by(user_id=current_user.id)
+    if projekt:
+        query = query.filter_by(project_id=projekt.id)
     zajecia_list = (
-        Zajecia.query.filter_by(user_id=current_user.id)
-        .filter(Zajecia.data >= today)
+        query.filter(Zajecia.data >= today)
         .order_by(Zajecia.data, Zajecia.godzina_od)
         .all()
     )
@@ -339,11 +380,14 @@ def kalendarz():
 @login_required
 def api_zajecia():
     """Return upcoming sessions for the current user in JSON format."""
+    projekt = get_aktywny_projekt()
     tz = pytz.timezone(current_app.config["TIMEZONE"])
     today = datetime.now(tz).date()
+    query = Zajecia.query.filter_by(user_id=current_user.id)
+    if projekt:
+        query = query.filter_by(project_id=projekt.id)
     sessions = (
-        Zajecia.query.filter_by(user_id=current_user.id)
-        .filter(Zajecia.data >= today)
+        query.filter(Zajecia.data >= today)
         .order_by(Zajecia.data, Zajecia.godzina_od)
         .all()
     )
@@ -365,8 +409,11 @@ def api_zajecia():
 @login_required
 def lista_beneficjentow():
     """List beneficiaries for the current user with optional search."""
+    projekt = get_aktywny_projekt()
     q = request.args.get("q", "").strip()
     query = Beneficjent.query.filter_by(user_id=current_user.id)
+    if projekt:
+        query = query.filter_by(project_id=projekt.id)
     if q:
         query = query.filter(
             Beneficjent.imie.ilike(f"%{q}%")
@@ -390,12 +437,17 @@ def lista_beneficjentow():
 @login_required
 def nowy_beneficjent():
     """Create a new beneficiary entry."""
+    projekt = _aktywny_projekt_or_redirect()
+    if projekt is None:
+        return redirect(url_for("sessions.lista_beneficjentow"))
+
     form = BeneficjentForm()
     if form.validate_on_submit():
         beneficjent = Beneficjent(
             imie=form.imie.data,
             wojewodztwo=form.wojewodztwo.data,
             user_id=current_user.id,
+            project_id=projekt.id,
         )
         db.session.add(beneficjent)
         db.session.commit()
@@ -418,7 +470,7 @@ def edytuj_beneficjenta(beneficjent_id):
             "edytuj_beneficjenta: beneficjent %s not found", beneficjent_id
         )
         abort(404)
-    if benef.user_id != current_user.id:
+    if benef.user_id != current_user.id or not _beneficjent_dostepny(benef):
         flash("Brak dostępu do tego beneficjenta.")
         return redirect(url_for("sessions.lista_beneficjentow"))
     form = BeneficjentForm(obj=benef)
@@ -445,7 +497,7 @@ def usun_beneficjenta(beneficjent_id):
                 "usun_beneficjenta: beneficjent %s not found", beneficjent_id
             )
             abort(404)
-        if benef.user_id != current_user.id:
+        if benef.user_id != current_user.id or not _beneficjent_dostepny(benef):
             flash("Brak dostępu do tego beneficjenta.")
             return redirect(url_for("sessions.lista_beneficjentow"))
         db.session.delete(benef)

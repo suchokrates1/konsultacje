@@ -245,3 +245,16 @@ class SettingsForm(FlaskForm):
     timezone = SelectField('Strefa czasowa', choices=TIMEZONE_CHOICES)
     submit = SubmitField('Zapisz')
     send_test = SubmitField('Wyślij test')
+
+
+class ProjektForm(FlaskForm):
+    """Form for creating or editing a project."""
+
+    nazwa = StringField('Nazwa projektu', validators=[DataRequired()])
+    submit = SubmitField('Zapisz')
+
+
+class ActivateProjektForm(FlaskForm):
+    """Form to set a project as the active edition."""
+
+    submit = SubmitField('Ustaw jako obecny')

@@ -121,6 +121,13 @@ def create_app(test_config=None):
     app.register_blueprint(admin_bp, url_prefix="/admin")
     register_error_handlers(app)
 
+    @app.context_processor
+    def inject_projekt():
+        from .models import ProjectStatus, Projekt
+
+        aktywny = Projekt.query.filter_by(status=ProjectStatus.AKTYWNY).first()
+        return {"aktywny_projekt": aktywny}
+
     @app.get("/healthz")
     def healthz():
         try:

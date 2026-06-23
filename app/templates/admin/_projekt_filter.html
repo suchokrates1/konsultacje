@@ -1,0 +1,12 @@
+{% macro render_projekt_filter(projekty, selected_projekt, action_url) %}
+<form method="get" action="{{ action_url }}" class="mb-3 d-flex justify-content-center align-items-center gap-2">
+  <label for="projekt_id" class="form-label mb-0">Projekt:</label>
+  <select name="projekt_id" id="projekt_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+    {% for p in projekty %}
+    <option value="{{ p.id }}" {% if selected_projekt and p.id == selected_projekt.id %}selected{% endif %}>
+      {{ p.nazwa }}{% if p.status.value == 'aktywny' %} (obecny){% else %} (archiwum){% endif %}
+    </option>
+    {% endfor %}
+  </select>
+</form>
+{% endmacro %}

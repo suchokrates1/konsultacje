@@ -19,16 +19,19 @@ from wtforms.validators import ValidationError
 from .. import db, mail
 from ..utils import send_email
 from ..forms import (
+    ActivateProjektForm,
     BeneficjentForm,
     ConfirmForm,
     DeleteForm,
     DemoteForm,
     PromoteForm,
+    ProjektForm,
     SettingsForm,
     UserEditForm,
     ZajeciaForm,
 )
-from ..models import Beneficjent, Roles, Settings, User, Zajecia
+from ..models import Beneficjent, Projekt, ProjectStatus, Roles, Settings, User, Zajecia
+from ..projekt_utils import get_aktywny_projekt, resolve_admin_projekt, ustaw_jako_aktywny
 
 
 admin_bp = Blueprint("admin", __name__)
@@ -65,13 +68,20 @@ def superadmin_required(view_func):
 @login_required
 @admin_required
 def admin_beneficjenci():
-    """Show all beneficiaries to the admin user."""
-    beneficjenci = Beneficjent.query.all()
+    """Show beneficiaries for the selected project."""
+    selected_projekt = resolve_admin_projekt()
+    projekty = Projekt.query.order_by(Projekt.utworzono.desc()).all()
+    query = Beneficjent.query
+    if selected_projekt:
+        query = query.filter_by(project_id=selected_projekt.id)
+    beneficjenci = query.all()
     delete_form = DeleteForm()
     return render_template(
         "admin/beneficjenci_list.html",
         beneficjenci=beneficjenci,
         delete_form=delete_form,
+        projekty=projekty,
+        selected_projekt=selected_projekt,
     )
 
 
@@ -121,8 +131,13 @@ def admin_usun_beneficjenta(beneficjent_id):
 @login_required
 @admin_required
 def admin_zajecia():
-    """Display all sessions for the admin."""
-    zajecia_list = Zajecia.query.order_by(
+    """Display sessions for the selected project."""
+    selected_projekt = resolve_admin_projekt()
+    projekty = Projekt.query.order_by(Projekt.utworzono.desc()).all()
+    query = Zajecia.query
+    if selected_projekt:
+        query = query.filter_by(project_id=selected_projekt.id)
+    zajecia_list = query.order_by(
         Zajecia.data.desc(), Zajecia.godzina_od.desc()
     ).all()
     delete_form = DeleteForm()
@@ -130,6 +145,8 @@ def admin_zajecia():
         "admin/zajecia_list.html",
         zajecia_list=zajecia_list,
         delete_form=delete_form,
+        projekty=projekty,
+        selected_projekt=selected_projekt,
     )
 
 
@@ -147,7 +164,9 @@ def admin_edytuj_zajecia(zajecia_id):
     form = ZajeciaForm(obj=zajecia)
     form.beneficjenci.choices = [
         (b.id, f"{b.imie} ({b.wojewodztwo})")
-        for b in Beneficjent.query.filter_by(user_id=zajecia.user_id).all()
+        for b in Beneficjent.query.filter_by(
+            user_id=zajecia.user_id, project_id=zajecia.project_id
+        ).all()
     ]
     if request.method == "GET":
         if zajecia.beneficjenci:
@@ -161,7 +180,12 @@ def admin_edytuj_zajecia(zajecia_id):
             zajecia.beneficjenci = [beneficjent]
             db.session.commit()
             flash("Zajęcia zaktualizowane.")
-            return redirect(url_for("admin.admin_zajecia"))
+            return redirect(
+                url_for(
+                    "admin.admin_zajecia",
+                    projekt_id=zajecia.project_id,
+                )
+            )
     except ValidationError:
         pass
     return render_template("zajecia_form.html", form=form)
@@ -183,6 +207,9 @@ def admin_usun_zajecia(zajecia_id):
         db.session.delete(zajecia)
         db.session.commit()
         flash("Zajęcia usunięte.")
+    projekt_id = request.form.get("projekt_id", type=int)
+    if projekt_id:
+        return redirect(url_for("admin.admin_zajecia", projekt_id=projekt_id))
     return redirect(url_for("admin.admin_zajecia"))
 
 
@@ -410,4 +437,87 @@ def admin_ustawienia():
         flash("Ustawienia zapisane.")
         return redirect(url_for("admin.admin_ustawienia"))
     return render_template("admin/settings_form.html", form=form)
+
+
+@admin_bp.route("/projekty")
+@login_required
+@admin_required
+def admin_projekty():
+    """List all projects and allow activation of a new edition."""
+    projekty = Projekt.query.order_by(Projekt.utworzono.desc()).all()
+    activate_form = ActivateProjektForm()
+    return render_template(
+        "admin/projekty_list.html",
+        projekty=projekty,
+        activate_form=activate_form,
+        ProjectStatus=ProjectStatus,
+    )
+
+
+@admin_bp.route("/projekty/nowy", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_nowy_projekt():
+    """Create a new project (starts in archive)."""
+    form = ProjektForm()
+    if form.validate_on_submit():
+        existing = Projekt.query.filter_by(nazwa=form.nazwa.data.strip()).first()
+        if existing:
+            flash("Projekt o tej nazwie już istnieje.")
+        else:
+            projekt = Projekt(
+                nazwa=form.nazwa.data.strip(),
+                status=ProjectStatus.ARCHIWUM,
+            )
+            db.session.add(projekt)
+            db.session.commit()
+            flash("Projekt utworzony.")
+            return redirect(url_for("admin.admin_projekty"))
+    return render_template(
+        "admin/projekt_form.html", form=form, title="Nowy projekt"
+    )
+
+
+@admin_bp.route("/projekty/<int:projekt_id>/edytuj", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_edytuj_projekt(projekt_id):
+    """Edit project name."""
+    projekt = db.session.get(Projekt, projekt_id)
+    if projekt is None:
+        abort(404)
+    form = ProjektForm(obj=projekt)
+    if form.validate_on_submit():
+        nazwa = form.nazwa.data.strip()
+        conflict = Projekt.query.filter(
+            Projekt.nazwa == nazwa, Projekt.id != projekt.id
+        ).first()
+        if conflict:
+            flash("Projekt o tej nazwie już istnieje.")
+        else:
+            projekt.nazwa = nazwa
+            db.session.commit()
+            flash("Projekt zaktualizowany.")
+            return redirect(url_for("admin.admin_projekty"))
+    return render_template(
+        "admin/projekt_form.html", form=form, title="Edytuj projekt"
+    )
+
+
+@admin_bp.route("/projekty/<int:projekt_id>/aktywuj", methods=["POST"])
+@login_required
+@admin_required
+def admin_aktywuj_projekt(projekt_id):
+    """Set the given project as the active edition."""
+    form = ActivateProjektForm()
+    projekt = db.session.get(Projekt, projekt_id)
+    if projekt is None:
+        abort(404)
+    if form.validate_on_submit():
+        if projekt.status == ProjectStatus.AKTYWNY:
+            flash("Ten projekt jest już obecny.")
+        else:
+            ustaw_jako_aktywny(projekt)
+            flash(f"Projekt „{projekt.nazwa}” ustawiony jako obecny.")
+    return redirect(url_for("admin.admin_projekty"))
 

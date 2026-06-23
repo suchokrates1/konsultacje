@@ -1,11 +1,14 @@
 """Database models used by the application."""
 
+from datetime import UTC, datetime
+
 from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import login_manager
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
+from sqlalchemy import event
 import enum
 
 
@@ -15,6 +18,13 @@ class Roles(enum.Enum):
     ADMIN = "admin"
     SUPERADMIN = "superadmin"
     INSTRUCTOR = "instructor"
+
+
+class ProjectStatus(enum.Enum):
+    """Lifecycle state of a consultation project/edition."""
+
+    AKTYWNY = "aktywny"
+    ARCHIWUM = "archiwum"
 
 
 class User(UserMixin, db.Model):
@@ -83,6 +93,31 @@ def load_user(user_id):
 # Additional application models
 
 
+class Projekt(db.Model):
+    """Consultation program edition (e.g. ATNIS V, ATNIS VI)."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    nazwa = db.Column(db.String(100), nullable=False, unique=True)
+    status = db.Column(
+        db.Enum(
+            ProjectStatus,
+            values_callable=lambda e: [s.value for s in e],
+        ),
+        default=ProjectStatus.ARCHIWUM,
+        nullable=False,
+    )
+    utworzono = db.Column(
+        db.DateTime, default=lambda: datetime.now(UTC), nullable=False
+    )
+    zarchiwizowano = db.Column(db.DateTime, nullable=True)
+
+    zajecia = db.relationship('Zajecia', back_populates='projekt')
+    beneficjenci = db.relationship('Beneficjent', back_populates='projekt')
+
+    def __repr__(self):
+        return f"<Projekt {self.id} {self.nazwa} ({self.status.value})>"
+
+
 class Beneficjent(db.Model):
     """Person receiving consultations stored for a particular user."""
 
@@ -90,7 +125,9 @@ class Beneficjent(db.Model):
     imie = db.Column(db.String(100), nullable=False)
     wojewodztwo = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projekt.id'), nullable=False)
     user = db.relationship('User')
+    projekt = db.relationship('Projekt', back_populates='beneficjenci')
 
     def __repr__(self):
         return f"<Beneficjent {self.id} {self.imie}>"
@@ -105,7 +142,9 @@ class Zajecia(db.Model):
     godzina_do = db.Column(db.Time, nullable=False)
     specjalista = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('projekt.id'), nullable=False)
     user = db.relationship('User')
+    projekt = db.relationship('Projekt', back_populates='zajecia')
 
     doc_sent_at = db.Column(db.DateTime, nullable=True)
 
@@ -169,3 +208,16 @@ class SentEmail(db.Model):
 
     def __repr__(self):
         return f"<SentEmail {self.id} to {self.recipient} status={self.status}>"
+
+
+def _assign_active_project(_mapper, _connection, target):
+    """Default new rows to the active project when project_id is unset."""
+    if target.project_id is not None:
+        return
+    aktywny = Projekt.query.filter_by(status=ProjectStatus.AKTYWNY).first()
+    if aktywny:
+        target.project_id = aktywny.id
+
+
+event.listens_for(Beneficjent, 'before_insert')(_assign_active_project)
+event.listens_for(Zajecia, 'before_insert')(_assign_active_project)

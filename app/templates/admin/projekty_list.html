@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Projekty{% endblock %}
+{% block content %}
+<h2>Projekty</h2>
+<p class="text-muted">Obecny projekt jest widoczny dla instruktorów. Poprzednie edycje pozostają w archiwum.</p>
+<div class="mb-3">
+  <a href="{{ url_for('admin.admin_nowy_projekt') }}" class="btn btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>Nowy projekt
+  </a>
+</div>
+<div class="table-responsive">
+<table class="table table-striped table-hover mx-auto text-start">
+  <thead>
+    <tr>
+      <th>Nazwa</th>
+      <th>Status</th>
+      <th>Utworzono</th>
+      <th>Zarchiwizowano</th>
+      <th>Zajęcia</th>
+      <th>Beneficjenci</th>
+      <th>Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in projekty %}
+    <tr>
+      <td>{{ p.nazwa }}</td>
+      <td>
+        {% if p.status == ProjectStatus.AKTYWNY %}
+        <span class="badge bg-success">Obecny</span>
+        {% else %}
+        <span class="badge bg-secondary">Archiwum</span>
+        {% endif %}
+      </td>
+      <td>{{ p.utworzono.strftime('%d.%m.%Y') if p.utworzono else '—' }}</td>
+      <td>{{ p.zarchiwizowano.strftime('%d.%m.%Y') if p.zarchiwizowano else '—' }}</td>
+      <td>{{ p.zajecia|length }}</td>
+      <td>{{ p.beneficjenci|length }}</td>
+      <td>
+        <a href="{{ url_for('admin.admin_edytuj_projekt', projekt_id=p.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj nazwę">
+          <i class="bi bi-pencil"></i>
+        </a>
+        {% if p.status != ProjectStatus.AKTYWNY %}
+        <form method="post" action="{{ url_for('admin.admin_aktywuj_projekt', projekt_id=p.id) }}" style="display:inline;">
+          {{ activate_form.csrf_token }}
+          <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Ustawić „{{ p.nazwa }}” jako obecny projekt? Poprzedni projekt trafi do archiwum.');" aria-label="Ustaw jako obecny" data-bs-toggle="tooltip" title="Ustaw jako obecny">
+            <i class="bi bi-check-circle"></i>
+          </button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">Brak projektów.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+{% endblock %}

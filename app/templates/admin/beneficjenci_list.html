@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% from "admin/_projekt_filter.html" import render_projekt_filter %}
 {% block title %}Wszyscy beneficjenci{% endblock %}
 {% block content %}
 <h2>Wszyscy beneficjenci</h2>
+{{ render_projekt_filter(projekty, selected_projekt, url_for('admin.admin_beneficjenci')) }}
 <div class="table-responsive">
 <table class="table table-striped table-hover mx-auto text-start">
   <thead>

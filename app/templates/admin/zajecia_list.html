@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% from "admin/_projekt_filter.html" import render_projekt_filter %}
 {% block title %}Wszystkie zajęcia{% endblock %}
 {% block content %}
 <h2>Wszystkie zajęcia</h2>
+{{ render_projekt_filter(projekty, selected_projekt, url_for('admin.admin_zajecia')) }}
 <div class="table-responsive">
 <table class="table table-striped table-hover mx-auto text-start">
   <thead>
@@ -9,6 +11,7 @@
       <th>Data</th>
       <th>Godziny</th>
       <th>Instruktor</th>
+      <th>Beneficjent</th>
       <th>Akcje</th>
     </tr>
   </thead>
@@ -18,12 +21,16 @@
       <td>{{ z.data.strftime('%d.%m.%Y') }}</td>
       <td>{{ z.godzina_od.strftime('%H:%M') }} - {{ z.godzina_do.strftime('%H:%M') }}</td>
       <td>{{ z.user.full_name }}</td>
+      <td>{{ z.beneficjenci[0].imie if z.beneficjenci else '—' }}</td>
       <td>
         <a href="{{ url_for('admin.admin_edytuj_zajecia', zajecia_id=z.id) }}" class="btn btn-sm btn-primary" aria-label="Edytuj" data-bs-toggle="tooltip" title="Edytuj">
           <i class="bi bi-pencil"></i>
         </a>
         <form method="post" action="{{ url_for('admin.admin_usun_zajecia', zajecia_id=z.id) }}" style="display:inline;">
           {{ delete_form.csrf_token }}
+          {% if selected_projekt %}
+          <input type="hidden" name="projekt_id" value="{{ selected_projekt.id }}">
+          {% endif %}
           <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Na pewno chcesz usunąć?');" aria-label="Usuń" data-bs-toggle="tooltip" title="Usuń">
             <i class="bi bi-trash"></i>
           </button>
@@ -31,7 +38,7 @@
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="4">Brak zajęć.</td></tr>
+    <tr><td colspan="5">Brak zajęć.</td></tr>
     {% endfor %}
   </tbody>
 </table>
