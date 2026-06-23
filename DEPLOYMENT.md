@@ -14,9 +14,11 @@ Configure these repository secrets in GitHub:
 - `TS_OAUTH_CLIENT_ID`: the same Tailscale OAuth client id already used by `retrievershop-suite`
 - `TS_OAUTH_SECRET`: the same Tailscale OAuth secret already used by `retrievershop-suite`
 - `SSH_PRIVATE_KEY`: private key that can SSH to `suchokrates1@100.110.194.46`
+- `GHCR_PAT`: GitHub PAT with `read:packages` (Vaultwarden: "GitHub PAT") — used on minipc to pull private images from GHCR
 
 `GITHUB_TOKEN` is already used automatically for pushing the image from Actions to GHCR.
-The deploy step assumes the GHCR package is public, so the server can pull it without a separate registry secret.
+The GHCR package is private, so minipc must authenticate before `docker compose pull`.
+The deploy workflow runs `docker login ghcr.io` on the server using `GHCR_PAT`.
 
 ## Server preparation
 
@@ -36,6 +38,7 @@ Then perform the first manual deployment:
 
 ```bash
 docker volume create konsultacje-instance
+echo "$GHCR_PAT" | docker login ghcr.io -u suchokrates1 --password-stdin
 export KONSULTACJE_IMAGE=ghcr.io/suchokrates1/konsultacje:latest
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
