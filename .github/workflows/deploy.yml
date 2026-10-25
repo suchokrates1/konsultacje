@@ -99,6 +99,9 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
         with:
           host: 100.110.194.46
+          # Port 22 na Tailscale obsluguje Tailscale SSH i odrzuca tag:ci.
+          # 2222 zostaje przy sshd i kluczu deploy.
+          port: 2222
           username: suchokrates1
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: KONSULTACJE_IMAGE,GHCR_PAT
